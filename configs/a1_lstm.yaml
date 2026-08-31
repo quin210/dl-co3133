@@ -1,0 +1,12 @@
+_base_: base.yaml
+name: a1_lstm
+model:
+  type: lstm                 # switch to gru for the LSTM-vs-GRU comparison (extension)
+  input_repr: rows           # 28 timesteps, each timestep is a 28-dim row
+  input_size: 28
+  hidden_size: 128
+  num_layers: 2
+  bidirectional: false
+  dropout: 0.2
+  num_classes: 10
+loss: cross_entropy

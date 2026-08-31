@@ -1,0 +1,15 @@
+_base_: base.yaml
+name: a1_transformer
+model:
+  type: transformer
+  input_repr: patches        # 7x7 patches -> 16 tokens, or row sequences
+  patch_size: 7
+  d_model: 128
+  nhead: 4
+  num_layers: 4
+  dim_feedforward: 256
+  dropout: 0.1
+  positional_encoding: learned
+  pooling: cls
+  num_classes: 10
+loss: cross_entropy

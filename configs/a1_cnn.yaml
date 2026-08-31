@@ -1,0 +1,12 @@
+_base_: base.yaml
+name: a1_cnn
+model:
+  type: cnn                  # self-designed architecture, no pretrained backbone
+  input_repr: image          # 1 x 28 x 28
+  channels: [32, 64, 128]
+  kernel_size: 3
+  pool: max
+  batch_norm: true
+  dropout: 0.3
+  num_classes: 10
+loss: cross_entropy

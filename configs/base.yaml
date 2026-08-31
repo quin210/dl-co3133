@@ -1,0 +1,39 @@
+# Shared configuration for all Assignment 1 models.
+# Every model in the main comparison MUST use the same seed and the same split.
+
+seed: 42
+deterministic: true
+
+data:
+  name: fashion_mnist      # fashion_mnist (main results) | mnist (debug only) | cifar10 (extension)
+  root: data/
+  val_ratio: 0.1
+  stratify: true
+  num_workers: 4
+  normalize:
+    mean: [0.2860]
+    std:  [0.3530]
+
+train:
+  batch_size: 128
+  epochs: 30
+  optimizer: adam
+  lr: 0.001
+  weight_decay: 0.0
+  scheduler: cosine
+  early_stopping_patience: 5
+  checkpoint_metric: val_macro_f1
+  checkpoint_mode: max
+  amp: false
+
+eval:
+  metrics: [accuracy, macro_f1]
+  measure_inference_time: true
+
+logging:
+  out_dir: experiments/
+  log_every: 50
+
+hardware:
+  device: cuda
+  gpu: "NVIDIA RTX 6000 Ada Generation"

@@ -1,0 +1,10 @@
+_base_: base.yaml
+name: a1_mlp
+model:
+  type: mlp
+  input_repr: flatten
+  hidden_dims: [512, 256]
+  activation: relu
+  dropout: 0.2
+  num_classes: 10
+loss: cross_entropy

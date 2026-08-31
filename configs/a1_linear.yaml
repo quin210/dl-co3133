@@ -1,0 +1,8 @@
+_base_: base.yaml
+name: a1_linear
+model:
+  type: linear
+  input_repr: flatten        # 28*28 -> 784
+  num_classes: 10
+  # Do not apply softmax before CrossEntropyLoss
+loss: cross_entropy
