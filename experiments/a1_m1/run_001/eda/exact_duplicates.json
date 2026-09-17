@@ -1,0 +1,22 @@
+{
+  "duplicate_groups": [],
+  "conflict_groups": [],
+  "overlap": {
+    "Training / Validation": {
+      "shared_hashes": 0,
+      "left_records": 0,
+      "right_records": 0
+    },
+    "Training / Official test": {
+      "shared_hashes": 0,
+      "left_records": 0,
+      "right_records": 0
+    },
+    "Validation / Official test": {
+      "shared_hashes": 0,
+      "left_records": 0,
+      "right_records": 0
+    }
+  },
+  "test_index_offset": 60000
+}

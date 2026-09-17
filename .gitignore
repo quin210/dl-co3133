@@ -9,3 +9,13 @@ experiments/**/*.ckpt
 runs/
 *.log
 .DS_Store
+
+.cache/
+/experiments/a1_m1/run_*/
+!/experiments/a1_m1/run_001/
+/experiments/a1_m1/run_001/training*/
+!/experiments/a1_m1/run_001/training/
+!/experiments/a1_m1/run_001/training/*/best.pt
+/experiments/a1_m1/run_001/eda/*.npz
+/experiments/a1_m1/run_001/eda/*.npy
+/experiments/a1_m1/run_001/gallery_indices.npy

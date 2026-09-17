@@ -1,0 +1,194 @@
+[
+  {
+    "model": "Linear",
+    "kind": "Correct",
+    "validation_position": 0,
+    "original_index": 7728,
+    "true": 3,
+    "predicted": 3
+  },
+  {
+    "model": "Linear",
+    "kind": "Correct",
+    "validation_position": 1,
+    "original_index": 8527,
+    "true": 1,
+    "predicted": 1
+  },
+  {
+    "model": "Linear",
+    "kind": "Correct",
+    "validation_position": 3,
+    "original_index": 161,
+    "true": 8,
+    "predicted": 8
+  },
+  {
+    "model": "Linear",
+    "kind": "Correct",
+    "validation_position": 4,
+    "original_index": 14162,
+    "true": 2,
+    "predicted": 2
+  },
+  {
+    "model": "Linear",
+    "kind": "Incorrect",
+    "validation_position": 2,
+    "original_index": 23942,
+    "true": 9,
+    "predicted": 7
+  },
+  {
+    "model": "Linear",
+    "kind": "Incorrect",
+    "validation_position": 17,
+    "original_index": 17647,
+    "true": 6,
+    "predicted": 3
+  },
+  {
+    "model": "Linear",
+    "kind": "Incorrect",
+    "validation_position": 21,
+    "original_index": 19241,
+    "true": 3,
+    "predicted": 6
+  },
+  {
+    "model": "Linear",
+    "kind": "Incorrect",
+    "validation_position": 51,
+    "original_index": 59643,
+    "true": 2,
+    "predicted": 4
+  },
+  {
+    "model": "MLP64",
+    "kind": "Correct",
+    "validation_position": 0,
+    "original_index": 7728,
+    "true": 3,
+    "predicted": 3
+  },
+  {
+    "model": "MLP64",
+    "kind": "Correct",
+    "validation_position": 1,
+    "original_index": 8527,
+    "true": 1,
+    "predicted": 1
+  },
+  {
+    "model": "MLP64",
+    "kind": "Correct",
+    "validation_position": 2,
+    "original_index": 23942,
+    "true": 9,
+    "predicted": 9
+  },
+  {
+    "model": "MLP64",
+    "kind": "Correct",
+    "validation_position": 3,
+    "original_index": 161,
+    "true": 8,
+    "predicted": 8
+  },
+  {
+    "model": "MLP64",
+    "kind": "Incorrect",
+    "validation_position": 45,
+    "original_index": 21051,
+    "true": 3,
+    "predicted": 4
+  },
+  {
+    "model": "MLP64",
+    "kind": "Incorrect",
+    "validation_position": 58,
+    "original_index": 36177,
+    "true": 2,
+    "predicted": 6
+  },
+  {
+    "model": "MLP64",
+    "kind": "Incorrect",
+    "validation_position": 75,
+    "original_index": 55269,
+    "true": 3,
+    "predicted": 0
+  },
+  {
+    "model": "MLP64",
+    "kind": "Incorrect",
+    "validation_position": 112,
+    "original_index": 13638,
+    "true": 3,
+    "predicted": 2
+  },
+  {
+    "model": "MLP256",
+    "kind": "Correct",
+    "validation_position": 0,
+    "original_index": 7728,
+    "true": 3,
+    "predicted": 3
+  },
+  {
+    "model": "MLP256",
+    "kind": "Correct",
+    "validation_position": 1,
+    "original_index": 8527,
+    "true": 1,
+    "predicted": 1
+  },
+  {
+    "model": "MLP256",
+    "kind": "Correct",
+    "validation_position": 3,
+    "original_index": 161,
+    "true": 8,
+    "predicted": 8
+  },
+  {
+    "model": "MLP256",
+    "kind": "Correct",
+    "validation_position": 4,
+    "original_index": 14162,
+    "true": 2,
+    "predicted": 2
+  },
+  {
+    "model": "MLP256",
+    "kind": "Incorrect",
+    "validation_position": 2,
+    "original_index": 23942,
+    "true": 9,
+    "predicted": 7
+  },
+  {
+    "model": "MLP256",
+    "kind": "Incorrect",
+    "validation_position": 13,
+    "original_index": 38312,
+    "true": 0,
+    "predicted": 6
+  },
+  {
+    "model": "MLP256",
+    "kind": "Incorrect",
+    "validation_position": 21,
+    "original_index": 19241,
+    "true": 3,
+    "predicted": 2
+  },
+  {
+    "model": "MLP256",
+    "kind": "Incorrect",
+    "validation_position": 45,
+    "original_index": 21051,
+    "true": 3,
+    "predicted": 4
+  }
+]

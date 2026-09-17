@@ -1,0 +1,65 @@
+[
+  {
+    "model": "Linear",
+    "seed": 42,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 3
+  },
+  {
+    "model": "MLP64",
+    "seed": 42,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 14
+  },
+  {
+    "model": "MLP256",
+    "seed": 42,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 14
+  },
+  {
+    "model": "Linear",
+    "seed": 7,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 12
+  },
+  {
+    "model": "MLP64",
+    "seed": 7,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 16
+  },
+  {
+    "model": "MLP256",
+    "seed": 7,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 16
+  },
+  {
+    "model": "Linear",
+    "seed": 123,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 12
+  },
+  {
+    "model": "MLP64",
+    "seed": 123,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 16
+  },
+  {
+    "model": "MLP256",
+    "seed": 123,
+    "prediction_parity": true,
+    "metric_parity": true,
+    "checkpoint_epoch": 16
+  }
+]
