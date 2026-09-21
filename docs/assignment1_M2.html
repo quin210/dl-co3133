@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Final report · G-02 · CO3133</title>
+<meta name="description" content="Final report">
+<link rel="stylesheet" href="assets/assignment.css">
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="location">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
+<div class="wrap">
+<header><p class="kicker">Assignment 1 · M2 Final</p><h1>Final report</h1><nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html" aria-current="page">M2 Final</a></nav><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1.html">Overview</a><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav></header>
+<main id="main"><aside class="placeholder"><p>Final PDF, slides and video pending.</p></aside>
+<section id="deliverables">
+<h2 id="section-1">Final deliverables</h2>
+<div class="table-scroll"><table>
+<thead><tr><th scope="col">Output</th><th scope="col">Destination</th></tr></thead>
+<tbody>
+<tr><th scope="row">HTML report</th><td><a href="assignment1.html">Assignment overview</a> · <a href="assignment1_M1.html">M1 Report</a></td></tr>
+<tr><th scope="row">Final PDF</th><td><a href="#final-pdf">Report outline and submission</a></td></tr>
+<tr><th scope="row">Presentation</th><td><a href="#slides">Slides</a> · <a href="#video">YouTube video</a></td></tr>
+<tr><th scope="row">Code and reconstruction</th><td><a href="assignment1_methods.html#reproduce">Reproduction instructions</a> · <a href="assignment1_runs.html">Run records</a><br/><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Assignment 1 source</a></td></tr>
+</tbody></table></div>
+</section>
+<section id="required-results">
+<h2 id="section-2">Comparison evidence</h2>
+<p>Linear, MLP, CNN, LSTM and Transformer share the Fashion-MNIST split and evaluation protocol. Current results use seed 42.</p>
+<div class="table-scroll"><table>
+<thead><tr><th scope="col">Evidence</th><th scope="col">Report section</th></tr></thead>
+<tbody>
+<tr><th scope="row">Class balance, samples and preprocessing</th><td><a href="assignment1_eda.html">Data exploration</a></td></tr>
+<tr><th scope="row">Architectures and experimental setup</th><td><a href="assignment1_methods.html#models">Models</a> · <a href="assignment1_methods.html#protocol">Protocol</a> · <a href="assignment1_methods.html#environment">Environment</a></td></tr>
+<tr><th scope="row">Accuracy, macro-F1, parameters and timing</th><td><a href="assignment1_results.html#3-held-out-test-results">Test results</a> · <a href="assignment1_runs.html#run-summary">Run comparison</a></td></tr>
+<tr><th scope="row">Training behavior and prediction errors</th><td><a href="assignment1_results.html#4-learning-curves">Curves</a> · <a href="assignment1_results.html#6-test-confusion-matrices">Confusion matrices</a> · <a href="assignment1_results.html#7-inspect-predictions">Correct and incorrect examples</a></td></tr>
+<tr><th scope="row">Representation, trade-offs and limitations</th><td><a href="assignment1_results.html#8-discussion">Discussion</a></td></tr>
+</tbody></table></div>
+</section>
+<section id="plan">
+<h2 id="section-3">Remaining work</h2>
+<ol>
+<li>Review explanations against the saved metrics, curves and errors; verify that tables and figures use the same selected checkpoints.</li>
+<li><strong>Optional:</strong> add seeds and report mean ± standard deviation, or run a single-factor ablation. Keep the split fixed and select using validation results.</li>
+<li>Complete the PDF and slides, record the presentation, then publish and submit the reviewed materials.</li>
+</ol>
+</section>
+<section id="final-pdf">
+<h2 id="section-4">Final PDF and submission</h2>
+<p><span class="placeholder">Final PDF report — pending publication</span></p>
+<p>Filename: <code>G-02_A1_Report.pdf</code>.</p>
+<ol>
+<li><strong>Problem and data:</strong> motivation, formulation, data source and license, EDA, split, leakage prevention and preprocessing.</li>
+<li><strong>Methodology:</strong> pipeline diagram, five architectures, loss, metrics, training settings and experimental design.</li>
+<li><strong>Implementation results:</strong> quantitative comparison, curves, prediction examples, error analysis, limitations and conclusions.</li>
+</ol>
+<p>Include member details and references. The group representative submits the PDF through the <a href="https://lms.hcmut.edu.vn/course/view.php?id=142848">course LMS</a>.</p>
+<p><span class="placeholder">LMS submission confirmation — not yet recorded</span></p>
+</section>
+<section id="slides">
+<h2 id="section-5">Presentation slides</h2>
+<p><span class="placeholder">Presentation slides — pending publication</span></p>
+<p>Present the problem, EDA findings, architectures, shared setup, main comparisons, error analysis and conclusions. Use selected figures from the report.</p>
+</section>
+<section id="video">
+<h2 id="section-6">YouTube presentation</h2>
+<p><span class="placeholder">YouTube presentation — pending publication</span></p>
+<p>Title: <code>CO3133-Semester-261 – Group G-02 – Assignment 1</code>.</p>
+<ul>
+<li>Publish as <strong>Public or Unlisted</strong>.</li>
+<li>All three members present or defend part of the work.</li>
+<li>Explain the problem, data, methods, setup, results, errors and conclusions; include a demo where useful.</li>
+</ul>
+</section>
+<section id="publication">
+<h2 id="section-7">Publication checks</h2>
+<p><span class="placeholder">Public GitHub Pages URL — not yet verified</span></p>
+<ul>
+<li>Verify installation, data preparation, training and evaluation from a clean environment using the recorded configuration and dependencies.</li>
+<li>Check public access to the report, slides, video, source and reconstruction instructions from Home and Assignment 1.</li>
+<li>Confirm member details, video playback and LMS submission.</li>
+</ul>
+</section>
+</main>
+
+<footer><a href="#top">Back to top</a></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+@import url("site.css");
+/* Palette sampled from the thesis reference: blue #0041ed, orange #ff600f.
+   Dark orange is used for readable text on white. */
+/* Assignment pages: one white document, with restrained notes and dark code. */
+:root { color-scheme: light; --ink: #242424; --muted: #626262; --line: #dedede; --accent: #0041ed; --orange: #ff600f; --orange-ink: #ad3a00; --blue-soft: #f2f6ff; --orange-soft: #fff7f2; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; color: var(--ink); font: 16px/1.7 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.wrap { max-width: 1000px; margin: auto; padding: 32px 32px 64px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { color: var(--orange-ink); text-decoration-thickness: 2px; }
+a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+header { padding-bottom: 24px; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.2; letter-spacing: -.025em; margin: 0 0 16px; font-weight: 650; color: var(--accent); }
+h2 { font-size: 1.5rem; letter-spacing: -.015em; margin: 44px 0 18px; font-weight: 650; color: var(--accent); }
+h3 { font-size: 1.08rem; margin: 28px 0 10px; font-weight: 650; color: var(--orange-ink); }
+p { margin: 12px 0; }
+p, li { max-width: 80ch; }
+ul, ol { padding-left: 24px; }
+li + li { margin-top: 6px; }
+.lede { color: var(--orange-ink); font-size: 1.1rem; max-width: 72ch; }
+.meta { font-size: 14px; color: var(--muted); }
+nav { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 22px 0 0; font-size: 14px; }
+.idea { margin: 24px 0; padding: 14px 18px; border: 1px solid var(--line); border-left: 3px solid var(--orange); border-radius: 3px; background: var(--orange-soft); }
+.idea strong { color: var(--orange-ink); }
+.idea p { margin: 0; }
+.idea p + p { margin-top: 8px; }
+.table-scroll { overflow-x: auto; margin: 20px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font-weight: 600; }
+thead th { color: var(--accent); background: var(--blue-soft); border-top: 1px solid #d5e0ff; border-bottom: 2px solid var(--accent); }
+.numeric td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+caption, figcaption { text-align: left; font-size: 13px; color: var(--muted); line-height: 1.6; }
+caption { padding-bottom: 10px; }
+figure { margin: 26px 0; }
+img { display: block; max-width: 100%; height: auto; }
+figcaption { margin-top: 10px; }
+code { font: .88em/1.6 "SFMono-Regular", Consolas, "Liberation Mono", monospace; overflow-wrap: anywhere; }
+pre { margin: 22px 0; padding: 20px 22px; background: #1e1e1e; color: #d4d4d4; border: 1px solid #343434; border-radius: 4px; overflow-x: auto; tab-size: 4; }
+pre code { font-size: 13px; overflow-wrap: normal; }
+.code-label { display: block; margin-bottom: 12px; color: #a7a7a7; font: 12px/1.4 system-ui, sans-serif; }
+dt { margin-top: 16px; font-weight: 600; }
+dd { margin: 3px 0 0; max-width: 80ch; }
+section, [id] { scroll-margin-top: 24px; }
+footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.skip { position: absolute; top: -100px; left: 16px; background: #fff; padding: 8px; }
+.skip:focus { top: 8px; }
+@media (max-width: 600px) { .wrap { padding: 22px 18px 40px; } h2 { font-size: 1.3rem; } th, td { padding: 9px; } pre { padding: 16px; } }
+@media print { .wrap { max-width: none; padding: 0; } body { font-size: 10pt; } nav, .skip { display: none; } pre { background: #fff; color: #222; white-space: pre-wrap; } pre span { color: #222 !important; } h2, h3 { break-after: avoid; } figure, tr { break-inside: avoid; } .table-scroll { overflow: visible; } a { color: inherit; } }
+
+/* Report pages are the primary destinations; code remains secondary. */
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 22px 0; }
+.report-button { display: inline-block; padding: 9px 15px; border: 1px solid var(--accent); border-radius: 3px; color: var(--accent); background: var(--blue-soft); font-size: 15px; font-weight: 600; text-decoration: none; }
+.report-button:hover { color: #fff; background: var(--accent); }
+.source-link { display: inline-block; padding: 3px 7px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); font-size: 12px; text-decoration: none; }
+.source-link:hover { color: var(--accent); border-color: var(--accent); }
+@media print { .report-actions { display: none; } }
+
+/* Reading structure shared by all report chapters. */
+.chapter-nav { gap: 8px 18px; padding: 12px 0; border-block: 1px solid var(--line); }
+.chapter-nav a { color: var(--muted); text-decoration: none; }
+.chapter-nav a[aria-current] { color: var(--accent); font-weight: 650; text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 5px; }
+.page-contents { gap: 6px 18px; margin-top: 18px; font-size: 13px; }
+.page-contents > span { flex-basis: 100%; color: var(--muted); }
+.source-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; font-size: 12px; color: var(--muted); }
+.page-turn { justify-content: space-between; gap: 24px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
+.page-turn a { display: flex; flex-direction: column; text-decoration: none; }
+.page-turn a:last-child { text-align: right; margin-left: auto; }
+.page-turn small { color: var(--muted); font-weight: 400; }
+.facts { margin: 20px 0; }
+.facts > div { display: grid; grid-template-columns: 100px 1fr; gap: 18px; padding: 8px 0; }
+.facts dt, .facts dd { margin: 0; }
+.report-list article { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.report-list h3, .report-list p { margin: 4px 0; }
+.selected-epoch { background: var(--orange-soft); }
+.selected-epoch th { color: var(--orange-ink); }
+.table-scroll td { overflow-wrap: anywhere; }
+@media (max-width: 600px) { .facts > div { grid-template-columns: 78px 1fr; gap: 12px; } .chapter-nav { gap: 8px 14px; } }
+@media print { .source-options, .page-turn { display: none; } body h2 { border-color: #888; } }
+
+.milestone-nav { margin: 22px 0 12px; gap: 12px; }
+.milestone-nav .report-button { background: #fff; }
+.milestone-nav .report-button[aria-current] { background: var(--accent); color: #fff; }
+.milestone-nav .report-button:hover { background: var(--blue-soft); color: var(--accent); }
+/* One shared 2×2 placeholder wrapper. */
+.placeholder {
+  display: inline-block;
+  max-width: 100%;
+  margin: 4px 0;
+  padding: 12px 16px;
+  background: conic-gradient(#8000c0 25%, #000 0 50%, #8000c0 0 75%, #000 0);
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+a.placeholder:hover { color: #fff; }
+aside.placeholder { display: block; margin: 24px 0; }
+.placeholder p { margin: 0; }
+.deliverable-links { display: flex; flex-wrap: wrap; gap: 12px; font-size: 14px; }

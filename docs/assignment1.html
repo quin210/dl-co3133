@@ -3,76 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Assignment 1 — CO3133</title>
-<link rel="stylesheet" href="assets/style.css">
+<title>Image classification on Fashion-MNIST · G-02 · CO3133</title>
+<meta name="description" content="Image classification on Fashion-MNIST">
+<link rel="stylesheet" href="assets/assignment.css">
 </head>
-<body>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="page">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
 <div class="wrap">
-
-<a class="back" href="index.html">← Home</a>
-
-<h1>Assignment 1 — Foundations of Deep Learning Pipelines and Architectures</h1>
-<p class="sub">From Linear Models to Modern Sequence Models: A Comparative Study for Image Classification<br>CO3133 · Semester-261 · Instructor: Lê Thành Sách</p>
-
-<h2>Group members</h2>
-<div class="tscroll">
-<table>
-<thead><tr><th>Full name</th><th>Student ID</th><th>Contribution to this assignment</th></tr></thead>
-<tbody>
-<tr><td>Võ Thị Như Quỳnh</td><td>2353041</td><td class="todo">To be updated</td></tr>
-<tr><td>Mai Trung Kiên</td><td>2352641</td><td class="todo">To be updated</td></tr>
-<tr><td>Hứa Tuệ Minh</td><td>2450018</td><td class="todo">To be updated</td></tr>
-</tbody>
-</table>
-</div>
-
-<h2>Problem statement</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Dataset description &amp; EDA</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Methodology</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Experimental setup</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Results</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Comparison &amp; discussion</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Error analysis</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Ablation study</h2>
-<p class="todo">Recommended for this assignment. Not yet available.</p>
-
-<h2>Limitations &amp; conclusion</h2>
-<p class="todo">Not yet available.</p>
-
-<h2>Links</h2>
-<div class="tscroll">
-<table>
-<thead><tr><th>Item</th><th>Link</th></tr></thead>
-<tbody>
-<tr><td>Source code</td><td class="todo">not available yet</td></tr>
-<tr><td>Checkpoints / reconstruction instructions</td><td class="todo">not available yet</td></tr>
-<tr><td>Report</td><td class="todo">not available yet</td></tr>
-<tr><td>Slides</td><td class="todo">not available yet</td></tr>
-<tr><td>YouTube presentation video</td><td class="todo">not available yet</td></tr>
-</tbody>
-</table>
-</div>
-<p class="todo">Required video title format: CO3133-Semester-261 – Group [ID] – Assignment 1</p>
-
-<h2>AI Usage Disclosure</h2>
-<p class="todo">Not yet available.</p>
-
-<footer>CO3133 — Semester-261 — Ho Chi Minh City University of Technology, VNU-HCM</footer>
-
+<header><p class="kicker">Assignment 1</p><h1>Image classification on Fashion-MNIST</h1><nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1.html" aria-current="page">Overview</a><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div></header>
+<main id="main"><section id="question"><h2 id="section-1">Problem</h2>
+<p>How do image representations affect classification accuracy and computational cost? We compare Linear, MLP, CNN, LSTM and Transformer on Fashion-MNIST: ten clothing classes represented by 28 × 28 grayscale images. Similar upper-body silhouettes make some categories difficult to separate.</p></section>
+<section id="setup"><h2 id="section-2">Experimental setup</h2>
+<p>A stratified seed-42 split gives 54,000 training, 6,000 validation and 10,000 test images. All models use training-only normalization, Adam at 0.001, batch size 128 and 16 epochs on four CPU threads. Validation macro-F1 selects each checkpoint. <a href="assignment1_methods.html#protocol">Full protocol</a>.</p></section>
+<section id="results"><h2 id="section-3">Results</h2><div aria-label="Five model comparison" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Seed 42; each checkpoint selected by validation macro-F1.</caption><thead><tr><th scope="col">Model</th><th scope="col">Val macro-F1</th><th scope="col">Test accuracy</th><th scope="col">Test macro-F1</th><th scope="col">Parameters</th><th scope="col">Train (s)</th><th scope="col">Test (ms/image)</th></tr></thead><tbody><tr><th scope="row"><a href="assignment1_runs.html#linear">Linear</a></th><td>0.8658</td><td>84.03%</td><td>0.8408</td><td>7,850</td><td>5.94</td><td>0.0019</td></tr><tr><th scope="row"><a href="assignment1_runs.html#mlp">MLP</a></th><td>0.9070</td><td>88.77%</td><td>0.8878</td><td>203,530</td><td>11.88</td><td>0.0024</td></tr><tr><th scope="row"><a href="assignment1_runs.html#cnn">CNN</a></th><td>0.9233</td><td>91.05%</td><td>0.9108</td><td>105,866</td><td>151.30</td><td>0.0346</td></tr><tr><th scope="row"><a href="assignment1_runs.html#lstm">LSTM</a></th><td>0.9007</td><td>88.21%</td><td>0.8819</td><td>24,714</td><td>70.20</td><td>0.0372</td></tr><tr><th scope="row"><a href="assignment1_runs.html#transformer">Transformer</a></th><td>0.8830</td><td>86.89%</td><td>0.8680</td><td>19,530</td><td>137.85</td><td>0.0720</td></tr></tbody></table></div>
+<aside class="idea"><p>CNN reaches <strong>91.05% test accuracy</strong>, 2.28 percentage points above MLP with roughly half the parameters. MLP offers faster inference; CNN takes about 14× as long per image on this CPU.</p></aside>
+<p>Training time includes validation and checkpoint work. Inference is batched throughput, measured as the median of three passes after warmup. <a href="assignment1_methods.html#metrics">Metric definitions</a>.</p>
+<p>Upper-body clothing remains the main source of confusion: CNN labels 165 of 1,000 T-shirts as Shirt. <a href="assignment1_results.html#6-test-confusion-matrices">Error analysis</a> examines the class pairs and prediction examples. These results cover one seed, one split and a fixed training budget; variability across runs has not been measured.</p></section>
+<section id="milestones"><h2 id="section-4">Milestones</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Milestone</th><th scope="col">Due</th><th scope="col">Weight within A1</th><th scope="col">Status</th></tr></thead><tbody>
+<tr><th scope="row"><a href="assignment1_M1.html">M1 Report</a></th><td>23 Sep 2026</td><td>25%</td><td>EDA and Linear/MLP baseline report.</td></tr>
+<tr><th scope="row"><a href="assignment1_M2.html">M2 Final</a></th><td>21 Oct 2026</td><td>75%</td><td>Five-model results available; final materials pending.</td></tr></tbody></table></div>
+<p class="deliverable-links"><a class="placeholder" href="assignment1_M2.html#final-pdf">Final PDF report — pending</a><a class="placeholder" href="assignment1_M2.html#slides">Presentation slides — pending</a><a class="placeholder" href="assignment1_M2.html#video">YouTube presentation — pending</a></p><p><a href="assignment1_M2.html#plan">Remaining work</a> · <a href="assignment1_methods.html#reproduce">Checkpoint reconstruction</a></p></section>
+<section id="references"><h2 id="section-5">References</h2><p><a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST dataset</a> · <a href="https://arxiv.org/abs/1708.07747">Fashion-MNIST paper</a></p></section></main>
+<nav class="page-turn" aria-label="Report reading order"><a href="index.html"><small>Previous</small>Course home</a><a href="assignment1_eda.html"><small>Next</small>Data exploration</a></nav>
+<footer><a href="#top">Back to top</a></footer>
 </div>
 </body>
 </html>

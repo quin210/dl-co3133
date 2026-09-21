@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dataset exploration · G-02 · CO3133</title>
+<meta name="description" content="Dataset exploration">
+<link rel="stylesheet" href="assets/assignment.css">
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="location">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
+<div class="wrap">
+<header><p class="kicker">Assignment 1</p><h1>Dataset exploration</h1><nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1.html">Overview</a><a href="assignment1_eda.html" aria-current="page">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/01_eda.ipynb">Notebook (.ipynb)</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#1-read-the-dataset">1. Read the dataset</a><a href="#2-define-the-train-and-validation-subsets">2. Define the train and validation subsets</a><a href="#3-look-at-one-image">3. Look at one image</a><a href="#4-class-distribution-and-imbalance">4. Class distribution and imbalance</a><a href="#5-representative-training-images">5. Representative training images</a><a href="#6-pixel-intensity-distribution">6. Pixel intensity distribution</a><a href="#7-brightness-contrast-and-foreground-coverage">7. Brightness, contrast and foreground coverage</a><a href="#8-average-appearance-of-each-class">8. Average appearance of each class</a><a href="#9-pca-how-much-variation-fits-in-fewer-dimensions">9. PCA: how much variation fits in fewer dimensions?</a><a href="#10-two-dimensional-views-of-the-same-images">10. Two-dimensional views of the same images</a><a href="#11-inspect-preprocessing">11. Inspect preprocessing</a><a href="#12-eda-conclusions">12. EDA conclusions</a></nav></header>
+<main id="main"><section><h2 id="1-read-the-dataset">1. Read the dataset</h2><p>Read the official image and label arrays. IDX image headers occupy 16 bytes; label headers occupy 8 bytes.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>1. Read the dataset</caption>
+<thead>
+<tr>
+<th scope="col">Set</th>
+<th scope="col">Image shape</th>
+<th scope="col">Label shape</th>
+<th scope="col">Pixel dtype</th>
+<th scope="col">Min</th>
+<th scope="col">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Original train</td>
+<td>(60000, 28, 28)</td>
+<td>(60000,)</td>
+<td>uint8</td>
+<td>0</td>
+<td>255</td>
+</tr>
+<tr>
+<td>Official test</td>
+<td>(10000, 28, 28)</td>
+<td>(10000,)</td>
+<td>uint8</td>
+<td>0</td>
+<td>255</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>There are 60,000 original training images and 10,000 official test images. Each image is 28 × 28 with one grayscale channel, stored as unsigned integers from 0 to 255. Image and label counts match in both sets; the image arrays have no explicit channel dimension.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>1. Read the dataset</caption>
+<thead>
+<tr>
+<th scope="col">File</th>
+<th scope="col">Bytes</th>
+<th scope="col">Mib</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>train-images-idx3-ubyte</td>
+<td>47040016</td>
+<td>44.861</td>
+</tr>
+<tr>
+<td>train-labels-idx1-ubyte</td>
+<td>60008</td>
+<td>0.057</td>
+</tr>
+<tr>
+<td>t10k-images-idx3-ubyte</td>
+<td>7840016</td>
+<td>7.477</td>
+</tr>
+<tr>
+<td>t10k-labels-idx1-ubyte</td>
+<td>10008</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>54950048</td>
+<td>52.404</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>The four uncompressed IDX files occupy 54,950,048 bytes (52.404 MiB) on disk, including their headers. Images store one unsigned byte per pixel; labels store one unsigned byte per image. The downloaded <code>.gz</code> files are compressed copies, while the arrays above read the uncompressed files directly.</p>
+</section><section><h2 id="2-define-the-train-and-validation-subsets">2. Define the train and validation subsets</h2><p>Reserve 10% of the original training set for validation. Use only the remaining training images for detailed EDA and fitted transformations.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>2. Define the train and validation subsets</caption>
+<thead>
+<tr>
+<th scope="col">Class</th>
+<th scope="col">Train</th>
+<th scope="col">Validation</th>
+<th scope="col">Official test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">T-shirt/top</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Trouser</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Pullover</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Dress</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Coat</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Sandal</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Shirt</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Sneaker</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Bag</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Ankle boot</th>
+<td>5400</td>
+<td>600</td>
+<td>1000</td>
+</tr>
+<tr>
+<th scope="row">Total</th>
+<td>54000</td>
+<td>6000</td>
+<td>10000</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>The split contains 54,000 training and 6,000 validation images. Every class contributes 5,400 training and 600 validation examples, so stratification preserves balance. The 10,000 official test images remain separate. Later image galleries and projection samples come from the training subset.</p>
+</section><section><h2 id="3-look-at-one-image">3. Look at one image</h2><p>Display an actual training image at its native resolution. The ID refers to its row in the original training file.</p>
+<figure><a aria-label="Open full-size figure: 3. Look at one image" href="assets/assignment1_eda/figure-13-00.png"><img alt="3. Look at one image; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-13-00.png"/></a><figcaption>3. Look at one image.</figcaption></figure><p>The image is made of discrete grayscale pixels: dark values form the background and lighter values describe the item. At this resolution, fine texture and small details are limited. The displayed label identifies a clothing category rather than a particular product.</p>
+<h3 id="3-1-pixel-values-and-the-flattened-input">3.1 Pixel values and the flattened input</h3><p>Zoom into an 8 × 8 patch and show the same image as a vector.</p>
+<figure><a aria-label="Open full-size figure: 3.1 Pixel values and the flattened input" href="assets/assignment1_eda/figure-16-00.png"><img alt="3.1 Pixel values and the flattened input; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-16-00.png"/></a><figcaption>3.1 Pixel values and the flattened input.</figcaption></figure><p>The patch includes intermediate gray values, so the image is not a binary silhouette. Flattening gives 784 features and preserves every pixel value in row-major order. A flat vector does not explicitly encode which pixels were adjacent in two dimensions; no resizing is needed.</p>
+</section><section><h2 id="4-class-distribution-and-imbalance">4. Class distribution and imbalance</h2><p>Count each class in the two original dataset partitions.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>4. Class distribution and imbalance</caption>
+<thead>
+<tr>
+<th scope="col">Class</th>
+<th scope="col">Original train</th>
+<th scope="col">Official test</th>
+<th scope="col">Train share (%)</th>
+<th scope="col">Test share (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">T-shirt/top</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Trouser</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Pullover</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Dress</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Coat</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Sandal</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Shirt</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Sneaker</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Bag</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+<tr>
+<th scope="row">Ankle boot</th>
+<td>6000</td>
+<td>1000</td>
+<td>10.0</td>
+<td>10.0</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>Every class has 6,000 original training examples and 1,000 official test examples: 10% of each partition. The largest-to-smallest class-count ratio is 1.0 in both sets. There is no class-frequency imbalance to correct, although some categories can still be harder to distinguish visually.</p>
+<h3 id="4-1-visual-comparison-of-class-counts">4.1 Visual comparison of class counts</h3><p>Show the original class counts side by side.</p>
+<figure><a aria-label="Open full-size figure: 4.1 Visual comparison of class counts" href="assets/assignment1_eda/figure-22-00.png"><img alt="4.1 Visual comparison of class counts; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-22-00.png"/></a><figcaption>4.1 Visual comparison of class counts.</figcaption></figure><p>The bars have equal length within each partition. The separate axes show different absolute counts, so compare class proportions rather than bar lengths across panels. An unweighted classification loss is a reasonable future baseline; per-class metrics will still be useful.</p>
+</section><section><h2 id="5-representative-training-images">5. Representative training images</h2><p>Inspect four seeded examples from each class. First, look at T-shirts, trousers, pullovers, dresses and coats.</p>
+<figure><a aria-label="Open full-size figure: 5. Representative training images" href="assets/assignment1_eda/figure-25-00.png"><img alt="5. Representative training images; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-25-00.png"/></a><figcaption>5. Representative training images.</figcaption></figure><p>Examples within one category differ in brightness, outline and detail. Trousers have a distinctive two-leg silhouette. Pullovers and coats share a torso-and-sleeves structure, while dresses vary in length and shape. Four examples illustrate variation but cannot establish how common each appearance is.</p>
+<h3 id="5-1-footwear-shirts-and-bags">5.1 Footwear, shirts and bags</h3><p>Inspect the remaining five classes using the same sampling rule.</p>
+<figure><a aria-label="Open full-size figure: 5.1 Footwear, shirts and bags" href="assets/assignment1_eda/figure-28-00.png"><img alt="5.1 Footwear, shirts and bags; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-28-00.png"/></a><figcaption>5.1 Footwear, shirts and bags.</figcaption></figure><p>Footwear often has a horizontal silhouette, but sandals, sneakers and ankle boots differ in how much of the foot or ankle they cover. Bags vary in body shape and handle visibility. Shirts share visual elements with several upper-body categories, making their class boundaries worth inspecting more closely.</p>
+</section><section><h2 id="6-pixel-intensity-distribution">6. Pixel intensity distribution</h2><p>Count intensities across all 54,000 training images. Use a logarithmic vertical axis so the background spike does not hide the other intensities.</p>
+<figure><a aria-label="Open full-size figure: 6. Pixel intensity distribution" href="assets/assignment1_eda/figure-31-00.png"><img alt="6. Pixel intensity distribution; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-31-00.png"/></a><figcaption>6. Pixel intensity distribution.</figcaption></figure><div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>6. Pixel intensity distribution</caption>
+<thead>
+<tr>
+<th scope="col">Class / model</th>
+<th scope="col">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Zero-valued pixels (%)</th>
+<td>50.2143</td>
+</tr>
+<tr>
+<th scope="row">Completely black images</th>
+<td>0.0000</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>About half of the training pixels are exactly zero, reflecting the large dark background regions. Other pixels span many intensities, so foreground texture is retained. A high proportion of zero pixels does not mean the corresponding images are empty; the all-black count distinguishes these cases.</p>
+<h3 id="6-1-where-do-pixels-vary">6.1 Where do pixels vary?</h3><p>Compare the mean image with variance at each pixel location. Both summaries use intensities scaled to [0, 1].</p>
+<figure><a aria-label="Open full-size figure: 6.1 Where do pixels vary?" href="assets/assignment1_eda/figure-34-00.png"><img alt="6.1 Where do pixels vary?; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-34-00.png"/></a><figcaption>6.1 Where do pixels vary?.</figcaption></figure><p>The mean image shows where clothing tends to occupy the frame, while variance highlights locations that change across examples. Background corners are comparatively stable. Low variance alone does not establish that a coordinate is useless for distinguishing classes, so these plots do not justify removing pixels.</p>
+</section><section><h2 id="7-brightness-contrast-and-foreground-coverage">7. Brightness, contrast and foreground coverage</h2><p>Summarize each image. Brightness is mean intensity, contrast is intensity standard deviation, and foreground means a raw pixel value above 26.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>7. Brightness, contrast and foreground coverage</caption>
+<thead>
+<tr>
+<th scope="col">Class / model</th>
+<th scope="col">Brightness</th>
+<th scope="col">Contrast</th>
+<th scope="col">Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">count</th>
+<td>54000.000</td>
+<td>54000.000</td>
+<td>54000.000</td>
+</tr>
+<tr>
+<th scope="row">mean</th>
+<td>0.286</td>
+<td>0.320</td>
+<td>0.451</td>
+</tr>
+<tr>
+<th scope="row">std</th>
+<td>0.126</td>
+<td>0.078</td>
+<td>0.149</td>
+</tr>
+<tr>
+<th scope="row">min</th>
+<td>0.019</td>
+<td>0.070</td>
+<td>0.038</td>
+</tr>
+<tr>
+<th scope="row">5%</th>
+<td>0.101</td>
+<td>0.178</td>
+<td>0.214</td>
+</tr>
+<tr>
+<th scope="row">50%</th>
+<td>0.272</td>
+<td>0.332</td>
+<td>0.458</td>
+</tr>
+<tr>
+<th scope="row">95%</th>
+<td>0.503</td>
+<td>0.428</td>
+<td>0.673</td>
+</tr>
+<tr>
+<th scope="row">max</th>
+<td>0.752</td>
+<td>0.475</td>
+<td>0.909</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>These features describe global appearance, not image correctness. Brightness combines item intensity and occupied area; coverage depends on the chosen threshold. Extreme values should lead to visual inspection before any decision to remove or alter an image.</p>
+<h3 id="7-1-compare-appearance-by-class">7.1 Compare appearance by class</h3><p>Show the within-class distributions. Outlier markers are hidden for readability; all images remain included in the boxplot calculations.</p>
+<figure><a aria-label="Open full-size figure: 7.1 Compare appearance by class" href="assets/assignment1_eda/figure-40-00.png"><img alt="7.1 Compare appearance by class; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-40-00.png"/></a><figcaption>7.1 Compare appearance by class.</figcaption></figure><p>The class distributions overlap, so none of these single-number features cleanly identifies every category. Sandals occupy relatively little foreground area, whereas fuller garments cover more of the frame. Differences in median brightness can reflect silhouette and background as well as fabric appearance.</p>
+<h3 id="7-2-inspect-the-extreme-examples">7.2 Inspect the extreme examples</h3><p>For each feature, display the two lowest and two highest training examples.</p>
+<figure><a aria-label="Open full-size figure: 7.2 Inspect the extreme examples" href="assets/assignment1_eda/figure-43-00.png"><img alt="7.2 Inspect the extreme examples; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-43-00.png"/></a><figcaption>7.2 Inspect the extreme examples.</figcaption></figure><p>The lowest-brightness examples are dark sandals; the lowest-contrast examples are dark shirts. The two highest-coverage examples are bags that nearly fill the frame. Sandal #39009 has an unusual large bright region below the footwear, which deserves closer inspection before proposing a cleaning rule. These deliberately selected extremes are not representative examples or confirmed labeling errors.</p>
+<h3 id="7-3-what-does-the-foreground-threshold-select">7.3 What does the foreground threshold select?</h3><p>Compare an image with its threshold mask.</p>
+<figure><a aria-label="Open full-size figure: 7.3 What does the foreground threshold select?" href="assets/assignment1_eda/figure-46-00.png"><img alt="7.3 What does the foreground threshold select?; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-46-00.png"/></a><figcaption>7.3 What does the foreground threshold select?.</figcaption></figure><p>The mask simplifies the grayscale image into occupied and unoccupied pixels. It can exclude dark parts of the garment, so coverage is a threshold-based proxy rather than a precise segmentation. The original grayscale image remains the input representation.</p>
+<h3 id="7-4-sensitivity-to-the-foreground-threshold">7.4 Sensitivity to the foreground threshold</h3><p>Change the threshold by ten intensity levels in either direction and compare median coverage by class.</p>
+<figure><a aria-label="Open full-size figure: 7.4 Sensitivity to the foreground threshold" href="assets/assignment1_eda/figure-49-00.png"><img alt="7.4 Sensitivity to the foreground threshold; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-49-00.png"/></a><figcaption>7.4 Sensitivity to the foreground threshold.</figcaption></figure><p>Increasing the threshold reduces measured foreground coverage. Compare the spacing and ordering of the curves before treating a class difference as robust. The thresholds describe the same unmodified images; they do not define alternative cleaned datasets.</p>
+</section><section><h2 id="8-average-appearance-of-each-class">8. Average appearance of each class</h2><p>Average the training images within each class, using a shared grayscale range.</p>
+<figure><a aria-label="Open full-size figure: 8. Average appearance of each class" href="assets/assignment1_eda/figure-52-00.png"><img alt="8. Average appearance of each class; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-52-00.png"/></a><figcaption>8. Average appearance of each class.</figcaption></figure><p>Averaging preserves common silhouettes while blurring details and variations in pose. Trousers and footwear retain characteristic shapes; several upper-body categories have similar outlines. These are synthetic mean images, not actual products or representative individual examples.</p>
+<h3 id="8-1-compare-class-means">8.1 Compare class means</h3><p>Measure root-mean-square (RMS) distance between class means on the [0, 1] intensity scale.</p>
+<figure><a aria-label="Open full-size figure: 8.1 Compare class means" href="assets/assignment1_eda/figure-55-00.png"><img alt="8.1 Compare class means; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-55-00.png"/></a><figcaption>8.1 Compare class means.</figcaption></figure><p>Dark off-diagonal cells indicate similar average appearances. This comparison suggests class pairs to inspect visually. It is not a confusion matrix: no classifier has been trained, and similarity between means does not measure prediction errors.</p>
+<h3 id="8-2-which-average-silhouettes-are-closest">8.2 Which average silhouettes are closest?</h3><p>List the five smallest distances between distinct classes.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>8.2 Which average silhouettes are closest?</caption>
+<thead>
+<tr>
+<th scope="col">Class a</th>
+<th scope="col">Class b</th>
+<th scope="col">Rms distance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pullover</td>
+<td>Coat</td>
+<td>0.088</td>
+</tr>
+<tr>
+<td>Pullover</td>
+<td>Shirt</td>
+<td>0.096</td>
+</tr>
+<tr>
+<td>Coat</td>
+<td>Shirt</td>
+<td>0.107</td>
+</tr>
+<tr>
+<td>T-shirt/top</td>
+<td>Shirt</td>
+<td>0.132</td>
+</tr>
+<tr>
+<td>Sandal</td>
+<td>Sneaker</td>
+<td>0.137</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>Pullover and Coat have the closest mean images. Their similar torso-and-sleeve structure is consistent with the earlier galleries. This is a hypothesis about visual ambiguity; class means can hide substantial differences among individual images.</p>
+<h3 id="8-3-return-to-real-images-of-the-closest-pair">8.3 Return to real images of the closest pair</h3><p>Use the previously sampled examples to compare the closest two classes directly.</p>
+<figure><a aria-label="Open full-size figure: 8.3 Return to real images of the closest pair" href="assets/assignment1_eda/figure-61-00.png"><img alt="8.3 Return to real images of the closest pair; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-61-00.png"/></a><figcaption>8.3 Return to real images of the closest pair.</figcaption></figure><p>The real examples show both shared silhouettes and differences that averaging smooths away. Necklines, openings, length and texture can matter, but they may be subtle at 28 × 28 resolution. Similarity in this small gallery does not imply that the categories are interchangeable.</p>
+</section><section><h2 id="9-pca-how-much-variation-fits-in-fewer-dimensions">9. PCA: how much variation fits in fewer dimensions?</h2><p>Fit an exploratory projection on a balanced sample of 6,000 training images. PCA uses pixel variation, not labels; labels only define the balanced sample.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>9. PCA: how much variation fits in fewer dimensions?</caption>
+<thead>
+<tr>
+<th scope="col">Components</th>
+<th scope="col">Cumulative variance (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>46.62</td>
+</tr>
+<tr>
+<td>8</td>
+<td>69.24</td>
+</tr>
+<tr>
+<td>16</td>
+<td>76.45</td>
+</tr>
+<tr>
+<td>32</td>
+<td>82.61</td>
+</tr>
+<tr>
+<td>64</td>
+<td>88.22</td>
+</tr>
+<tr>
+<td>128</td>
+<td>92.94</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>Two components retain about 46.62% of the variation in this 6,000-image training sample; 64 retain 88.22%, and 128 retain 92.94%. A two-dimensional view therefore discards more than half the measured variation. Retained variance is different from the category-specific information needed for classification.</p>
+<h3 id="9-1-cumulative-explained-variance">9.1 Cumulative explained variance</h3><p>View the tradeoff between the number of components and retained variation.</p>
+<figure><a aria-label="Open full-size figure: 9.1 Cumulative explained variance" href="assets/assignment1_eda/figure-67-00.png"><img alt="9.1 Cumulative explained variance; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-67-00.png"/></a><figcaption>9.1 Cumulative explained variance.</figcaption></figure><p>The curve rises quickly and then flattens: later components each add less variance. Only 128 components were computed, so targets above the endpoint cannot be assigned a component count from this run. A compression choice would need a separate evaluation of its effect on the eventual task.</p>
+<h3 id="9-2-look-at-reconstructed-images">9.2 Look at reconstructed images</h3><p>Reconstruct one sampled image from each of four classes. Clip only the displayed intensities to [0, 1].</p>
+<figure><a aria-label="Open full-size figure: 9.2 Look at reconstructed images" href="assets/assignment1_eda/figure-70-00.png"><img alt="9.2 Look at reconstructed images; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-70-00.png"/></a><figcaption>9.2 Look at reconstructed images.</figcaption></figure><p>Broad silhouettes are recognizable with eight components, while more components sharpen sleeves, trouser legs and the boot outline. The patterned trousers and printed T-shirt still lose fine detail at 64 components. These images belong to the PCA fitting sample and illustrate reconstruction; they do not estimate performance on unseen data.</p>
+</section><section><h2 id="10-two-dimensional-views-of-the-same-images">10. Two-dimensional views of the same images</h2><p>Select 200 images per class from the PCA sample and plot their first two component scores.</p>
+<figure><a aria-label="Open full-size figure: 10. Two-dimensional views of the same images" href="assets/assignment1_eda/figure-73-00.png"><img alt="10. Two-dimensional views of the same images; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-73-00.png"/></a><figcaption>10. Two-dimensional views of the same images.</figcaption></figure><p>Several labels overlap in the first two components. PCA maximizes overall pixel variance, so its leading directions need not separate clothing classes. Overlap in this view does not show that the original 784-dimensional inputs are inseparable.</p>
+<h3 id="10-1-a-nonlinear-view-with-t-sne">10.1 A nonlinear view with t-SNE</h3><p>Embed the same 2,000 images using their first 50 PCA scores. This is an exploratory visualization, not classifier training.</p>
+<figure><a aria-label="Open full-size figure: 10.1 A nonlinear view with t-SNE" href="assets/assignment1_eda/figure-76-00.png"><img alt="10.1 A nonlinear view with t-SNE; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-76-00.png"/></a><figcaption>10.1 A nonlinear view with t-SNE.</figcaption></figure><p>Trousers form a compact neighborhood, while many pullover, coat and shirt points mix in the upper-body clothing region. Footwear occupies another part of the view, with some sandal and sneaker mixing. These local patterns support further image inspection. Distances between distant groups, apparent gaps and cluster sizes are not classification accuracy or reliable global similarity measures; the layout depends on sampling and settings.</p>
+</section><section><h2 id="11-inspect-preprocessing">11. Inspect preprocessing</h2><p>Calculate normalization statistics from the 54,000 training images only. Scaling divides by 255; standardization then subtracts the training mean and divides by its standard deviation.</p>
+<div>
+<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>11. Inspect preprocessing</caption>
+<thead>
+<tr>
+<th scope="col">Representation</th>
+<th scope="col">Mean</th>
+<th scope="col">Population std</th>
+<th scope="col">Min</th>
+<th scope="col">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw</td>
+<td>72.983297</td>
+<td>90.055735</td>
+<td>0.000000</td>
+<td>255.000000</td>
+</tr>
+<tr>
+<td>Scaled</td>
+<td>0.286209</td>
+<td>0.353160</td>
+<td>0.000000</td>
+<td>1.000000</td>
+</tr>
+<tr>
+<td>Standardized</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td>-0.810424</td>
+<td>2.021156</td>
+</tr>
+</tbody>
+</table></div>
+</div><p>The training-fitted mean and standard deviation on the [0, 1] scale are approximately 0.286209 and 0.353160. Standardization gives zero mean and unit standard deviation over all training pixels together, not separately within each image. Any later validation or test transformation should reuse these training statistics.</p>
+<h3 id="11-1-the-same-image-before-and-after-scaling">11.1 The same image before and after scaling</h3><p>Use corresponding display ranges to compare the same image in three numerical representations.</p>
+<figure><a aria-label="Open full-size figure: 11.1 The same image before and after scaling" href="assets/assignment1_eda/figure-82-00.png"><img alt="11.1 The same image before and after scaling; saved experiment output." loading="lazy" src="assets/assignment1_eda/figure-82-00.png"/></a><figcaption>11.1 The same image before and after scaling.</figcaption></figure><p>The silhouettes remain identical because these transformations change numerical scale while preserving pixel order and relative contrast. The color bars show that the underlying values differ. Standardization includes negative values and is not restricted to [0, 1].</p>
+</section><section><h2 id="12-eda-conclusions">12. EDA conclusions</h2><div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Evidence from the exploration</th>
+<th scope="col">Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ten equally frequent classes in the original sets and stratified subsets</td>
+<td>Start from an unweighted baseline; inspect class-specific performance later.</td>
+</tr>
+<tr>
+<td>Fixed 28 × 28 grayscale images</td>
+<td>Keep native resolution; a flattened image contains 784 values.</td>
+</tr>
+<tr>
+<td>Large background regions and varied foreground intensities</td>
+<td>Scaling is useful; zero pixels alone are not a reason to reject an image.</td>
+</tr>
+<tr>
+<td>Broad brightness and coverage distributions within classes</td>
+<td>Inspect unusual examples visually before proposing cleaning rules.</td>
+</tr>
+<tr>
+<td>Pullover and Coat have similar mean silhouettes</td>
+<td>Treat related upper-body categories as a hypothesis for later error analysis.</td>
+</tr>
+<tr>
+<td>Two-dimensional projections discard information and mix some labels</td>
+<td>Use them for exploration, not as an estimate of classifier performance.</td>
+</tr>
+<tr>
+<td>Normalization statistics are calculated from training pixels only</td>
+<td>Reuse the same mean and standard deviation for later validation and test inputs.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Limits.</strong> The galleries are small samples. Pixel distances and threshold masks
+describe appearance, not product identity or labeling correctness. PCA and t-SNE
+are sample-based exploratory views. This exploration provides no classification
+accuracy or evidence about which trained model is best.</p>
+<p><strong>Preprocessing decision.</strong> Separate training code can reproduce the split using seed 42,
+<code>test_size=0.10</code> and <code>stratify=y</code>, and compute normalization on that training subset.
+The EDA supports keeping all images and all pixel coordinates for an initial baseline.</p>
+<h3 id="sources">Sources</h3><ul>
+<li><a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST dataset</a>, Xiao et al. (2017), MIT license.</li>
+<li><a href="https://arxiv.org/abs/1708.07747">Fashion-MNIST paper</a>.</li>
+<li>Course handbook and foundation slides: dataset description, preprocessing and exploratory analysis.</li>
+</ul>
+</section></main>
+<nav class="page-turn" aria-label="Report reading order"><a href="assignment1.html"><small>Previous</small>Overview</a><a href="assignment1_methods.html"><small>Next</small>Methods &amp; reproduction</a></nav>
+<footer><a href="#top">Back to top</a></footer>
+</div>
+</body>
+</html>
