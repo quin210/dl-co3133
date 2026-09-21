@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Methods and reproduction · G-02 · CO3133</title>
+<meta name="description" content="Methods and reproduction">
+<link rel="stylesheet" href="assets/assignment.css">
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="location">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
+<div class="wrap">
+<header><p class="kicker">Assignment 1</p><h1>Methods and reproduction</h1><nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1.html">Overview</a><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html" aria-current="page">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">One pipeline, five architectures</a><a href="#section-2">Data and inputs</a><a href="#section-3">Model definitions</a><a href="#section-4">Training and selection</a><a href="#section-5">Loss, metrics and timing</a><a href="#section-6">Recorded environment</a><a href="#section-7">Reproduce the experiment</a><a href="#section-8">Saved evidence</a><a href="#section-9">Limitations</a></nav></header>
+<main id="main"><section id="pipeline">
+<h2 id="section-1">One pipeline, five architectures</h2>
+<p>Five architectures classify 28 × 28 grayscale Fashion-MNIST images into ten classes, using the same inputs, split, optimizer, training budget and evaluation.</p>
+<pre aria-label="Experiment pipeline"><code>IDX images and labels
+  → fixed stratified training / validation split
+  → normalization fitted on training pixels
+  → Dataset and DataLoader
+  → model → ten raw class scores → cross-entropy
+  → Adam updates over 16 epochs
+  → highest validation macro-F1 selects the checkpoint
+  → selected weights evaluated on the official test set</code></pre>
+<p>The project defines data preparation, architectures and training/evaluation. PyTorch supplies layers, differentiation and Adam; NumPy handles arrays, scikit-learn splits/metrics, and Matplotlib figures.</p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/data_loader.py">Data loader source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train.py">Training source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/evaluate.py">Evaluation source</a></p>
+</section>
+<section id="inputs">
+<h2 id="section-2">Data and inputs</h2>
+<p>A seed-42 stratified split divides 60,000 official training images into 54,000 training and 6,000 validation images; the 10,000-image test set is unchanged. Each class contributes 5,400, 600 and 1,000 images respectively. No images are removed or relabeled.</p>
+<p>Checkpoints store disjoint training/validation indices. Test data neither selects weights nor fits normalization. Product identifiers are unavailable, so image-index separation cannot establish product-level independence.</p>
+<pre aria-label="Preprocessing and tensor shapes"><code>x = (pixel / 255 − training_mean) / training_std
+training_mean = 0.286209    training_std = 0.353160
+
+images: float32 [B, 1, 28, 28]
+labels: int64   [B]          values 0 … 9
+logits: float32 [B, 10]      output of every model</code></pre>
+<p>Training-only statistics normalize images once in the dataset constructor. Batch size is 128, with partial batches retained. Only training shuffles, using a seeded generator; loaders use zero workers. No resizing, augmentation or feature extraction precedes the models. See <a href="assignment1_eda.html">data exploration</a> for the supporting analysis.</p>
+</section>
+<section id="models">
+<h2 id="section-3">Model definitions</h2>
+<p><code>B</code> denotes batch size. Every model returns ten raw logits. Softmax is used for inspection probabilities, never before cross-entropy.</p>
+<div aria-label="Model architecture comparison" class="table-scroll" role="region" tabindex="0"><table>
+<caption>Implemented architectures</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Internal representation</th><th scope="col">Parameters</th></tr></thead>
+<tbody>
+<tr><th scope="row"><a href="#linear">Linear</a></th><td>784 pixels → 10 logits</td><td>7,850</td></tr>
+<tr><th scope="row"><a href="#mlp">MLP</a></th><td>784 pixels → 256 ReLU features → 10 logits</td><td>203,530</td></tr>
+<tr><th scope="row"><a href="#cnn">CNN</a></th><td>Two convolution/pooling blocks → 64 features → 10 logits</td><td>105,866</td></tr>
+<tr><th scope="row"><a href="#lstm">LSTM</a></th><td>28 rows × 28 values → 64-value final hidden state → 10 logits</td><td>24,714</td></tr>
+<tr><th scope="row"><a href="#transformer">Transformer</a></th><td>49 patches × 16 pixels → 32-value tokens → two encoder layers → 10 logits</td><td>19,530</td></tr>
+</tbody></table></div>
+<h3 id="linear">Linear: a weighted pixel baseline</h3>
+<p>Each class receives a weighted sum of 784 pixels plus a bias, <code>z = Wx + b</code>. Without hidden features, the model cannot express nonlinear pixel interactions.</p>
+<pre><code>[B, 1, 28, 28] → Flatten → [B, 784]
+              → Linear(784, 10) → [B, 10]
+parameters = 784 × 10 + 10 = 7,850</code></pre>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/linear.py">Linear source</a></p>
+<h3 id="mlp">MLP: nonlinear combinations of pixels</h3>
+<p>A hidden layer learns 256 features: <code>h = max(0, W₁x + b₁)</code>, then <code>z = W₂h + b₂</code>. ReLU zeros negative activations, enabling nonlinear decision boundaries without explicitly representing spatial neighborhoods.</p>
+<pre><code>[B, 1, 28, 28] → Flatten → [B, 784]
+              → Linear(784, 256) → ReLU → [B, 256]
+              → Linear(256, 10) → [B, 10]
+parameters = (784 × 256 + 256) + (256 × 10 + 10)
+           = 203,530</code></pre>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/mlp.py">MLP source</a></p>
+<h3 id="cnn">CNN: local patterns with shared filters</h3>
+<p>Two blocks learn local features with shared 3 × 3 filters, ReLU and 2 × 2 max pooling, followed by a dense classifier. Padding of one preserves spatial size during convolution.</p>
+<pre><code>[B, 1, 28, 28]
+  → Conv2d(1, 16, kernel=3, padding=1) → ReLU
+  → MaxPool2d(2) → [B, 16, 14, 14]
+  → Conv2d(16, 32, kernel=3, padding=1) → ReLU
+  → MaxPool2d(2) → [B, 32, 7, 7]
+  → Flatten → [B, 1568]
+  → Linear(1568, 64) → ReLU → Linear(64, 10) → [B, 10]</code></pre>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/cnn.py">CNN source</a></p>
+<h3 id="lstm">LSTM: reading the image row by row</h3>
+<p>A single 64-unit LSTM reads 28 image rows from top to bottom. Gates control new and retained information: <code>cₜ = fₜ ⊙ cₜ₋₁ + iₜ ⊙ gₜ</code>, <code>hₜ = oₜ ⊙ tanh(cₜ)</code>. The final hidden state feeds the classifier. This representation prioritizes row order over two-dimensional neighborhoods.</p>
+<pre><code>[B, 1, 28, 28] → squeeze channel → [B, 28, 28]
+              → LSTM(input_size=28, hidden_size=64, layers=1)
+              → final hidden state [B, 64]
+              → Linear(64, 10) → [B, 10]</code></pre>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/lstm.py">LSTM source</a></p>
+<h3 id="transformer">Transformer: attention across image patches</h3>
+<p>Each of 49 non-overlapping 4 × 4 patches becomes a 32-value token with a learned position embedding. Two encoders use four attention heads, feed-forward width 64, residual connections and layer normalization. With eight values per head, <code>Attention(Q, K, V) = softmax(QKᵀ / √dₖ)V</code> connects distant patches; position embeddings preserve spatial identity.</p>
+<pre><code>[B, 1, 28, 28] → 7 × 7 patches → [B, 49, 16]
+              → Linear(16, 32) + learned positions [1, 49, 32]
+              → two Transformer encoder layers → [B, 49, 32]
+              → mean over 49 tokens → [B, 32]
+              → Linear(32, 10) → [B, 10]</code></pre>
+<p>Encoders use ReLU and zero dropout; classification uses mean pooling without a class token. No pretrained weights are used.</p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/transformer.py">Transformer source</a></p>
+</section>
+<section id="protocol">
+<h2 id="section-4">Training and selection</h2>
+<div aria-label="Shared training settings" class="table-scroll" role="region" tabindex="0"><table>
+<caption>Settings shared by all five models</caption>
+<thead><tr><th scope="col">Setting</th><th scope="col">Value</th></tr></thead>
+<tbody>
+<tr><th scope="row">Random seed</th><td>42 for Python, NumPy and PyTorch; training shuffle also uses 42</td></tr>
+<tr><th scope="row">Optimizer</th><td>Adam, learning rate 0.001</td></tr>
+<tr><th scope="row">Budget</th><td>16 epochs, batch size 128; every epoch runs</td></tr>
+<tr><th scope="row">Gradient clipping</th><td>Maximum total gradient norm 5.0</td></tr>
+<tr><th scope="row">Selection</th><td>Highest validation macro-F1; earliest epoch wins an exact tie</td></tr>
+<tr><th scope="row">Regularization</th><td>No augmentation, dropout, weight decay or learning-rate scheduler</td></tr>
+<tr><th scope="row">Execution</th><td>CPU, four PyTorch threads, float32, deterministic algorithms enabled</td></tr>
+</tbody></table></div>
+<p>Each batch clears gradients, computes cross-entropy, backpropagates, clips gradients and updates with Adam. Non-finite losses or gradients raise errors. Validation follows each epoch in evaluation mode without gradients.</p>
+<p>Reported metrics use selected weights in <code>best.pt</code>; <code>checkpoint.pt</code> stores epoch-16 weights. Test results do not select checkpoints.</p>
+<aside class="idea"><p><strong>Comparison scope:</strong> architecture changes both capacity and image representation. This is not a capacity-matched ablation or hyperparameter search; equal epochs do not imply equal compute or optimization difficulty.</p></aside>
+<p>History records predictions while weights change. Checkpoint training metrics use fixed selected weights, so they may differ from that epoch's history.</p>
+</section>
+<section id="metrics">
+<h2 id="section-5">Loss, metrics and timing</h2>
+<p>For logits <code>z</code> and target <code>y</code>, cross-entropy is <code>−z[y] + log(Σₖ exp(z[k]))</code>. Batch loss is averaged; epoch loss weights batches by image count. Prediction uses <code>argmax(z)</code> without post-processing.</p>
+<ul>
+<li><strong>Accuracy:</strong> correct predictions divided by the number of images.</li>
+<li><strong>Macro-F1:</strong> unweighted mean of ten class scores, <code>F1 = 2TP / (2TP + FP + FN)</code>; undefined scores are zero.</li>
+<li><strong>Training time:</strong> the 16-epoch training and validation loop, including history writes and copies of best weights. It excludes dataset preparation, post-training fixed-weight metrics and final artifact generation.</li>
+<li><strong>Inference time:</strong> the median of three complete batched passes after one warmup, divided by image count. It includes DataLoader iteration, the forward pass and argmax; it excludes metric calculation.</li>
+</ul>
+<p>Inference measures batched CPU throughput, not single-request latency. Measurements appear in <a href="assignment1_results.html">results and analysis</a>.</p>
+</section>
+<section id="environment">
+<h2 id="section-6">Recorded environment</h2>
+<p>All runs record Python 3.12.13, PyTorch 2.14.0, NumPy 2.5.3 and scikit-learn 1.9.1 on <code>macOS-26.6.2-arm64-arm-64bit</code>, using four CPU threads. Processor model and memory are not recorded. Notebook and plotting dependencies are pinned below.</p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/requirements.txt">Pinned dependencies</a></p>
+</section>
+<section id="reproduce">
+<h2 id="section-7">Reproduce the experiment</h2>
+<p>From the <code>dl-co3133</code> repository root. Training creates new timestamped folders; evaluation refreshes metrics and predictions in every saved model folder containing <code>best.pt</code>.</p>
+<h3 id="full-run">Train and evaluate all five models</h3>
+<pre><code>python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python Assignment1/download.py
+.venv/bin/python Assignment1/data_loader.py
+.venv/bin/python Assignment1/train.py
+.venv/bin/python Assignment1/evaluate.py</code></pre>
+<p>The loader prints split sizes, tensor shapes and normalization statistics. Training order: Linear, MLP, CNN, LSTM, Transformer.</p>
+<h3 id="m1-run">Train and evaluate only the M1 baselines</h3>
+<p>After setup and data download, train Linear and MLP with the same settings, resetting the seed before each model.</p>
+<pre><code>.venv/bin/python - &lt;&lt;'PY'
+import sys
+sys.path.insert(0, "Assignment1")
+from train import set_seed, fit
+from evaluate import evaluate
+from models.linear import LinearClassifier
+from models.mlp import MLP
+
+for name, Model in [("Linear", LinearClassifier), ("MLP", MLP)]:
+    set_seed(42)
+    folder = fit(Model(), name, seed=42)
+    evaluate(Model(), folder)
+PY</code></pre>
+<h3 id="reload">Reconstruct a saved model without retraining</h3>
+<p>Reload the retained CNN with its saved split and normalization to measure test accuracy and macro-F1. Change <code>folder</code> for another model.</p>
+<pre><code>.venv/bin/python - &lt;&lt;'PY'
+import sys
+from pathlib import Path
+import torch
+sys.path.insert(0, "Assignment1")
+from data_loader import get_data_loaders
+from evaluate import predict
+from models.linear import LinearClassifier
+from models.mlp import MLP
+from models.cnn import CNN
+from models.lstm import LSTMClassifier
+from models.transformer import TransformerClassifier
+
+classes = {"Linear": LinearClassifier, "MLP": MLP, "CNN": CNN,
+           "LSTM": LSTMClassifier, "Transformer": TransformerClassifier}
+folder = Path("Assignment1/outputs/CNN_seed42_20260921_102822_896256")
+saved = torch.load(folder / "best.pt", map_location="cpu", weights_only=True)
+info, data = saved["info"], saved["data"]
+torch.set_num_threads(info["threads"])
+torch.use_deterministic_algorithms(True)
+model = classes[info["model"]]()
+model.load_state_dict(saved["model_state"])
+model.eval()
+_, validation, test, _ = get_data_loaders(
+    batch_size=info["batch_size"], seed=info["seed"],
+    split=data, normalization=data,
+)
+metrics, labels, predictions, probabilities = predict(model, test)
+print("Selected weight epoch:", saved["epoch"])
+print(metrics)
+PY</code></pre>
+<p>Top-level <code>epoch</code> identifies saved weights; <code>info</code> describes the run and selected checkpoint, even in the final-weight file. Optimizer state is absent, so reloading does not restore Adam's training state.</p>
+</section>
+<section id="artifacts">
+<h2 id="section-8">Saved evidence</h2>
+<p>Each run is stored under <code>Assignment1/outputs/&lt;Model&gt;_seed42_&lt;timestamp&gt;/</code>.</p>
+<div aria-label="Experiment artifacts" class="table-scroll" role="region" tabindex="0"><table>
+<thead><tr><th scope="col">Artifact</th><th scope="col">What it records</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>best.pt</code></th><td>Selected weights, weight epoch, run metadata, split indices and normalization.</td></tr>
+<tr><th scope="row"><code>checkpoint.pt</code></th><td>Final epoch-16 weights, with the same run metadata and data configuration.</td></tr>
+<tr><th scope="row"><code>checkpoint_info.json</code></th><td>Settings, seed, parameter count, selected epoch, fixed-weight training/validation metrics, training time and environment.</td></tr>
+<tr><th scope="row"><code>history.csv</code></th><td>Training and validation loss, accuracy and macro-F1 for each epoch.</td></tr>
+<tr><th scope="row"><code>learning_curves.png</code></th><td>The six history curves and the selected epoch.</td></tr>
+<tr><th scope="row"><code>metrics.json</code></th><td>Selected-checkpoint validation/test metrics and inference timings, together with run metadata.</td></tr>
+<tr><th scope="row"><code>validation_predictions.npz</code></th><td>Source indices, raw validation images, labels, predictions and ten-class probabilities.</td></tr>
+<tr><th scope="row"><code>test_predictions.npz</code></th><td>Official test indices, labels, predictions and probabilities. Raw test images remain in the dataset.</td></tr>
+</tbody></table></div>
+<p>The results notebook reads the latest evaluated run per model and seed; its folder names identify the compared runs.</p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs">Saved run files</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/01_eda.ipynb">EDA notebook</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/02_results.ipynb">Results notebook</a></p>
+</section>
+<section id="limits">
+<h2 id="section-9">Limitations</h2>
+<p>One seed, split and 16-epoch budget cannot establish training variability, a statistically reliable ranking or optimal configurations. Repeated seeds would permit mean and spread estimates.</p>
+<p>Saved preprocessing and deterministic algorithms support repeatability, but software and hardware can affect results and timings. Small grayscale catalog images limit generalization to color, high-resolution detail and real-world scenes.</p>
+</section>
+</main>
+<nav class="page-turn" aria-label="Report reading order"><a href="assignment1_eda.html"><small>Previous</small>Data exploration</a><a href="assignment1_results.html"><small>Next</small>Results &amp; errors</a></nav>
+<footer><a href="#top">Back to top</a></footer>
+</div>
+</body>
+</html>
