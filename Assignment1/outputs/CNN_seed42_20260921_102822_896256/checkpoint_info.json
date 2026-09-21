@@ -1,0 +1,41 @@
+{
+  "model": "CNN",
+  "model_class": "CNN",
+  "seed": 42,
+  "best_epoch": 14,
+  "epochs_run": 16,
+  "parameters": 105866,
+  "fit_seconds": 151.30404154202552,
+  "train": {
+    "loss": 0.12816275296829366,
+    "accuracy": 0.9517037037037037,
+    "macro_f1": 0.9518631949693063
+  },
+  "validation": {
+    "loss": 0.22869162038962046,
+    "accuracy": 0.9226666666666666,
+    "macro_f1": 0.9232575743215984
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "ab87db07ff20560118cdd8073171128a531251e5",
+  "source_uncommitted": true,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.14.0",
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies"
+}

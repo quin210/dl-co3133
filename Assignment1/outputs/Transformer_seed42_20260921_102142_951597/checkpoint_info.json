@@ -1,0 +1,42 @@
+{
+  "model": "Transformer",
+  "model_class": "TransformerClassifier",
+  "seed": 42,
+  "best_epoch": 16,
+  "epochs_run": 16,
+  "parameters": 19530,
+  "fit_seconds": 137.8494763750059,
+  "train": {
+    "loss": 0.29234520375287093,
+    "accuracy": 0.8919074074074074,
+    "macro_f1": 0.8910036068661936
+  },
+  "validation": {
+    "loss": 0.31440507459640504,
+    "accuracy": 0.8836666666666667,
+    "macro_f1": 0.8829928046662687
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "patience": 4,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "ab87db07ff20560118cdd8073171128a531251e5",
+  "source_uncommitted": true,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.14.0",
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies"
+}
