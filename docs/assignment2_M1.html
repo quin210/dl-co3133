@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assignment 2 · Milestone 1 · Dataset Proposal · G-02 · CO3133</title>
+<meta name="description" content="Milestone 1 dataset proposal: tomato leaf disease classification. Class CC01, group G-02, CO3133.">
+<link rel="stylesheet" href="assets/assignment.css">
+<style>
+.pdf-reader { display: block; width: 100%; height: auto; aspect-ratio: 210 / 297; min-height: 600px; border: 1px solid var(--line); }
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html" aria-current="location">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
+<div class="milestone-bar">
+<nav class="milestone-nav" aria-label="Assignment 2 milestones"><a class="report-button" href="assignment2.html">Main</a><a class="report-button" href="assignment2_M1.html" aria-current="page">M1 Proposal</a><a class="report-button" href="assignment2_M2.html">M2 Draft</a><a class="report-button" href="assignment2_M3.html">M3 Final</a></nav>
+</div>
+<div class="wrap">
+<header>
+<p class="kicker">Assignment 2 · Milestone 1</p>
+<h1>Tomato leaf disease classification</h1>
+
+
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-2">Dataset</a><a href="#section-3">Proposed method</a><a href="#section-4">Detailed Proposal</a></nav>
+</header>
+<main id="main">
+<section>
+<h2 id="section-2">Dataset</h2>
+<ul>
+<li><strong>Name:</strong> Tomato Leaves Dataset.</li>
+<li><strong>Source:</strong> <a href="https://huggingface.co/datasets/shreemunale/tomato-leaves-dataset">shreemunale/tomato-leaves-dataset on Hugging Face</a>, combining tomato images from PlantVillage and PlantDoc.</li>
+<li><strong>Version:</strong> repository revision <code>c029791</code>.</li>
+<li><strong>Licence:</strong> CC BY 4.0, as listed by the dataset repository.</li>
+<li><strong>Task:</strong> image classification into seven disease categories and one healthy category.</li>
+<li><strong>Input:</strong> a tomato-leaf image, converted to RGB and resized to <code>224 × 224</code> for the models.</li>
+<li><strong>Annotation:</strong> one class label per image.</li>
+</ul>
+<h3>Class labels</h3>
+<ul>
+<li><strong>0:</strong> Bacterial spot</li>
+<li><strong>1:</strong> Early blight</li>
+<li><strong>2:</strong> Late blight</li>
+<li><strong>3:</strong> Leaf mold</li>
+<li><strong>4:</strong> Septoria leaf spot</li>
+<li><strong>5:</strong> Tomato yellow leaf curl virus</li>
+<li><strong>6:</strong> Tomato mosaic virus</li>
+<li><strong>7:</strong> Healthy</li>
+</ul>
+<h3>Size and split</h3>
+<ul>
+<li><strong>Total:</strong> 17,996 images across eight classes.</li>
+<li><strong>Training:</strong> 14,404 images.</li>
+<li><strong>Validation:</strong> 1,796 images.</li>
+<li><strong>Test:</strong> 1,796 images.</li>
+<li><strong>Selection:</strong> use all eight classes and all valid images.</li>
+<li><strong>Leakage prevention:</strong> keep each original photograph and its identifiable copies, augmentations, and crops in the same partition.</li>
+</ul>
+</section>
+<section>
+<h2 id="section-3">Proposed method</h2>
+<ul>
+<li><strong>Baseline:</strong> train a small CNN from scratch.</li>
+<li><strong>Pretrained model:</strong> ImageNet-pretrained ResNet-18 with an eight-class output head.</li>
+<li><strong>Comparison:</strong> frozen backbone versus full fine-tuning.</li>
+<li><strong>Metrics:</strong> accuracy and macro-F1; select checkpoints using validation macro-F1.</li>
+</ul>
+</section>
+<section>
+<h2 id="section-4">Detailed Proposal</h2>
+<object class="pdf-reader" data="reports/A2_M1.pdf#view=Fit" type="application/pdf" aria-label="Assignment 2 Milestone 1 dataset proposal PDF">
+<p><a href="reports/A2_M1.pdf">Open the dataset proposal PDF</a>.</p>
+</object>
+</section>
+</main>
+</div>
+</body>
+</html>

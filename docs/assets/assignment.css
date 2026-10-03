@@ -54,6 +54,7 @@ footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line);
 .report-button:hover { color: #fff; background: var(--accent); }
 .source-link { display: inline-block; padding: 3px 7px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); font-size: 12px; text-decoration: none; }
 .source-link:hover { color: var(--accent); border-color: var(--accent); }
+.link-list { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin: 4px 0; }
 @media print { .report-actions { display: none; } }
 
 /* Reading structure shared by all report chapters. */
@@ -82,6 +83,10 @@ footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line);
 .milestone-nav .report-button { background: #fff; }
 .milestone-nav .report-button[aria-current] { background: var(--accent); color: #fff; }
 .milestone-nav .report-button:hover { background: var(--blue-soft); color: var(--accent); }
+.milestone-bar { background: var(--blue-soft); border-bottom: 1px solid var(--line); }
+.milestone-bar .milestone-nav { max-width: 1000px; margin: 0 auto; padding: 12px 32px; }
+@media (max-width: 600px) { .milestone-bar .milestone-nav { padding-inline: 18px; } }
+@media print { .milestone-bar { display: none; } }
 /* One shared 2×2 placeholder wrapper. */
 .placeholder {
   display: inline-block;

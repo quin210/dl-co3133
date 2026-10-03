@@ -13,8 +13,11 @@
 <a class="course-brand" href="index.html">G-02 Assignment Home</a>
 <nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="location">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
 </div></div>
+<div class="milestone-bar">
+<nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html">Main</a><a class="report-button" href="assignment1_M1.html" aria-current="page">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav>
+</div>
 <div class="wrap">
-<header><p class="kicker">Assignment 1 · M1 Draft</p><h1>Linear and MLP on Fashion-MNIST</h1><nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1_M1.html" aria-current="page">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1.html">Overview</a><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">M1 scope</a><a href="#section-2">Part 1 — Problem and data description</a><a href="#section-3">Part 2 — Methodology</a><a href="#section-4">Part 3 — Implementation results</a><a href="#section-5">Reproducibility and artifacts</a></nav></header>
+<header><p class="kicker">Assignment 1 · M1 Draft</p><h1>Linear and MLP on Fashion-MNIST</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">M1 scope</a><a href="#section-2">Part 1 — Problem and data description</a><a href="#section-3">Part 2 — Methodology</a><a href="#section-4">Part 3 — Implementation results</a><a href="#section-5">Reproducibility and artifacts</a></nav></header>
 <main id="main">
 <h2 id="section-1">M1 scope</h2>
 <ul>
@@ -155,7 +158,11 @@
 <figure><img alt="Twelve Linear test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_results/figure-35-00.png"/><figcaption>Linear recognizes the first boot, pullover and trousers, but labels Coats #17 and #25 as Pullovers. Correct Pullover #8624 has only 22.9% confidence.</figcaption></figure>
 <figure><img alt="Twelve MLP test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_results/figure-35-01.png"/><figcaption>MLP correctly predicts Coat #5482 with 24.3% confidence, yet gives the wrong label to Sneaker #12 with 93.7% confidence. Higher confidence alone does not establish correctness.</figcaption></figure>
 <h3 id="cnn-extension">Optional CNN comparison</h3>
-<p>The <a href="assignment1_methods.html#cnn">two-block CNN</a> uses the same split and training settings, selecting epoch 14. It reaches <strong>91.05% test accuracy and 0.9108 macro-F1</strong>, improving accuracy by 2.28 percentage points over MLP with 105,866 parameters versus 203,530. Batched CPU inference is about 14× slower. <a href="assignment1_results.html#cnn-curves">Learning curves</a> · <a href="assignment1_results.html#cnn-confusion">Error analysis</a> · <a href="assignment1_runs.html#cnn">Run record</a>.</p>
+<p>The <a href="assignment1_methods.html#cnn">two-block CNN</a> uses the same split and training settings, selecting epoch 14. It reaches <strong>91.05% test accuracy and 0.9108 macro-F1</strong>, improving accuracy by 2.28 percentage points over MLP with 105,866 parameters versus 203,530. Batched CPU inference is about 14× slower. <span class="link-list">
+<a href="assignment1_results.html#cnn-curves">Learning curves</a>
+<a href="assignment1_results.html#cnn-confusion">Error analysis</a>
+<a href="assignment1_runs.html#cnn">Run record</a>
+</span></p>
 <h3 id="limitations">Limitations and conclusion</h3>
 <p>MLP improves overall classification; Linear remains smaller and faster. Upper-body ambiguity persists, and gains are not uniform across classes.</p>
 <p>One seed and one split provide no estimate of training variability, so mean ± standard deviation is unavailable. The 16-epoch budget and default settings do not establish each architecture’s best attainable performance. Timings describe batched CPU throughput, not single-request latency or performance on other hardware. Low-resolution grayscale catalog data limits generalization to real photographs; duplicate/product-level leakage has not been audited.</p>
@@ -163,7 +170,10 @@
 </section>
 <section id="reproduce">
 <h2 id="section-5">Reproducibility and artifacts</h2>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133">Source repository</a> · <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/requirements.txt">Pinned dependencies</a>. From the repository root, with Python 3.12:</p>
+<p><span class="link-list">
+<a href="https://github.com/quin210/dl-co3133">Source repository</a>
+<a href="https://github.com/quin210/dl-co3133/blob/main/requirements.txt">Pinned dependencies</a>
+</span>From the repository root, with Python 3.12:</p>
 <pre><span class="code-label">Terminal · repository root</span><code>python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python Assignment1/download.py
@@ -192,7 +202,6 @@ PY</code></pre>
 </section>
 </main>
 
-<footer><a href="#top">Back to top</a></footer>
 </div>
 </body>
 </html>
