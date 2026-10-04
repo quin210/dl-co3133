@@ -1,0 +1,49 @@
+{
+  "model": "Linear",
+  "model_class": "LinearClassifier",
+  "seed": 43,
+  "best_epoch": 11,
+  "epochs_run": 16,
+  "parameters": 7850,
+  "fit_seconds": 4.024355250003282,
+  "train": {
+    "loss": 0.38310448078755976,
+    "accuracy": 0.8661851851851852,
+    "macro_f1": 0.867098879158372
+  },
+  "validation": {
+    "loss": 0.3942560558319092,
+    "accuracy": 0.8651666666666666,
+    "macro_f1": 0.8658445544883829,
+    "inference_ms": 0.0014597916694280382
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "3c06e599d5a652d3ae67ff2a72bd1f23edb0aab9",
+  "source_uncommitted": false,
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.14.0",
+    "numpy": "2.4.6",
+    "sklearn": "1.9.1",
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies",
+  "test": {
+    "loss": 0.44754975152015686,
+    "accuracy": 0.8422,
+    "macro_f1": 0.8431246180722445,
+    "inference_ms": 0.001257629200699739
+  },
+  "inference_timing": "median of 3 full passes after 1 warmup; DataLoader + forward + argmax; no metrics"
+}
