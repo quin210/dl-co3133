@@ -46,6 +46,9 @@ def inference_time(model, loader):
     return float(np.median(durations) * 1_000 / len(loader.dataset))
 
 def evaluate(model, folder):
+    if (Path(folder) / "metrics.json").exists():
+        print("Skip (already evaluated):", folder)
+        return None
     torch.set_num_threads(THREADS)
     torch.use_deterministic_algorithms(True)
     folder = Path(folder)
