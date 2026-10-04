@@ -29,7 +29,7 @@ BATCH_SIZE = 128
 EPOCHS = 16
 LEARNING_RATE = 0.001
 CLIP_NORM = 5.0
-SEEDS = (43, 44, 45, 46)
+SEEDS = (42, 43, 44, 45, 46)
 # the same cpu thread count applies to every model
 THREADS = 4
 DEVICE = torch.device("cpu")
