@@ -1,0 +1,49 @@
+{
+  "model": "CNNBudget25k",
+  "model_class": "CNNBudget",
+  "seed": 44,
+  "best_epoch": 15,
+  "epochs_run": 16,
+  "parameters": 25337,
+  "fit_seconds": 103.88984754201374,
+  "train": {
+    "loss": 0.17467678218417698,
+    "accuracy": 0.9376666666666666,
+    "macro_f1": 0.9376874545704638
+  },
+  "validation": {
+    "loss": 0.23554002602895102,
+    "accuracy": 0.9183333333333333,
+    "macro_f1": 0.9182403002359288,
+    "inference_ms": 0.030912423666450195
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "92f65c703cd92110626a8bb1d671adbfdbe2201f",
+  "source_uncommitted": false,
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.14.0",
+    "numpy": "2.4.6",
+    "sklearn": "1.9.1",
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies",
+  "test": {
+    "loss": 0.26779903593063353,
+    "accuracy": 0.9068,
+    "macro_f1": 0.9067299973260745,
+    "inference_ms": 0.029345887500676328
+  },
+  "inference_timing": "median of 3 full passes after 1 warmup; DataLoader + forward + argmax; no metrics"
+}

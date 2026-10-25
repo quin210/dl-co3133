@@ -1,0 +1,41 @@
+{
+  "model": "MLPBudget25k",
+  "model_class": "MLPBudget",
+  "seed": 42,
+  "best_epoch": 16,
+  "epochs_run": 16,
+  "parameters": 24655,
+  "fit_seconds": 4.039053082989994,
+  "train": {
+    "loss": 0.25475691757378754,
+    "accuracy": 0.9073703703703704,
+    "macro_f1": 0.9074523519187018
+  },
+  "validation": {
+    "loss": 0.3220461399555206,
+    "accuracy": 0.8851666666666667,
+    "macro_f1": 0.8855931901907829
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "92f65c703cd92110626a8bb1d671adbfdbe2201f",
+  "source_uncommitted": false,
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.14.0",
+    "numpy": "2.4.6",
+    "sklearn": "1.9.1",
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies"
+}
