@@ -1,6 +1,6 @@
 # CO3133 — Deep Learning and Its Applications (Semester-261)
 
-Course project repository.
+Course project repository — **Group G-02**.
 Website: https://quin210.github.io/dl-co3133/
 
 Ho Chi Minh City University of Technology (HCMUT), VNU-HCM · Faculty of Computer Science and Engineering
@@ -10,9 +10,9 @@ Instructor: Lê Thành Sách
 
 | Full name | Student ID | Main role | GitHub |
 |---|---|---|---|
-| Võ Thị Như Quỳnh | 2353041 | — | [quin210](https://github.com/quin210) |
-| Mai Trung Kiên | 2352641 | — | [MaiTrungKien](https://github.com/MaiTrungKien) |
-| Hứa Tuệ Minh | 2450018 | — | [HuaTueMinh](https://github.com/HuaTueMinh) |
+| Võ Thị Như Quỳnh | 2353041 | Pipeline configuration, repository and website | [quin210](https://github.com/quin210) |
+| Mai Trung Kiên | 2352641 | Model training, experiment runs and result assets | [MaiTrungKien](https://github.com/MaiTrungKien) |
+| Hứa Tuệ Minh | 2450018 | EDA notebooks and report figures | [HuaTueMinh](https://github.com/HuaTueMinh) |
 
 ## Contents
 
@@ -21,6 +21,8 @@ Instructor: Lê Thành Sách
 | A1 | Foundations of Deep Learning Pipelines and Architectures | 40% |
 | A2 | Deep Learning on Large-Scale Data and Specialized Tasks | 30% |
 | A3 | Multimodal Deep Learning | 30% |
+
+
 
 
 ## Links
