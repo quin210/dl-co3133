@@ -21,8 +21,10 @@ from data_loader import get_data_loaders, read_fashion_mnist
 from models.linear import LinearClassifier
 from models.mlp import MLP
 from models.cnn import CNN
-from models.lstm import LSTMClassifier
-from models.transformer import TransformerClassifier
+from models.lstm import LSTMClassifier, LSTMColumns
+from models.transformer import TransformerClassifier, TransformerPatch7, TransformerRows
+from models.gru import GRUClassifier
+from models.augmented import AugmentedLinear, AugmentedMLP, AugmentedCNN, AugmentedLSTM, AugmentedTransformer
 
 # the same budget and selection rule apply to every architecture
 BATCH_SIZE = 128
@@ -171,6 +173,24 @@ def main():
         fit(LSTMClassifier(), "LSTM", seed)
         set_seed(seed)
         fit(TransformerClassifier(), "Transformer", seed)
+        set_seed(seed)
+        fit(GRUClassifier(), "GRU", seed)
+        set_seed(seed)
+        fit(LSTMColumns(), "LSTMColumns", seed)
+        set_seed(seed)
+        fit(TransformerPatch7(), "TransformerPatch7", seed)
+        set_seed(seed)
+        fit(TransformerRows(), "TransformerRows", seed)
+        set_seed(seed)
+        fit(AugmentedLinear(), "AugmentedLinear", seed)
+        set_seed(seed)
+        fit(AugmentedMLP(), "AugmentedMLP", seed)
+        set_seed(seed)
+        fit(AugmentedCNN(), "AugmentedCNN", seed)
+        set_seed(seed)
+        fit(AugmentedLSTM(), "AugmentedLSTM", seed)
+        set_seed(seed)
+        fit(AugmentedTransformer(), "AugmentedTransformer", seed)
 
 if __name__ == "__main__":
     main()
