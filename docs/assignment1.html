@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Image classification on Fashion-MNIST · G-02 · CO3133</title>
 <meta name="description" content="Image classification on Fashion-MNIST">
-<link rel="stylesheet" href="assets/assignment.css?v=2">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
@@ -17,27 +17,75 @@
 <nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html" aria-current="page">Main</a><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav>
 </div>
 <div class="wrap">
-<header><p class="kicker">Assignment 1</p><h1>Image classification on Fashion-MNIST</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div><dl class="facts"><div><dt>Group</dt><dd>G-02</dd></div><div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br/>Mai Trung Kiên (2352641)<br/>Hứa Tuệ Minh (2450018)</dd></div><div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div></dl></header>
-<main id="main"><section id="question"><h2 id="section-1">Problem</h2>
+<header><p class="kicker">Assignment 1</p><h1>Image classification on Fashion-MNIST</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_analysis.html">Post-results analysis</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div><dl class="facts"><div><dt>Group</dt><dd>G-02</dd></div><div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br/>Mai Trung Kiên (2352641)<br/>Hứa Tuệ Minh (2450018)</dd></div><div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div></dl></header>
+<main id="main">
+<section id="outputs"><h2 id="section-1">Final outputs</h2>
+<nav class="output-blocks" aria-label="Final outputs">
+<a href="reports/A1_M2.pdf" target="_blank" rel="noopener">Report<small>Final PDF</small></a>
+<a href="https://docs.google.com/presentation/d/1DJYgbHssM-nnuGg2aaGe868UyI4TCb-tHDOmIzBRGLQ/edit?usp=sharing" target="_blank" rel="noopener">Slides<small>Google Slides</small></a>
+<span class="placeholder" id="video">YouTube video<small>Pending publication</small></span>
+<a href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code<small>GitHub</small></a>
+<a href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs">Checkpoints<small>Saved best.pt files</small></a>
+<a href="https://github.com/quin210/dl-co3133/blob/main/AI_USAGE.md">AI usage<small>AI_USAGE.md</small></a>
+</nav>
+</section>
+<section id="question"><h2 id="section-2">Problem</h2>
 <p>How do image representations affect classification accuracy and computational cost? We compare Linear, MLP, CNN, LSTM and Transformer on Fashion-MNIST: ten clothing classes represented by 28 × 28 grayscale images. Similar upper-body silhouettes make some categories difficult to separate.</p></section>
-<section id="setup"><h2 id="section-2">Experimental setup</h2>
-<p>A stratified seed-42 split gives 54,000 training, 6,000 validation and 10,000 test images. All models use training-only normalization, Adam at 0.001, batch size 128 and 16 epochs on four CPU threads. Validation macro-F1 selects each checkpoint. <a href="assignment1_methods.html#protocol">Full protocol</a>.</p></section>
-<section id="results"><h2 id="section-3">Results</h2><div aria-label="Five model comparison" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Seed 42; each checkpoint selected by validation macro-F1.</caption><thead><tr><th scope="col">Model</th><th scope="col">Val macro-F1</th><th scope="col">Test accuracy</th><th scope="col">Test macro-F1</th><th scope="col">Parameters</th><th scope="col">Train (s)</th><th scope="col">Test (ms/image)</th></tr></thead><tbody><tr><th scope="row"><a href="assignment1_runs.html#linear">Linear</a></th><td>0.8658</td><td>84.03%</td><td>0.8408</td><td>7,850</td><td>5.94</td><td>0.0019</td></tr><tr><th scope="row"><a href="assignment1_runs.html#mlp">MLP</a></th><td>0.9070</td><td>88.77%</td><td>0.8878</td><td>203,530</td><td>11.88</td><td>0.0024</td></tr><tr><th scope="row"><a href="assignment1_runs.html#cnn">CNN</a></th><td>0.9233</td><td>91.05%</td><td>0.9108</td><td>105,866</td><td>151.30</td><td>0.0346</td></tr><tr><th scope="row"><a href="assignment1_runs.html#lstm">LSTM</a></th><td>0.9007</td><td>88.21%</td><td>0.8819</td><td>24,714</td><td>70.20</td><td>0.0372</td></tr><tr><th scope="row"><a href="assignment1_runs.html#transformer">Transformer</a></th><td>0.8830</td><td>86.89%</td><td>0.8680</td><td>19,530</td><td>137.85</td><td>0.0720</td></tr></tbody></table></div>
-<aside class="idea"><p>CNN reaches <strong>91.05% test accuracy</strong>, 2.28 percentage points above MLP with roughly half the parameters. MLP offers faster inference; CNN takes about 14× as long per image on this CPU.</p></aside>
-<p>Training time includes validation and checkpoint work. Inference is batched throughput, measured as the median of three passes after warmup. <a href="assignment1_methods.html#metrics">Metric definitions</a>.</p>
-<p>Upper-body clothing remains the main source of confusion: CNN labels 165 of 1,000 T-shirts as Shirt. <a href="assignment1_results.html#6-test-confusion-matrices">Error analysis</a> examines the class pairs and prediction examples. These results cover one seed, one split and a fixed training budget; variability across runs has not been measured.</p></section>
-<section id="milestones"><h2 id="section-4">Milestones</h2>
+<section id="data"><h2 id="section-3">Dataset and EDA</h2>
+<p>Fashion-MNIST (Zalando Research, MIT license) has 60,000 training and 10,000 test images in ten balanced classes. A stratified split with seed 42 gives 54,000 training, 6,000 validation and 10,000 test images. EDA and normalization use only training images.</p>
+<p>The EDA shows balanced classes, a large zero background and similar upper-body silhouettes: Pullover and Coat have the closest class means. These findings support unweighted loss, native resolution and an error analysis of upper-body classes. <a href="assignment1_eda.html">Data exploration</a>.</p></section>
+<section id="methodology"><h2 id="section-4">Methodology</h2>
+<p>All five models share one data pipeline, one training loop and one evaluation protocol. Only the model block changes. Linear and MLP read 784 flattened pixels. CNN reads the 28 × 28 grid with two 3 × 3 convolution blocks. LSTM reads 28 rows in order. Transformer reads 49 patches of 4 × 4 pixels with learned positions. <a href="assignment1_methods.html#models">Models</a>.</p></section>
+<section id="setup"><h2 id="section-5">Experimental setup</h2>
+<p>A fixed stratified split (seed 42) gives 54,000 training, 6,000 validation and 10,000 test images. Each model trains once for each of five seeds, 42 to 46, on this same split. The training seed sets the initial weights and the shuffle order. All models use training-only normalization, Adam at a learning rate of 0.001, batch size 128, gradient clipping at norm 5.0 and 16 epochs on four CPU threads. Validation macro-F1 selects each checkpoint. <a href="assignment1_methods.html#protocol">Full protocol</a>.</p></section>
+<section id="results"><h2 id="section-6">Results</h2><div aria-label="Five model comparison over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Mean ± SD over 5 training seeds (42–46) on one split; validation macro-F1 selects each checkpoint. Scores in %; fit time and test time are means over the 5 seeds.</caption><thead><tr><th scope="col">Model</th><th scope="col">Val macro-F1 (%)</th><th scope="col">Test accuracy (%)</th><th scope="col">Test macro-F1 (%)</th><th scope="col">Parameters</th><th scope="col">Mean fit (s)</th><th scope="col">Mean test (ms/image)</th></tr></thead><tbody><tr><th scope="row"><a href="assignment1_runs.html#linear">Linear</a></th><td>86.51 ± 0.07</td><td>84.17 ± 0.08</td><td>84.15 ± 0.11</td><td>7,850</td><td>4.15</td><td>0.0013</td></tr><tr><th scope="row"><a href="assignment1_runs.html#mlp">MLP</a></th><td>90.54 ± 0.17</td><td>88.77 ± 0.26</td><td>88.77 ± 0.23</td><td>203,530</td><td>7.77</td><td>0.0020</td></tr><tr><th scope="row"><a href="assignment1_runs.html#cnn">CNN</a></th><td>92.56 ± 0.21</td><td>91.26 ± 0.28</td><td>91.27 ± 0.27</td><td>105,866</td><td>105.36</td><td>0.0270</td></tr><tr><th scope="row"><a href="assignment1_runs.html#lstm">LSTM</a></th><td>89.80 ± 0.11</td><td>88.11 ± 0.25</td><td>88.10 ± 0.21</td><td>24,714</td><td>46.37</td><td>0.0219</td></tr><tr><th scope="row"><a href="assignment1_runs.html#transformer">Transformer</a></th><td>88.48 ± 0.33</td><td>87.15 ± 0.39</td><td>87.06 ± 0.36</td><td>19,530</td><td>102.85</td><td>0.0545</td></tr></tbody></table></div>
+<aside class="idea"><p><strong>CNN gives the best result:</strong> 91.27 ± 0.27% test macro-F1. It is 2.50 points above MLP on average and better in 5/5 seeds. It uses about half the MLP parameters (105,866 against 203,530). MLP inference is faster: CNN needs about 13 times the MLP time per image (0.0270 against 0.0020 ms/image).</p></aside>
+<p>Fit time includes validation and checkpoint work. Inference time is batched throughput: the median of three complete passes after one warmup. <a href="assignment1_methods.html#metrics">Metric definitions</a>.</p>
+<p>The model rank is the same for all five seeds: CNN, MLP, LSTM, Transformer, Linear. Five seeds on one split measure training variability only. They are not a test of statistical significance. <a href="assignment1_results.html#5-training-seed-variability">Seed variability</a>.</p>
+
+</section>
+<section id="discussion"><h2 id="section-7">Results discussion</h2>
+<p>MLP improves on Linear by 4.62 macro-F1 points in all five seeds. MLP combines pixels nonlinearly, but it also has more parameters, so nonlinearity is not the only possible cause. CNN keeps the spatial grid and is the most accurate model, with about half the MLP parameters. LSTM and Transformer are smaller than MLP but slower at inference, because they repeat computation across rows or patches.</p>
+<p>A matched-parameter ablation gives each model about 25k parameters. Paired by seed, CNN has the highest test macro-F1 in 5/5 seeds. Its mean lead is 3.50 points over MLP, 2.40 over LSTM and 3.51 over Transformer. Each gap is larger than the larger seed SD. Validation macro-F1 agrees in 5/5 seeds. Thus the parameter count does not explain the CNN lead. The ablation does not match compute: at 25k parameters, mean fit time is 101.74 s for CNN and 4.37 s for MLP (<a href="assignment1_methods.html#limits">limitations</a>). The 25k CNN gets 90.51 ± 0.34% test macro-F1, which is higher than the full-size MLP. <a href="assignment1_results.html#10-ablation-matched-parameter-budget">Ablation</a>.</p></section>
+<section id="errors"><h2 id="section-8">Error analysis</h2>
+<p>Most errors are confusions between upper-body garments: T-shirt/top, Pullover, Coat and Shirt. Over seeds 42–46, this group gives 59.3–65.0% of the errors of each model. For CNN, it gives 568 of 874 errors per seed on average (65.0%). Errors with a softmax confidence of 0.9 or more are 25.1% of CNN errors and 23.1% of MLP errors. Thus a high confidence does not show that a prediction is correct. <a href="assignment1_results.html#8-error-analysis">Error analysis</a>. <a href="assignment1_analysis.html#1-five-seed-errors">Five-seed errors</a>.</p></section>
+<section id="analysis"><h2 id="section-9">Post-results analysis</h2>
+<p>The post-results analysis reuses the saved runs and trains nothing. It also compares 45 extension runs: 9 models × seeds 42–46.</p>
+<ul>
+<li>Shirt is the weakest class in all 25 main runs (F1 0.599 for Linear to 0.751 for CNN). 146 test images are wrong in all 25 runs, and 48 of them are Shirts. <a href="assignment1_analysis.html#1-five-seed-errors">Five-seed errors</a>.</li>
+<li>CNN is the most robust model under shift, occlusion and contrast in 5/5 seeds. Noise reverses the ranking: from σ = 0.10, MLP is best. At σ = 0.20, CNN and Transformer lose more than 25 points. <a href="assignment1_analysis.html#2-robustness">Robustness</a>.</li>
+<li>LSTM reads rows, so the shift axis matters. Under a 3 px shift, LSTM keeps 75.96% macro-F1 for a vertical shift but only 27.93% for a horizontal shift. <a href="assignment1_analysis.html#2-robustness">Robustness</a>.</li>
+<li>GRU is 0.78 pp above LSTM in 5/5 seeds, with 18,698 against 24,714 parameters. <a href="assignment1_analysis.html#4-lstm-vs-gru">LSTM vs GRU</a>.</li>
+<li>The input representation matters. Row tokens (TransformerRows) are 1.38 pp above 4 × 4 patches in 5/5 seeds. <a href="assignment1_analysis.html#5-representation-ablation">Representation ablation</a>.</li>
+<li>Shift and noise augmentation decreases clean macro-F1 in 5/5 seeds, by 0.92 pp (CNN) to 5.66 pp (Linear). It repairs the shift and noise weaknesses: at σ = 0.20, CNN goes from 65.89% to 82.70%. Occlusion and contrast × 0.5 get worse for all five models. <a href="assignment1_analysis.html#6-augmentation">Augmentation</a>.</li>
+</ul>
+<p>Full chapter: <a href="assignment1_analysis.html">Post-results analysis</a>. <a href="assignment1_analysis.html#7-summary">Summary table</a>.</p></section>
+<section id="limitations"><h2 id="section-10">Limitations and conclusion</h2>
+<p><strong>Limitations.</strong> All runs use one split, five training seeds and a fixed 16-epoch budget with no tuning per architecture, so the scores are not the best possible result of each architecture. Transformer selects its final epoch in four of five seeds. Error counts are five-seed means; galleries and example maps come from seed 42. Robustness uses synthetic corruptions with one random draw each, and the occlusion maps use at most 300 sampled images; they measure model sensitivity, not verified reasons. The augmentation applies shift and noise together. The extension runs used a second software environment, so they are exploratory. Timings come from one CPU machine.</p>
+<p><strong>Conclusion.</strong> Parameter count alone does not explain the differences; the image representation and its inductive bias matter.</p>
+<ul>
+<li><a href="assignment1_results.html#5-training-seed-variability">Main comparison</a>: CNN is best (91.27 ± 0.27% test macro-F1), and the ranking CNN &gt; MLP &gt; LSTM &gt; Transformer &gt; Linear is the same in all five seeds. CNN needs about 13 times the MLP inference time.</li>
+<li><a href="assignment1_results.html#10-ablation-matched-parameter-budget">Matched parameter budget</a>: at about 25k parameters, CNN still leads every model in 5/5 seeds; the 25,337-parameter CNN (90.51%) is better than the 203,530-parameter MLP (88.77%).</li>
+<li><a href="assignment1_analysis.html#1-five-seed-errors">Errors</a>: Shirt is the weakest class in all 25 runs, and 146 test images are wrong in every run.</li>
+<li><a href="assignment1_analysis.html#2-robustness">Robustness</a>: CNN is the most robust model to shift, occlusion and reduced contrast, but noise reverses the ranking (MLP is best from σ = 0.10; CNN and Transformer lose more than 25 points at σ = 0.20). LSTM keeps 75.96% under a 3-pixel vertical shift but only 27.93% under a horizontal shift.</li>
+<li><a href="assignment1_analysis.html#3-interpretability">Interpretability</a>: explanations depend on the seed for every model except Linear, LSTM decides late, and Transformer attention is not shorter-range on average than uniform attention.</li>
+<li><a href="assignment1_analysis.html#4-lstm-vs-gru">Sequence models</a>: GRU is 0.78 points better than LSTM in 5/5 seeds with 24% fewer parameters, and row tokens make the Transformer 1.38 points better in 5/5 seeds.</li>
+<li><a href="assignment1_analysis.html#6-augmentation">Augmentation</a>: shift + noise augmentation repairs most of the shift weakness and reduces the noise weakness of CNN, LSTM and Transformer, but lowers clean macro-F1 in 5/5 seeds (−0.92 to −5.66 points).</li>
+</ul>
+<p>Clean accuracy alone does not show how a model fails; robustness needs its own test.</p>
+</section>
+<section id="milestones"><h2 id="section-11">Milestones</h2>
 <div class="table-scroll"><table><thead><tr><th scope="col">Milestone</th><th scope="col">Due</th><th scope="col">Weight within A1</th><th scope="col">Status</th></tr></thead><tbody>
 <tr><th scope="row"><a href="assignment1_M1.html">M1 Report</a></th><td>23 Sep 2026</td><td>25%</td><td>EDA and Linear/MLP baseline report.</td></tr>
-<tr><th scope="row"><a href="assignment1_M2.html">M2 Final</a></th><td>21 Oct 2026</td><td>75%</td><td>Five-model results available; final materials pending.</td></tr></tbody></table></div>
-<p class="deliverable-links"><a class="placeholder" href="assignment1_M2.html#final-pdf">Final PDF report — pending</a><a class="placeholder" href="assignment1_M2.html#slides">Presentation slides — pending</a><a class="placeholder" href="assignment1_M2.html#video">YouTube presentation — pending</a></p><p><span class="link-list">
-<a href="assignment1_M2.html#plan">Remaining work</a>
-<a href="assignment1_methods.html#reproduce">Checkpoint reconstruction</a>
-</span></p></section>
-<section id="references"><h2 id="section-5">References</h2><p><span class="link-list">
+<tr><th scope="row"><a href="assignment1_M2.html">M2 Final</a></th><td>21 Oct 2026</td><td>75%</td><td>Five models, five seeds, error analysis and ablation. Report and slides published; video pending.</td></tr></tbody></table></div>
+</section>
+<section id="ai-usage"><h2 id="section-12">AI usage disclosure</h2>
+<p>The group takes full responsibility for all code, numbers, figures and text. AI tools helped with ideas, learning, drafting and language editing. No result, metric, figure or data came from AI: every number comes from the group's own runs and their analysis. <a href="https://github.com/quin210/dl-co3133/blob/main/AI_USAGE.md">AI_USAGE.md</a> has the dated log.</p></section>
+<section id="references"><h2 id="section-13">References</h2><p><span class="link-list">
 <a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST dataset</a>
 <a href="https://arxiv.org/abs/1708.07747">Fashion-MNIST paper</a>
-</span></p></section></main>
+</span></p></section>
+</main>
 <nav class="page-turn" aria-label="Report reading order"><a href="index.html"><small>Previous</small>Course home</a><a href="assignment1_eda.html"><small>Next</small>Data exploration</a></nav>
 </div>
 </body>

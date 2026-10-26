@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Final report · G-02 · CO3133</title>
 <meta name="description" content="Final report">
-<link rel="stylesheet" href="assets/assignment.css?v=2">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
@@ -17,106 +17,179 @@
 <nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html">Main</a><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html" aria-current="page">M2 Final</a></nav>
 </div>
 <div class="wrap">
-<header><p class="kicker">Assignment 1 · M2 Final</p><h1>Final report</h1></header>
-<main id="main"><section class="report-preview" aria-labelledby="pdf-report">
+<header><p class="kicker">Assignment 1 · M2 Final</p><h1>Five architectures on Fashion-MNIST</h1></header>
+<main id="main">
+<section class="report-preview" id="final-pdf" aria-labelledby="pdf-report">
 <div class="report-card-row">
-<div class="report-cover report-cover-pending" aria-hidden="true">PDF</div>
+<div class="report-cover" aria-hidden="true"><object class="report-cover-pdf" data="reports/A1_M2.pdf#page=1&amp;view=Fit&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0" type="application/pdf" tabindex="-1">PDF</object></div>
 <div class="report-preview-copy">
 <h2 class="report-preview-title" id="pdf-report">M2 Final PDF report</h2>
-<p>Pending</p>
+<p>Final report - 44 pages</p>
+</div>
+<div class="report-card-actions">
+<a class="report-button report-open" href="reports/A1_M2.pdf" target="_blank" rel="noopener" aria-label="Open PDF in a new tab">Open PDF</a>
 </div>
 </div>
+<details class="report-pdf-preview">
+<summary>Preview PDF</summary>
+<object class="pdf-reader" data="reports/A1_M2.pdf#view=Fit&amp;navpanes=0" type="application/pdf" aria-label="Assignment 1 M2 final PDF report">
+<p><a href="reports/A1_M2.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+</object>
+</details>
 </section>
-<section id="deliverables">
-<h2 id="section-1">Final deliverables</h2>
-<div class="table-scroll"><table>
-<thead><tr><th scope="col">Output</th><th scope="col">Destination</th></tr></thead>
-<tbody>
-<tr><th scope="row">HTML report</th><td><span class="link-list">
-<a href="assignment1.html">Assignment overview</a>
-<a href="assignment1_M1.html">M1 Report</a>
-</span></td></tr>
-<tr><th scope="row">Final PDF</th><td><a href="#final-pdf">Report outline and submission</a></td></tr>
-<tr><th scope="row">Presentation</th><td><span class="link-list">
-<a href="#slides">Slides</a>
-<a href="#video">YouTube video</a>
-</span></td></tr>
-<tr><th scope="row">Code and reconstruction</th><td><span class="link-list">
-<a href="assignment1_methods.html#reproduce">Reproduction instructions</a>
-<a href="assignment1_runs.html">Run records</a>
-<a href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Assignment 1 source</a>
-</span></td></tr>
-</tbody></table></div>
-</section>
-<section id="required-results">
-<h2 id="section-2">Comparison evidence</h2>
-<p>Linear, MLP, CNN, LSTM and Transformer share the Fashion-MNIST split and evaluation protocol. Current results use seed 42.</p>
-<div class="table-scroll"><table>
-<thead><tr><th scope="col">Evidence</th><th scope="col">Report section</th></tr></thead>
-<tbody>
-<tr><th scope="row">Class balance, samples and preprocessing</th><td><a href="assignment1_eda.html">Data exploration</a></td></tr>
-<tr><th scope="row">Architectures and experimental setup</th><td><span class="link-list">
-<a href="assignment1_methods.html#models">Models</a>
-<a href="assignment1_methods.html#protocol">Protocol</a>
-<a href="assignment1_methods.html#environment">Environment</a>
-</span></td></tr>
-<tr><th scope="row">Accuracy, macro-F1, parameters and timing</th><td><span class="link-list">
-<a href="assignment1_results.html#3-held-out-test-results">Test results</a>
-<a href="assignment1_runs.html#run-summary">Run comparison</a>
-</span></td></tr>
-<tr><th scope="row">Training behavior and prediction errors</th><td><span class="link-list">
-<a href="assignment1_results.html#4-learning-curves">Curves</a>
-<a href="assignment1_results.html#6-test-confusion-matrices">Confusion matrices</a>
-<a href="assignment1_results.html#7-inspect-predictions">Correct and incorrect examples</a>
-</span></td></tr>
-<tr><th scope="row">Representation, trade-offs and limitations</th><td><a href="assignment1_results.html#8-discussion">Discussion</a></td></tr>
-</tbody></table></div>
-</section>
-<section id="plan">
-<h2 id="section-3">Remaining work</h2>
-<ol>
-<li>Review explanations against the saved metrics, curves and errors; verify that tables and figures use the same selected checkpoints.</li>
-<li><strong>Optional:</strong> add seeds and report mean ± standard deviation, or run a single-factor ablation. Keep the split fixed and select using validation results.</li>
-<li>Complete the PDF and slides, record the presentation, then publish and submit the reviewed materials.</li>
-</ol>
-</section>
-<section id="final-pdf">
-<h2 id="section-4">Final PDF and submission</h2>
-<p><span class="placeholder">Final PDF report — pending publication</span></p>
-<p>Filename: <code>G-02_A1_Report.pdf</code>.</p>
-<ol>
-<li><strong>Problem and data:</strong> motivation, formulation, data source and license, EDA, split, leakage prevention and preprocessing.</li>
-<li><strong>Methodology:</strong> pipeline diagram, five architectures, loss, metrics, training settings and experimental design.</li>
-<li><strong>Implementation results:</strong> quantitative comparison, curves, prediction examples, error analysis, limitations and conclusions.</li>
-</ol>
-<p>Include member details and references. The group representative submits the PDF through the <a href="https://lms.hcmut.edu.vn/course/view.php?id=142848">course LMS</a>.</p>
-<p><span class="placeholder">LMS submission confirmation — not yet recorded</span></p>
-</section>
-<section id="slides">
-<h2 id="section-5">Presentation slides</h2>
-<p><span class="placeholder">Presentation slides — pending publication</span></p>
-<p>Present the problem, EDA findings, architectures, shared setup, main comparisons, error analysis and conclusions. Use selected figures from the report.</p>
-</section>
-<section id="video">
-<h2 id="section-6">YouTube presentation</h2>
-<p><span class="placeholder">YouTube presentation — pending publication</span></p>
-<p>Title: <code>CO3133-Semester-261 – Group G-02 – Assignment 1</code>.</p>
+<nav class="output-blocks" aria-label="Final outputs">
+<a href="https://docs.google.com/presentation/d/1DJYgbHssM-nnuGg2aaGe868UyI4TCb-tHDOmIzBRGLQ/edit?usp=sharing" target="_blank" rel="noopener">Slides<small>Google Slides</small></a>
+<span class="placeholder" id="video">YouTube video<small>Pending publication</small></span>
+<a href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code<small>GitHub</small></a>
+<a href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs">Checkpoints<small>Saved best.pt files</small></a>
+<a href="https://github.com/quin210/dl-co3133/blob/main/AI_USAGE.md">AI usage<small>AI_USAGE.md</small></a>
+</nav>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">Part 1 - Problem and data</a><a href="#section-2">Part 2 - Methodology</a><a href="#section-3">Part 3 - Results</a><a href="#section-4">Conclusion</a></nav>
+<section id="problem-data">
+<h2 id="section-1">Part 1 - Problem and data</h2>
 <ul>
-<li>Publish as <strong>Public or Unlisted</strong>.</li>
-<li>All three members present or defend part of the work.</li>
-<li>Explain the problem, data, methods, setup, results, errors and conclusions; include a demo where useful.</li>
+<li><a href="assignment1.html#question">Problem</a>: classify 28 × 28 grayscale Fashion-MNIST images into ten clothing classes.</li>
+<li><a href="assignment1_methods.html#inputs">Data and split</a>: one stratified split (seed 42) with 54,000 training, 6,000 validation and 10,000 test images.
+<ul>
+<li><a href="assignment1_eda.html#1-read-the-dataset">Read the dataset</a></li>
+<li><a href="assignment1_eda.html#2-define-the-train-and-validation-subsets">Training and validation subsets</a></li>
+</ul>
+</li>
+<li><a href="assignment1_eda.html">Exploratory data analysis</a>: balanced classes and a fixed 28 × 28 input; upper-body garments look alike.
+<ul>
+<li><a href="assignment1_eda.html#3-look-at-one-image">One image and the flattened input</a></li>
+<li><a href="assignment1_eda.html#4-class-distribution-and-imbalance">Class distribution and imbalance</a></li>
+<li><a href="assignment1_eda.html#5-representative-training-images">Representative training images</a></li>
+<li><a href="assignment1_eda.html#6-pixel-intensity-distribution">Pixel intensity distribution</a></li>
+<li><a href="assignment1_eda.html#7-brightness-contrast-and-foreground-coverage">Brightness, contrast and foreground coverage</a></li>
+<li><a href="assignment1_eda.html#8-average-appearance-of-each-class">Average appearance of each class</a></li>
+<li><a href="assignment1_eda.html#9-pca-how-much-variation-fits-in-fewer-dimensions">PCA</a></li>
+<li><a href="assignment1_eda.html#10-two-dimensional-views-of-the-same-images">PCA and t-SNE views</a></li>
+<li><a href="assignment1_eda.html#11-inspect-preprocessing">Preprocessing</a></li>
+<li><a href="assignment1_eda.html#12-eda-conclusions">EDA conclusions</a></li>
+</ul>
+</li>
 </ul>
 </section>
-<section id="publication">
-<h2 id="section-7">Publication checks</h2>
-<p><span class="placeholder">Public GitHub Pages URL — not yet verified</span></p>
+<section id="methodology">
+<h2 id="section-2">Part 2 - Methodology</h2>
 <ul>
-<li>Verify installation, data preparation, training and evaluation from a clean environment using the recorded configuration and dependencies.</li>
-<li>Check public access to the report, slides, video, source and reconstruction instructions from Home and Assignment 1.</li>
-<li>Confirm member details, video playback and LMS submission.</li>
+<li><a href="assignment1_methods.html#pipeline">Pipeline</a>: one data pipeline, training loop and evaluation for every model.</li>
+<li><a href="assignment1_methods.html#models">Five models</a>: from 7,850 to 203,530 parameters.
+<ul>
+<li><a href="assignment1_methods.html#linear">Linear / softmax classifier</a></li>
+<li><a href="assignment1_methods.html#mlp">MLP</a></li>
+<li><a href="assignment1_methods.html#cnn">CNN</a></li>
+<li><a href="assignment1_methods.html#lstm">LSTM over image rows</a></li>
+<li><a href="assignment1_methods.html#transformer">Transformer over 4 × 4 patches</a></li>
 </ul>
+</li>
+<li><a href="assignment1_methods.html#protocol">Fair comparison</a>: same split, optimizer, 16-epoch budget and checkpoint rule (highest validation macro-F1); seeds 42–46.
+<ul>
+<li><a href="assignment1_methods.html#metrics">Loss, metrics and timing</a></li>
+<li><a href="assignment1_methods.html#ablation">Matched-parameter ablation design</a></li>
+</ul>
+</li>
+<li><a href="assignment1_methods.html#extension-models">Extension models</a>: GRU, three input representations and shift + noise augmentation.
+<ul>
+<li><a href="assignment1_methods.html#augmentation">Shift and noise augmentation</a></li>
+<li><a href="assignment1_methods.html#analysis-protocol">Post-results analysis protocol</a></li>
+</ul>
+</li>
+<li><a href="assignment1_methods.html#reproduce">Reproduction</a>: commands to train, evaluate and reload every run.
+<ul>
+<li><a href="assignment1_methods.html#environment">Recorded environment</a></li>
+<li><a href="assignment1_methods.html#full-run">Train and evaluate all models</a></li>
+<li><a href="assignment1_methods.html#reload">Reconstruct a saved model</a></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="results">
+<h2 id="section-3">Part 3 - Results</h2>
+<div class="table-scroll"><table class="numeric">
+<caption>Test macro-F1 (%), mean ± SD over seeds 42–46</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Main comparison</th><th scope="col">About 25k parameters</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>84.15 ± 0.11</td><td>-</td></tr>
+<tr><th scope="row">MLP</th><td>88.77 ± 0.23</td><td>87.01 ± 0.30</td></tr>
+<tr><th scope="row">CNN</th><td>91.27 ± 0.27</td><td>90.51 ± 0.34</td></tr>
+<tr><th scope="row">LSTM</th><td>88.10 ± 0.21</td><td>88.10 ± 0.21</td></tr>
+<tr><th scope="row">Transformer</th><td>87.06 ± 0.36</td><td>87.00 ± 0.54</td></tr>
+</tbody></table></div>
+<ul>
+<li><a href="assignment1_results.html#3-held-out-test-results">Test results</a>: accuracy, macro-F1, parameters, training and inference time.
+<ul>
+<li><a href="assignment1_results.html#1-saved-runs">Saved runs</a></li>
+<li><a href="assignment1_results.html#2-validation-comparison">Validation comparison</a></li>
+<li><a href="assignment1_results.html#3-held-out-test-results">Held-out test results</a></li>
+</ul>
+</li>
+<li><a href="assignment1_results.html#5-training-seed-variability">Training-seed variability</a>: CNN is best in 5/5 seeds; the ranking is the same in every seed.</li>
+<li><a href="assignment1_results.html#4-learning-curves">Training behaviour</a>: training and validation curves for every model.
+<ul>
+<li><a href="assignment1_results.html#4-learning-curves">Learning curves</a></li>
+<li><a href="assignment1_results.html#4-1-validation-images">Validation images</a></li>
+</ul>
+</li>
+<li><a href="assignment1_results.html#8-error-analysis">Errors</a>: most errors are among upper-body garments.
+<ul>
+<li><a href="assignment1_results.html#6-test-confusion-matrices">Confusion matrices</a></li>
+<li><a href="assignment1_results.html#7-inspect-predictions">Correct and incorrect predictions</a></li>
+<li><a href="assignment1_results.html#8-error-analysis">Error analysis</a></li>
+</ul>
+</li>
+<li><a href="assignment1_results.html#10-ablation-matched-parameter-budget">Matched parameter budget</a>: all models at about 25k parameters; CNN still leads in 5/5 seeds.</li>
+<li><a href="assignment1_results.html#9-discussion">Results discussion</a>: local filters give CNN its lead, but MLP is about 13 times faster at inference (0.0021 against 0.0268 ms/image, seed 42).</li>
+<li><a href="assignment1_analysis.html">Post-results analysis</a>: the 25 main runs reused and 45 extension runs added with the same protocol.
+<ul>
+<li><a href="assignment1_analysis.html#1-five-seed-errors">Five-seed error analysis</a>: 146 test images are wrong in all 25 runs.
+<ul>
+<li><a href="assignment1_analysis.html#1-1-error-groups">Error groups and stable errors</a></li>
+<li><a href="assignment1_analysis.html#1-2-gallery-images">Gallery images over five seeds</a></li>
+</ul>
+</li>
+<li><a href="assignment1_analysis.html#2-robustness">Robustness evaluation</a>: noise, shift, occlusion and contrast on all 25 main runs.
+<ul>
+<li><a href="assignment1_analysis.html#noise-implementation">Noise implementation</a></li>
+<li><a href="assignment1_analysis.html#2-robustness">Robustness under corruption</a></li>
+</ul>
+</li>
+<li><a href="assignment1_analysis.html#3-interpretability">Interpretability analysis</a>: what each model uses to decide.
+<ul>
+<li><a href="assignment1_analysis.html#3-interpretability">Occlusion maps</a></li>
+<li><a href="assignment1_analysis.html#4-1-lstm-row-probe">LSTM row probe</a></li>
+<li><a href="assignment1_analysis.html#4-2-transformer-attention">Transformer attention</a></li>
+</ul>
+</li>
+<li><a href="assignment1_analysis.html#4-lstm-vs-gru">LSTM and GRU</a>: GRU is 0.78 pp better in 5/5 seeds with 24% fewer parameters.</li>
+<li><a href="assignment1_analysis.html#5-representation-ablation">Representation ablation</a>: LSTM over columns, 7 × 7 patches and row tokens.</li>
+<li><a href="assignment1_analysis.html#6-augmentation">Shift + noise augmentation</a>: all five models retrained with shifted and noisy training images.</li>
+<li><a href="assignment1_analysis.html#7-summary">Summary</a>: what the analysis shows.
+<ul>
+<li><a href="assignment1_analysis.html#8-1-eda">EDA predictions and results</a></li>
+<li><a href="assignment1_analysis.html#8-2-limitations">Limitations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+
+<section id="conclusion">
+<h2 id="section-4">Conclusion</h2>
+<ul>
+<li><a href="assignment1_results.html#10-ablation-matched-parameter-budget">Inductive bias over size</a>: a 25,337-parameter CNN (90.51%) beats the 203,530-parameter MLP (88.77%).</li>
+<li><a href="assignment1_analysis.html#1-five-seed-errors">Hard cases in the data</a>: Shirt is the weakest class in all 25 runs, and 146 test images are wrong in every run.</li>
+<li><a href="assignment1_analysis.html#2-robustness">Different failure modes</a>: CNN is the most robust to shift, occlusion and contrast, but noise reverses the ranking; the sequence direction decides which shift hurts LSTM.</li>
+<li><a href="assignment1_analysis.html#3-interpretability">Sensitivity, not reasons</a>: explanations depend on the seed for every model except Linear; Transformer attention is not shorter-range on average than uniform attention.</li>
+<li><a href="assignment1_analysis.html#4-lstm-vs-gru">The sequence matters</a>: GRU is 0.78 pp better than LSTM with 24% fewer parameters, and row tokens make the Transformer 1.38 pp better (both 5/5 seeds).</li>
+<li><a href="assignment1_analysis.html#6-augmentation">Robustness has a price</a>: shift + noise augmentation repairs the shift weakness but lowers clean macro-F1 in 5/5 seeds (−0.92 pp CNN to −5.66 pp Linear).</li>
+</ul>
+<p>Full detail: <a href="assignment1.html">Assignment 1 page</a> and the PDF report.</p>
 </section>
 </main>
+<nav class="page-turn" aria-label="Report reading order"><a href="assignment1_M1.html"><small>Previous</small>M1 Report</a><a href="assignment1.html"><small>Next</small>Assignment overview</a></nav>
 
 </div>
 </body>
