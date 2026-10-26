@@ -10,8 +10,10 @@ from data_loader import get_data_loaders, read_fashion_mnist
 from models.linear import LinearClassifier
 from models.mlp import MLP
 from models.cnn import CNN
-from models.lstm import LSTMClassifier
-from models.transformer import TransformerClassifier
+from models.lstm import LSTMClassifier, LSTMColumns
+from models.transformer import TransformerClassifier, TransformerPatch7, TransformerRows
+from models.gru import GRUClassifier
+from models.augmented import AugmentedLinear, AugmentedMLP, AugmentedCNN, AugmentedLSTM, AugmentedTransformer
 from train import DEVICE, OUTPUTS, THREADS
 
 def predict(model, loader):
@@ -86,6 +88,24 @@ def main():
         evaluate(LSTMClassifier(), folder.parent)
     for folder in sorted(OUTPUTS.glob("Transformer_seed*/best.pt")):
         evaluate(TransformerClassifier(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("GRU_seed*/best.pt")):
+        evaluate(GRUClassifier(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("LSTMColumns_seed*/best.pt")):
+        evaluate(LSTMColumns(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("TransformerPatch7_seed*/best.pt")):
+        evaluate(TransformerPatch7(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("TransformerRows_seed*/best.pt")):
+        evaluate(TransformerRows(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("AugmentedLinear_seed*/best.pt")):
+        evaluate(AugmentedLinear(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("AugmentedMLP_seed*/best.pt")):
+        evaluate(AugmentedMLP(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("AugmentedCNN_seed*/best.pt")):
+        evaluate(AugmentedCNN(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("AugmentedLSTM_seed*/best.pt")):
+        evaluate(AugmentedLSTM(), folder.parent)
+    for folder in sorted(OUTPUTS.glob("AugmentedTransformer_seed*/best.pt")):
+        evaluate(AugmentedTransformer(), folder.parent)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,49 @@
+{
+  "model": "AugmentedCNN",
+  "model_class": "AugmentedCNN",
+  "seed": 46,
+  "best_epoch": 16,
+  "epochs_run": 16,
+  "parameters": 105866,
+  "fit_seconds": 180.46825174998958,
+  "train": {
+    "loss": 0.21189192469914755,
+    "accuracy": 0.9218148148148149,
+    "macro_f1": 0.9221256187751324
+  },
+  "validation": {
+    "loss": 0.22804781262079873,
+    "accuracy": 0.9141666666666667,
+    "macro_f1": 0.9147279871963494,
+    "inference_ms": 0.03362203482538462
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "4f6a1f5e1c9318b5e91195b7f3347957df1c0f2f",
+  "source_uncommitted": true,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.14.0",
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1",
+    "platform": "macOS-26.7.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies",
+  "test": {
+    "loss": 0.2600994073629379,
+    "accuracy": 0.9053,
+    "macro_f1": 0.905621510484947,
+    "inference_ms": 0.03226807499304414
+  },
+  "inference_timing": "median of 3 full passes after 1 warmup; DataLoader + forward + argmax; no metrics"
+}
