@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linear and MLP on Fashion-MNIST · G-02 · CO3133</title>
 <meta name="description" content="Linear and MLP on Fashion-MNIST">
-<link rel="stylesheet" href="assets/assignment.css?v=2">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
@@ -37,17 +37,17 @@
 </object>
 </details>
 </section>
-<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#section-1">M1 scope</a><a href="#section-2">Part 1 — Problem and data description</a><a href="#section-3">Part 2 — Methodology</a><a href="#section-4">Part 3 — Implementation results</a><a href="#section-5">Reproducibility and artifacts</a></nav>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#section-1">M1 scope</a><a href="#section-2">Part 1 - Problem and data description</a><a href="#section-3">Part 2 - Methodology</a><a href="#section-4">Part 3 - Implementation results</a><a href="#section-5">Reproducibility and artifacts</a></nav>
 <h2 id="section-1">M1 scope</h2>
 <ul>
-<li><strong>EDA:</strong> <a href="assignment1_eda.html">Data exploration</a> — class balance, samples and preprocessing, extended with appearance statistics, class similarity, PCA and t-SNE.</li>
-<li><strong>Dataset/DataLoader:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/data_loader.py">data_loader.py</a> — fixed split, normalization and batches.</li>
-<li><strong>Training and validation:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train.py">train.py</a> — shared loop and checkpoints.</li>
-<li><strong>Runnable Linear and MLP:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/linear.py">linear.py</a> and <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/mlp.py">mlp.py</a> — both trained for 16 epochs; results below.</li>
+<li><strong>EDA:</strong> <a href="assignment1_eda.html">Data exploration</a> - class balance, samples and preprocessing, extended with appearance statistics, class similarity, PCA and t-SNE.</li>
+<li><strong>Dataset/DataLoader:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/data_loader.py">data_loader.py</a> - fixed split, normalization and batches.</li>
+<li><strong>Training and validation:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train.py">train.py</a> - shared loop and checkpoints.</li>
+<li><strong>Runnable Linear and MLP:</strong> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/linear.py">linear.py</a> and <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/mlp.py">mlp.py</a> - both trained for 16 epochs; results below.</li>
 <li><strong>Optional CNN:</strong> trained and evaluated using the same pipeline; <a href="#cnn-extension">comparison with MLP</a>.</li>
 </ul>
 <section id="problem-data">
-<h2 id="section-2">Part 1 — Problem and data description</h2>
+<h2 id="section-2">Part 1 - Problem and data description</h2>
 <h3>Problem statement</h3>
 <p>Predict one of ten clothing classes from a 28 × 28 grayscale image for automatic product categorization. Similar upper-body silhouettes and limited detail make some classes difficult to separate.</p>
 <p>Given <code>x ∈ R^(1×28×28)</code>, learn ten class scores <code>fθ(x)</code> and predict <code>ŷ = argmax fθ(x)</code>. M1 compares a linear classifier and an MLP with one hidden layer, measuring accuracy against parameter and runtime costs.</p>
@@ -69,15 +69,15 @@
 <p>Validation is stratified from the official training set with seed 42. Detailed EDA and normalization use only training images; test evaluation follows checkpoint selection. Disjoint training and validation indices are stored with checkpoints. Product identities are unavailable, so index separation cannot establish product-level independence or exclude near-duplicates.</p>
 <h3>Exploratory data analysis</h3>
 <figure>
-<img alt="All ten classes have 6,000 images in the official training set and 1,000 in the test set." src="assets/assignment1_eda/figure-22-00.png"/>
+<img alt="All ten classes have 6,000 images in the official training set and 1,000 in the test set." src="assets/assignment1_eda/class_counts.png"/>
 <figcaption>Class counts from notebook 01. Classes are balanced, so the baselines use unweighted cross-entropy.</figcaption>
 </figure>
 <figure>
-<img alt="Four training examples each of T-shirt, trouser, pullover, dress and coat." loading="lazy" src="assets/assignment1_eda/figure-25-00.png"/>
+<img alt="Four training examples each of T-shirt, trouser, pullover, dress and coat." loading="lazy" src="assets/assignment1_eda/samples_tshirt_to_coat.png"/>
 <figcaption>Seeded training samples. Pullovers and coats share torso-and-sleeve shapes; trousers have a more distinctive outline.</figcaption>
 </figure>
 <figure>
-<img alt="Four training examples each of sandal, shirt, sneaker, bag and ankle boot." loading="lazy" src="assets/assignment1_eda/figure-28-00.png"/>
+<img alt="Four training examples each of sandal, shirt, sneaker, bag and ankle boot." loading="lazy" src="assets/assignment1_eda/samples_sandal_to_ankle_boot.png"/>
 <figcaption>Samples vary within each class. Shirts overlap visually with other upper-body garments; footwear differs in opening, sole and ankle shape.</figcaption>
 </figure>
 <p>The four uncompressed IDX files occupy 54,950,048 bytes (52.404 MiB), including headers. Images contain 784 unsigned-byte pixels; labels are integers from 0 to 9. No images are removed, relabeled or imputed.</p>
@@ -87,7 +87,7 @@
 <p>Pixels are divided by 255, then standardized with training-only mean <code>0.286209</code> and standard deviation <code>0.353160</code>, giving values approximately −0.8104 to 2.0212. Full batches contain <code>float32</code> images <code>[128, 1, 28, 28]</code> and <code>int64</code> labels <code>[128]</code>. No resizing or augmentation is used; partial batches are retained. <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/data_loader.py">data_loader.py</a> prints batch shapes and fitted statistics.</p>
 </section>
 <section id="methodology">
-<h2 id="section-3">Part 2 — Methodology</h2>
+<h2 id="section-3">Part 2 - Methodology</h2>
 <h3>Pipeline</h3>
 <pre aria-label="Training and evaluation pipeline"><span class="code-label">Training and evaluation</span><code>Raw IDX images + labels
   → fixed train / validation / test split
@@ -129,7 +129,7 @@
 <p>Training uses float32 without pretrained weights or hyperparameter search; settings are in <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train.py">train.py</a>. The project defines architectures and training/evaluation; PyTorch provides layers, differentiation and Adam, NumPy arrays, scikit-learn splits/metrics, and Matplotlib plots.</p>
 </section>
 <section id="results">
-<h2 id="section-4">Part 3 — Implementation results</h2>
+<h2 id="section-4">Part 3 - Implementation results</h2>
 <h3>Quantitative comparison</h3>
 <p>Retained seed-42 baseline results; the <a href="assignment1_results.html">full comparison</a> covers all five models.</p>
 <div class="table-scroll">
@@ -144,11 +144,11 @@
 <p>Inference time is the median of three full batched passes after one warmup, including batch loading, forward computation and argmax. Training time includes validation and history/checkpoint bookkeeping. Both runs were measured sequentially.</p>
 <h3>Training behavior</h3>
 <figure>
-<img alt="Linear training and validation loss, accuracy and macro-F1 across 16 epochs; selected epoch 12." loading="lazy" src="assets/assignment1_results/figure-16-00.png"/>
+<img alt="Linear training and validation loss, accuracy and macro-F1 across 16 epochs; selected epoch 12." loading="lazy" src="assets/assignment1_M1/linear_learning_curves.png"/>
 <figcaption>Linear: selected epoch 12; training continued through epoch 16.</figcaption>
 </figure>
 <figure>
-<img alt="MLP training and validation loss, accuracy and macro-F1 across 16 epochs; selected epoch 14." loading="lazy" src="assets/assignment1_results/figure-16-01.png"/>
+<img alt="MLP training and validation loss, accuracy and macro-F1 across 16 epochs; selected epoch 14." loading="lazy" src="assets/assignment1_M1/mlp_learning_curves.png"/>
 <figcaption>MLP: selected epoch 14. Training loss keeps falling while validation loss does not consistently improve.</figcaption>
 </figure>
 <h3>Comparison and representation</h3>
@@ -158,8 +158,8 @@
 <p>Epoch curves record changing weights; the accuracy gaps above use fixed selected weights.</p>
 <h3 id="errors">Confusion matrices and error analysis</h3>
 <p>From saved test predictions: rows are true labels, columns are predictions, and each row contains 1,000 images. Linear makes 1,597 errors (15.97%); MLP makes 1,123 (11.23%).</p>
-<figure><img alt="Linear test confusion matrix. Shirt has 595 correct predictions out of 1,000; T-shirt to Shirt is the largest directional error, with 147 cases." loading="lazy" src="assets/assignment1_results/figure-27-00.png"/><figcaption>Linear — test counts, selected epoch 12.</figcaption></figure>
-<figure><img alt="MLP test confusion matrix. Shirt has 721 correct predictions out of 1,000; T-shirt to Shirt is the largest directional error, with 135 cases." loading="lazy" src="assets/assignment1_results/figure-27-01.png"/><figcaption>MLP — test counts, selected epoch 14.</figcaption></figure>
+<figure><img alt="Linear test confusion matrix. Shirt has 595 correct predictions out of 1,000; T-shirt to Shirt is the largest directional error, with 147 cases." loading="lazy" src="assets/assignment1_M1/linear_confusion.png"/><figcaption>Linear - test counts, selected epoch 12.</figcaption></figure>
+<figure><img alt="MLP test confusion matrix. Shirt has 721 correct predictions out of 1,000; T-shirt to Shirt is the largest directional error, with 135 cases." loading="lazy" src="assets/assignment1_M1/mlp_confusion.png"/><figcaption>MLP - test counts, selected epoch 14.</figcaption></figure>
 <div class="table-scroll"><table>
 <caption>Selected directional test errors; percentages use the 1,000 true-class images as denominator.</caption>
 <thead><tr><th scope="col">True → predicted</th><th scope="col">Linear</th><th scope="col">MLP</th></tr></thead>
@@ -174,8 +174,8 @@
 <p><strong>Footwear:</strong> MLP improves overall performance but increases Sneaker→Sandal errors from 27 to 35. Test Sneaker #12 becomes Sandal with 93.7% MLP confidence, and Ankle boot #23 becomes Sandal with over 99.9%. These examples motivate validation-based augmentation and confidence calibration experiments.</p>
 <h3>Correct, difficult and incorrect predictions</h3>
 <p>Rows show the first four correct predictions, four lowest-confidence correct predictions, and first four mistakes. IDs are zero-based test indices. Confidence is maximum softmax probability, uncalibrated for correctness. Examples illustrate behavior; confusion matrices quantify frequency.</p>
-<figure><img alt="Twelve Linear test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_results/figure-35-00.png"/><figcaption>Linear recognizes the first boot, pullover and trousers, but labels Coats #17 and #25 as Pullovers. Correct Pullover #8624 has only 22.9% confidence.</figcaption></figure>
-<figure><img alt="Twelve MLP test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_results/figure-35-01.png"/><figcaption>MLP correctly predicts Coat #5482 with 24.3% confidence, yet gives the wrong label to Sneaker #12 with 93.7% confidence. Higher confidence alone does not establish correctness.</figcaption></figure>
+<figure><img alt="Twelve Linear test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_M1/linear_predictions.png"/><figcaption>Linear recognizes the first boot, pullover and trousers, but labels Coats #17 and #25 as Pullovers. Correct Pullover #8624 has only 22.9% confidence.</figcaption></figure>
+<figure><img alt="Twelve MLP test examples with image IDs, true labels, predicted labels and confidence; rows show correct, low-confidence correct and incorrect predictions." loading="lazy" src="assets/assignment1_M1/mlp_predictions.png"/><figcaption>MLP correctly predicts Coat #5482 with 24.3% confidence, yet gives the wrong label to Sneaker #12 with 93.7% confidence. Higher confidence alone does not establish correctness.</figcaption></figure>
 <h3 id="cnn-extension">Optional CNN comparison</h3>
 <p>The <a href="assignment1_methods.html#cnn">two-block CNN</a> uses the same split and training settings, selecting epoch 14. It reaches <strong>91.05% test accuracy and 0.9108 macro-F1</strong>, improving accuracy by 2.28 percentage points over MLP with 105,866 parameters versus 203,530. Batched CPU inference is about 14× slower. <span class="link-list">
 <a href="assignment1_results.html#cnn-curves">Learning curves</a>
@@ -214,8 +214,8 @@ PY</code></pre>
 <p>Outputs are saved under <code>Assignment1/outputs/</code>.</p>
 <h3>Retained runs</h3>
 <ul>
-<li><a href="assignment1_runs.html#linear">Linear run</a> — selected epoch 12.</li>
-<li><a href="assignment1_runs.html#mlp">MLP run</a> — selected epoch 14.</li>
+<li><a href="assignment1_runs.html#linear">Linear run</a> - selected epoch 12.</li>
+<li><a href="assignment1_runs.html#mlp">MLP run</a> - selected epoch 14.</li>
 </ul>
 <p>Retained runs include metrics, curves, epoch histories and predictions. Both checkpoint files store weights, epoch, split indices and normalization, without optimizer state. Rerunning reconstructs checkpoints with new timestamps and timing measurements.</p>
 </section>

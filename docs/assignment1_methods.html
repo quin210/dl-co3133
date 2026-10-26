@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Methods and reproduction · G-02 · CO3133</title>
 <meta name="description" content="Methods and reproduction">
-<link rel="stylesheet" href="assets/assignment.css?v=2">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
@@ -17,10 +17,10 @@
 <nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html">Main</a><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav>
 </div>
 <div class="wrap">
-<header><p class="kicker">Assignment 1</p><h1>Methods and reproduction</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html" aria-current="page">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">One pipeline, five architectures</a><a href="#section-2">Data and inputs</a><a href="#section-3">Model definitions</a><a href="#section-4">Training and selection</a><a href="#section-5">Loss, metrics and timing</a><a href="#section-6">Recorded environment</a><a href="#section-7">Reproduce the experiment</a><a href="#section-8">Saved evidence</a><a href="#section-9">Limitations</a></nav></header>
+<header><p class="kicker">Assignment 1</p><h1>Methods and reproduction</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html" aria-current="page">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_analysis.html">Post-results analysis</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1">Source code</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#section-1">1. One pipeline, five architectures</a><a href="#section-2">2. Data and inputs</a><a href="#section-3">3. Model definitions</a><a href="#section-4">4. Extension models</a><a href="#section-5">5. Training and selection</a><a href="#section-6">6. Loss, metrics and timing</a><a href="#section-7">7. Recorded environment</a><a href="#section-8">8. Reproduce the experiment</a><a href="#section-9">9. Saved evidence</a><a href="#section-10">10. Limitations</a></nav></header>
 <main id="main"><section id="pipeline">
-<h2 id="section-1">One pipeline, five architectures</h2>
-<p>Five architectures classify 28 × 28 grayscale Fashion-MNIST images into ten classes, using the same inputs, split, optimizer, training budget and evaluation.</p>
+<h2 id="section-1">1. One pipeline, five architectures</h2>
+<p>Five architectures classify 28 × 28 grayscale Fashion-MNIST images into ten classes. They use the same inputs, split, optimizer, training budget and evaluation. Each architecture trains once for each of five seeds, 42 to 46. Nine <a href="#extension-models">extension models</a> use the same pipeline.</p>
 <pre aria-label="Experiment pipeline"><code>IDX images and labels
   → fixed stratified training / validation split
   → normalization fitted on training pixels
@@ -33,7 +33,7 @@
 <p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/data_loader.py">Data loader source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train.py">Training source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/evaluate.py">Evaluation source</a></p>
 </section>
 <section id="inputs">
-<h2 id="section-2">Data and inputs</h2>
+<h2 id="section-2">2. Data and inputs</h2>
 <p>A seed-42 stratified split divides 60,000 official training images into 54,000 training and 6,000 validation images; the 10,000-image test set is unchanged. Each class contributes 5,400, 600 and 1,000 images respectively. No images are removed or relabeled.</p>
 <p>Checkpoints store disjoint training/validation indices. Test data neither selects weights nor fits normalization. Product identifiers are unavailable, so image-index separation cannot establish product-level independence.</p>
 <pre aria-label="Preprocessing and tensor shapes"><code>x = (pixel / 255 − training_mean) / training_std
@@ -45,7 +45,7 @@ logits: float32 [B, 10]      output of every model</code></pre>
 <p>Training-only statistics normalize images once in the dataset constructor. Batch size is 128, with partial batches retained. Only training shuffles, using a seeded generator; loaders use zero workers. No resizing, augmentation or feature extraction precedes the models. See <a href="assignment1_eda.html">data exploration</a> for the supporting analysis.</p>
 </section>
 <section id="models">
-<h2 id="section-3">Model definitions</h2>
+<h2 id="section-3">3. Model definitions</h2>
 <p><code>B</code> denotes batch size. Every model returns ten raw logits. Softmax is used for inspection probabilities, never before cross-entropy.</p>
 <div aria-label="Model architecture comparison" class="table-scroll" role="region" tabindex="0"><table>
 <caption>Implemented architectures</caption>
@@ -57,68 +57,248 @@ logits: float32 [B, 10]      output of every model</code></pre>
 <tr><th scope="row"><a href="#lstm">LSTM</a></th><td>28 rows × 28 values → 64-value final hidden state → 10 logits</td><td>24,714</td></tr>
 <tr><th scope="row"><a href="#transformer">Transformer</a></th><td>49 patches × 16 pixels → 32-value tokens → two encoder layers → 10 logits</td><td>19,530</td></tr>
 </tbody></table></div>
-<h3 id="linear">Linear: a weighted pixel baseline</h3>
+<h3 id="linear">3.1 Linear: a weighted pixel baseline</h3>
 <p>Each class receives a weighted sum of 784 pixels plus a bias, <code>z = Wx + b</code>. Without hidden features, the model cannot express nonlinear pixel interactions.</p>
-<pre><code>[B, 1, 28, 28] → Flatten → [B, 784]
-              → Linear(784, 10) → [B, 10]
+<div class="code-map">
+<pre aria-label="LinearClassifier source"><span class="code-label">Assignment1/models/linear.py</span><code><span class="tok-kw">class</span> <span class="tok-cls">LinearClassifier</span>(<span class="tok-cls">nn</span>.<span class="tok-cls">Module</span>):
+    <span class="tok-com"># one score per class from the raw pixel vector</span>
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(<span class="tok-kw">self</span>):
+        <span class="tok-kw">super</span>().<span class="tok-fn">__init__</span>()
+        <span class="tok-kw">self</span>.<span class="tok-var">layers</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Sequential</span>(
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Flatten</span>(), <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">784</span>, <span class="tok-num">10</span>)
+        )
+
+    <span class="tok-kw">def</span> <span class="tok-fn">forward</span>(<span class="tok-kw">self</span>, <span class="tok-var">images</span>):
+        <span class="tok-ctl">return</span> <span class="tok-kw">self</span>.<span class="tok-fn">layers</span>(<span class="tok-var">images</span>)</code></pre>
+<pre aria-label="LinearClassifier tensor shapes"><span class="code-label">Tensor shapes</span><code>input  [B, 1, 28, 28]
+  │
+  │ Flatten        [B, 784]
+  │ Linear 784→10  [B, 10]
+  ▼
+output [B, 10]
+
 parameters = 784 × 10 + 10 = 7,850</code></pre>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/linear.py">Linear source</a></p>
-<h3 id="mlp">MLP: nonlinear combinations of pixels</h3>
+</div>
+<h3 id="mlp">3.2 MLP: nonlinear combinations of pixels</h3>
 <p>A hidden layer learns 256 features: <code>h = max(0, W₁x + b₁)</code>, then <code>z = W₂h + b₂</code>. ReLU zeros negative activations, enabling nonlinear decision boundaries without explicitly representing spatial neighborhoods.</p>
-<pre><code>[B, 1, 28, 28] → Flatten → [B, 784]
-              → Linear(784, 256) → ReLU → [B, 256]
-              → Linear(256, 10) → [B, 10]
-parameters = (784 × 256 + 256) + (256 × 10 + 10)
-           = 203,530</code></pre>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/mlp.py">MLP source</a></p>
-<h3 id="cnn">CNN: local patterns with shared filters</h3>
+<div class="code-map">
+<pre aria-label="MLP source"><span class="code-label">Assignment1/models/mlp.py</span><code><span class="tok-kw">class</span> <span class="tok-cls">MLP</span>(<span class="tok-cls">nn</span>.<span class="tok-cls">Module</span>):
+    <span class="tok-com"># a nonlinear baseline without spatial assumptions</span>
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(<span class="tok-kw">self</span>):
+        <span class="tok-kw">super</span>().<span class="tok-fn">__init__</span>()
+        <span class="tok-kw">self</span>.<span class="tok-var">layers</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Sequential</span>(
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Flatten</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">784</span>, <span class="tok-num">256</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">ReLU</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">256</span>, <span class="tok-num">10</span>),
+        )
+
+    <span class="tok-kw">def</span> <span class="tok-fn">forward</span>(<span class="tok-kw">self</span>, <span class="tok-var">images</span>):
+        <span class="tok-ctl">return</span> <span class="tok-kw">self</span>.<span class="tok-fn">layers</span>(<span class="tok-var">images</span>)</code></pre>
+<pre aria-label="MLP tensor shapes"><span class="code-label">Tensor shapes</span><code>input  [B, 1, 28, 28]
+  │
+  │ Flatten         [B, 784]
+  │ Linear 784→256  [B, 256]
+  │ ReLU            [B, 256]
+  │ Linear 256→10   [B, 10]
+  ▼
+output [B, 10]
+
+parameters = (784 × 256 + 256)
+             + (256 × 10 + 10)
+             = 203,530</code></pre>
+</div>
+<h3 id="cnn">3.3 CNN: local patterns with shared filters</h3>
 <p>Two blocks learn local features with shared 3 × 3 filters, ReLU and 2 × 2 max pooling, followed by a dense classifier. Padding of one preserves spatial size during convolution.</p>
-<pre><code>[B, 1, 28, 28]
-  → Conv2d(1, 16, kernel=3, padding=1) → ReLU
-  → MaxPool2d(2) → [B, 16, 14, 14]
-  → Conv2d(16, 32, kernel=3, padding=1) → ReLU
-  → MaxPool2d(2) → [B, 32, 7, 7]
-  → Flatten → [B, 1568]
-  → Linear(1568, 64) → ReLU → Linear(64, 10) → [B, 10]</code></pre>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/cnn.py">CNN source</a></p>
-<h3 id="lstm">LSTM: reading the image row by row</h3>
+<div class="code-map">
+<pre aria-label="CNN source"><span class="code-label">Assignment1/models/cnn.py</span><code><span class="tok-kw">class</span> <span class="tok-cls">CNN</span>(<span class="tok-cls">nn</span>.<span class="tok-cls">Module</span>):
+    <span class="tok-com"># shared filters preserve local image structure</span>
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(<span class="tok-kw">self</span>):
+        <span class="tok-kw">super</span>().<span class="tok-fn">__init__</span>()
+        <span class="tok-kw">self</span>.<span class="tok-var">layers</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Sequential</span>(
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Conv2d</span>(<span class="tok-num">1</span>, <span class="tok-num">16</span>, <span class="tok-var">kernel_size</span>=<span class="tok-num">3</span>, <span class="tok-var">padding</span>=<span class="tok-num">1</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">ReLU</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">MaxPool2d</span>(<span class="tok-num">2</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Conv2d</span>(<span class="tok-num">16</span>, <span class="tok-num">32</span>, <span class="tok-var">kernel_size</span>=<span class="tok-num">3</span>, <span class="tok-var">padding</span>=<span class="tok-num">1</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">ReLU</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">MaxPool2d</span>(<span class="tok-num">2</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Flatten</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">32</span> * <span class="tok-num">7</span> * <span class="tok-num">7</span>, <span class="tok-num">64</span>),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">ReLU</span>(),
+            <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">64</span>, <span class="tok-num">10</span>),
+        )
+
+    <span class="tok-kw">def</span> <span class="tok-fn">forward</span>(<span class="tok-kw">self</span>, <span class="tok-var">images</span>):
+        <span class="tok-ctl">return</span> <span class="tok-kw">self</span>.<span class="tok-fn">layers</span>(<span class="tok-var">images</span>)</code></pre>
+<pre aria-label="CNN tensor shapes"><span class="code-label">Tensor shapes</span><code>input  [B, 1, 28, 28]
+  │
+  │ Conv2d 1→16, 3×3   [B, 16, 28, 28]
+  │ ReLU               [B, 16, 28, 28]
+  │ MaxPool2d 2        [B, 16, 14, 14]
+  │ Conv2d 16→32, 3×3  [B, 32, 14, 14]
+  │ ReLU               [B, 32, 14, 14]
+  │ MaxPool2d 2        [B, 32, 7, 7]
+  │ Flatten            [B, 1568]
+  │ Linear 1568→64     [B, 64]
+  │ ReLU               [B, 64]
+  │ Linear 64→10       [B, 10]
+  ▼
+output [B, 10]
+
+parameters = 105,866</code></pre>
+</div>
+<h3 id="lstm">3.4 LSTM: reading the image row by row</h3>
 <p>A single 64-unit LSTM reads 28 image rows from top to bottom. Gates control new and retained information: <code>cₜ = fₜ ⊙ cₜ₋₁ + iₜ ⊙ gₜ</code>, <code>hₜ = oₜ ⊙ tanh(cₜ)</code>. The final hidden state feeds the classifier. This representation prioritizes row order over two-dimensional neighborhoods.</p>
-<pre><code>[B, 1, 28, 28] → squeeze channel → [B, 28, 28]
-              → LSTM(input_size=28, hidden_size=64, layers=1)
-              → final hidden state [B, 64]
-              → Linear(64, 10) → [B, 10]</code></pre>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/lstm.py">LSTM source</a></p>
-<h3 id="transformer">Transformer: attention across image patches</h3>
+<div class="code-map">
+<pre aria-label="LSTMClassifier source"><span class="code-label">Assignment1/models/lstm.py</span><code><span class="tok-kw">class</span> <span class="tok-cls">LSTMClassifier</span>(<span class="tok-cls">nn</span>.<span class="tok-cls">Module</span>):
+    <span class="tok-com"># image rows form a sequence from top to bottom</span>
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(<span class="tok-kw">self</span>):
+        <span class="tok-kw">super</span>().<span class="tok-fn">__init__</span>()
+        <span class="tok-kw">self</span>.<span class="tok-var">lstm</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">LSTM</span>(
+            <span class="tok-var">input_size</span>=<span class="tok-num">28</span>,
+            <span class="tok-var">hidden_size</span>=<span class="tok-num">64</span>,
+            <span class="tok-var">num_layers</span>=<span class="tok-num">1</span>,
+            <span class="tok-var">batch_first</span>=<span class="tok-kw">True</span>,
+        )
+        <span class="tok-kw">self</span>.<span class="tok-var">classifier</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">64</span>, <span class="tok-num">10</span>)
+
+    <span class="tok-kw">def</span> <span class="tok-fn">forward</span>(<span class="tok-kw">self</span>, <span class="tok-var">images</span>):
+        <span class="tok-var">rows</span> = <span class="tok-var">images</span>.<span class="tok-fn">squeeze</span>(<span class="tok-num">1</span>)
+        <span class="tok-var">_</span>, (<span class="tok-var">hidden</span>, <span class="tok-var">_</span>) = <span class="tok-kw">self</span>.<span class="tok-fn">lstm</span>(<span class="tok-var">rows</span>)
+        <span class="tok-ctl">return</span> <span class="tok-kw">self</span>.<span class="tok-fn">classifier</span>(<span class="tok-var">hidden</span>[-<span class="tok-num">1</span>])</code></pre>
+<pre aria-label="LSTMClassifier tensor shapes"><span class="code-label">Tensor shapes</span><code>input  [B, 1, 28, 28]
+  │
+  │ squeeze(1)    [B, 28, 28]
+  │ LSTM 28→64    h: [1, B, 64]
+  │ hidden[-1]    [B, 64]
+  │ Linear 64→10  [B, 10]
+  ▼
+output [B, 10]
+
+parameters = 24,714</code></pre>
+</div>
+<h3 id="transformer">3.5 Transformer: attention across image patches</h3>
 <p>Each of 49 non-overlapping 4 × 4 patches becomes a 32-value token with a learned position embedding. Two encoders use four attention heads, feed-forward width 64, residual connections and layer normalization. With eight values per head, <code>Attention(Q, K, V) = softmax(QKᵀ / √dₖ)V</code> connects distant patches; position embeddings preserve spatial identity.</p>
-<pre><code>[B, 1, 28, 28] → 7 × 7 patches → [B, 49, 16]
-              → Linear(16, 32) + learned positions [1, 49, 32]
-              → two Transformer encoder layers → [B, 49, 32]
-              → mean over 49 tokens → [B, 32]
-              → Linear(32, 10) → [B, 10]</code></pre>
+<div class="code-map">
+<pre aria-label="TransformerClassifier source"><span class="code-label">Assignment1/models/transformer.py</span><code><span class="tok-kw">class</span> <span class="tok-cls">TransformerClassifier</span>(<span class="tok-cls">nn</span>.<span class="tok-cls">Module</span>):
+    <span class="tok-com"># attention combines patches with learned spatial positions</span>
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(<span class="tok-kw">self</span>):
+        <span class="tok-kw">super</span>().<span class="tok-fn">__init__</span>()
+        <span class="tok-kw">self</span>.<span class="tok-var">projection</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">16</span>, <span class="tok-num">32</span>)
+        <span class="tok-kw">self</span>.<span class="tok-var">positions</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Parameter</span>(
+            <span class="tok-cls">torch</span>.<span class="tok-fn">empty</span>(<span class="tok-num">1</span>, <span class="tok-num">49</span>, <span class="tok-num">32</span>)
+        )
+        <span class="tok-cls">nn</span>.<span class="tok-var">init</span>.<span class="tok-fn">normal_</span>(<span class="tok-kw">self</span>.<span class="tok-var">positions</span>, <span class="tok-var">std</span>=<span class="tok-num">0.02</span>)
+        <span class="tok-var">layer</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">TransformerEncoderLayer</span>(
+            <span class="tok-var">d_model</span>=<span class="tok-num">32</span>,
+            <span class="tok-var">nhead</span>=<span class="tok-num">4</span>,
+            <span class="tok-var">dim_feedforward</span>=<span class="tok-num">64</span>,
+            <span class="tok-var">dropout</span>=<span class="tok-num">0.0</span>,
+            <span class="tok-var">batch_first</span>=<span class="tok-kw">True</span>,
+        )
+        <span class="tok-kw">self</span>.<span class="tok-var">encoder</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">TransformerEncoder</span>(
+            <span class="tok-var">layer</span>, <span class="tok-var">num_layers</span>=<span class="tok-num">2</span>, <span class="tok-var">enable_nested_tensor</span>=<span class="tok-kw">False</span>
+        )
+        <span class="tok-kw">self</span>.<span class="tok-var">classifier</span> = <span class="tok-cls">nn</span>.<span class="tok-cls">Linear</span>(<span class="tok-num">32</span>, <span class="tok-num">10</span>)
+
+    <span class="tok-kw">def</span> <span class="tok-fn">forward</span>(<span class="tok-kw">self</span>, <span class="tok-var">images</span>):
+        <span class="tok-var">patches</span> = <span class="tok-var">images</span>.<span class="tok-fn">unfold</span>(<span class="tok-num">2</span>, <span class="tok-num">4</span>, <span class="tok-num">4</span>).<span class="tok-fn">unfold</span>(<span class="tok-num">3</span>, <span class="tok-num">4</span>, <span class="tok-num">4</span>)
+        <span class="tok-var">patches</span> = <span class="tok-var">patches</span>.<span class="tok-fn">reshape</span>(<span class="tok-var">images</span>.<span class="tok-var">shape</span>[<span class="tok-num">0</span>], <span class="tok-num">49</span>, <span class="tok-num">16</span>)
+        <span class="tok-var">tokens</span> = <span class="tok-kw">self</span>.<span class="tok-fn">projection</span>(<span class="tok-var">patches</span>) + <span class="tok-kw">self</span>.<span class="tok-var">positions</span>
+        <span class="tok-ctl">return</span> <span class="tok-kw">self</span>.<span class="tok-fn">classifier</span>(
+            <span class="tok-kw">self</span>.<span class="tok-fn">encoder</span>(<span class="tok-var">tokens</span>).<span class="tok-fn">mean</span>(<span class="tok-var">dim</span>=<span class="tok-num">1</span>)
+        )</code></pre>
+<pre aria-label="TransformerClassifier tensor shapes"><span class="code-label">Tensor shapes</span><code>input  [B, 1, 28, 28]
+  │
+  │ unfold 4×4, twice  [B, 1, 7, 7, 4, 4]
+  │ reshape            [B, 49, 16]
+  │ Linear 16→32       [B, 49, 32]
+  │ + positions        [B, 49, 32]
+  │ encoder ×2         [B, 49, 32]
+  │ mean(dim=1)        [B, 32]
+  │ Linear 32→10       [B, 10]
+  ▼
+output [B, 10]
+
+parameters = 19,530</code></pre>
+</div>
 <p>Encoders use ReLU and zero dropout; classification uses mean pooling without a class token. No pretrained weights are used.</p>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/transformer.py">Transformer source</a></p>
+</section>
+<section id="extension-models">
+<h2 id="section-4">4. Extension models</h2>
+<p>The five models above give the main comparison. <code>train.py</code> also trains nine extension models with the same split, protocol and seeds 42–46 (45 runs). Each extension model changes one factor of a main model. The <a href="assignment1_analysis.html">post-results analysis</a> compares them. These extensions are exploratory.</p>
+<div aria-label="Extension model definitions" class="table-scroll" role="region" tabindex="0"><table class="numeric">
+<caption>Extension models. Each row changes one factor of a main model. The training settings are the same. For TransformerPatch7 and TransformerRows, the number of tokens, the token size and the input projection change with the cut.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Source</th><th scope="col">Change from the main model</th><th scope="col">Parameters</th></tr></thead>
+<tbody>
+<tr><th scope="row">GRU</th><td><code>models/gru.py</code></td><td>LSTM with <code>nn.GRU</code> in place of <code>nn.LSTM</code>: 28 rows of 28 pixels, hidden size 64</td><td>18,698</td></tr>
+<tr><th scope="row">LSTMColumns</th><td><code>models/lstm.py</code></td><td>LSTM reads 28 columns from left to right, not 28 rows from top to bottom</td><td>24,714</td></tr>
+<tr><th scope="row">TransformerPatch7</th><td><code>models/transformer.py</code></td><td>16 patches of 7 × 7 pixels (16 tokens × 49 values), not 49 patches of 4 × 4 pixels</td><td>19,530</td></tr>
+<tr><th scope="row">TransformerRows</th><td><code>models/transformer.py</code></td><td>28 row tokens of 28 pixels each</td><td>19,242</td></tr>
+<tr><th scope="row">AugmentedLinear</th><td><code>models/augmented.py</code></td><td>Linear with shift and noise augmentation</td><td>7,850</td></tr>
+<tr><th scope="row">AugmentedMLP</th><td><code>models/augmented.py</code></td><td>MLP with shift and noise augmentation</td><td>203,530</td></tr>
+<tr><th scope="row">AugmentedCNN</th><td><code>models/augmented.py</code></td><td>CNN with shift and noise augmentation</td><td>105,866</td></tr>
+<tr><th scope="row">AugmentedLSTM</th><td><code>models/augmented.py</code></td><td>LSTM with shift and noise augmentation</td><td>24,714</td></tr>
+<tr><th scope="row">AugmentedTransformer</th><td><code>models/augmented.py</code></td><td>Transformer with shift and noise augmentation</td><td>19,530</td></tr>
+</tbody></table></div>
+<h3 id="augmentation">4.1 Shift and noise augmentation</h3>
+<p>The five Augmented models change each training image every time the model reads it:</p>
+<ul>
+<li><strong>Shift:</strong> the image moves by a random integer <code>dy</code> and <code>dx</code> in {−2, …, 2} px. Background values fill the empty pixels. 24 of 25 draws move the image.</li>
+<li><strong>Noise:</strong> after the shift, each image gets Gaussian noise with probability 0.5, so about half of the images get noise. The noise has σ = 0.10 on the [0, 1] pixel scale. The result is clipped to the pixel range.</li>
+<li><strong>Scope:</strong> augmentation applies in training mode only. Validation, test and checkpoint selection use clean images.</li>
+</ul>
+<p>The same models get both changes, so their effects cannot be separated. <code>metrics.json</code> records <code>"augmentation": null</code> for these runs, because <code>train.fit</code> writes a fixed value. The real augmentation is in <code>models/augmented.py</code>.</p>
+<h3 id="analysis-protocol">4.2 Post-results analysis protocol</h3>
+<p>The post-results analysis loads the saved <code>best.pt</code> checkpoints and <code>test_predictions.npz</code> files. It trains nothing.</p>
+<ul>
+<li><strong>Five-seed errors:</strong> per-class F1, confusion matrices and repeated errors over the 25 main runs.</li>
+<li><strong>Corruptions:</strong> noise (σ = 0.05, 0.10, 0.20), shift (1, 2, 3 px up, down, left, right), occlusion (one 8 × 8 or 12 × 12 px square) and contrast (× 0.75, × 0.5). Fixed random seeds give every model and seed the same test images.</li>
+<li><strong>Check:</strong> the clean pass must reproduce the test macro-F1 in <code>metrics.json</code>. Otherwise the analysis stops.</li>
+<li><strong>Saved scores:</strong> the analysis writes the scores once to <code>Assignment1/outputs/robustness_scores.csv</code>. A later run evaluates only the models that are not in this file.</li>
+<li><strong>Interpretability:</strong> occlusion sensitivity on a maximum of 300 test images, an LSTM row probe and Transformer attention weights.</li>
+</ul>
+<p><span class="link-list"><a href="assignment1_analysis.html#1-five-seed-errors">Five-seed errors</a><a href="assignment1_analysis.html#2-robustness">Robustness</a><a href="assignment1_analysis.html#3-interpretability">Interpretability</a><a href="assignment1_analysis.html#4-lstm-vs-gru">LSTM vs GRU</a><a href="assignment1_analysis.html#5-representation-ablation">Representation ablation</a><a href="assignment1_analysis.html#6-augmentation">Augmentation</a><a href="assignment1_analysis.html#7-summary">Summary</a></span></p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/gru.py">GRU source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/augmented.py">Augmentation source</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/03_analysis.ipynb">03_analysis.ipynb</a></p>
 </section>
 <section id="protocol">
-<h2 id="section-4">Training and selection</h2>
+<h2 id="section-5">5. Training and selection</h2>
 <div aria-label="Shared training settings" class="table-scroll" role="region" tabindex="0"><table>
-<caption>Settings shared by all five models</caption>
+<caption>Settings shared by all 14 models and all seeds</caption>
 <thead><tr><th scope="col">Setting</th><th scope="col">Value</th></tr></thead>
 <tbody>
-<tr><th scope="row">Random seed</th><td>42 for Python, NumPy and PyTorch; training shuffle also uses 42</td></tr>
+<tr><th scope="row">Training seeds</th><td>42, 43, 44, 45 and 46: one run per model and seed. For each seed, <code>train.py</code> trains 14 models: 5 main models and 9 extension models (70 runs: 25 main and 45 extension). Each seed sets Python, NumPy and PyTorch and the training shuffle.</td></tr>
+<tr><th scope="row">Split</th><td>Always the seed-42 stratified split, for all training seeds</td></tr>
 <tr><th scope="row">Optimizer</th><td>Adam, learning rate 0.001</td></tr>
 <tr><th scope="row">Budget</th><td>16 epochs, batch size 128; every epoch runs</td></tr>
 <tr><th scope="row">Gradient clipping</th><td>Maximum total gradient norm 5.0</td></tr>
 <tr><th scope="row">Selection</th><td>Highest validation macro-F1; earliest epoch wins an exact tie</td></tr>
-<tr><th scope="row">Regularization</th><td>No augmentation, dropout, weight decay or learning-rate scheduler</td></tr>
+<tr><th scope="row">Regularization</th><td>No dropout, weight decay or learning-rate scheduler. No augmentation, except in the five <a href="#augmentation">Augmented extension models</a></td></tr>
 <tr><th scope="row">Execution</th><td>CPU, four PyTorch threads, float32, deterministic algorithms enabled</td></tr>
 </tbody></table></div>
 <p>Each batch clears gradients, computes cross-entropy, backpropagates, clips gradients and updates with Adam. Non-finite losses or gradients raise errors. Validation follows each epoch in evaluation mode without gradients.</p>
 <p>Reported metrics use selected weights in <code>best.pt</code>; <code>checkpoint.pt</code> stores epoch-16 weights. Test results do not select checkpoints.</p>
-<aside class="idea"><p><strong>Comparison scope:</strong> architecture changes both capacity and image representation. This is not a capacity-matched ablation or hyperparameter search; equal epochs do not imply equal compute or optimization difficulty.</p></aside>
+<aside class="idea"><p><strong>Comparison scope:</strong> the five main models give the main comparison. In this comparison, the architecture changes both the parameter count and the image representation. The <a href="#ablation">matched-parameter ablation</a> removes the parameter-count difference at about 25k parameters. There is no hyperparameter search. Equal epochs do not mean equal compute or equal optimization difficulty.</p></aside>
 <p>History records predictions while weights change. Checkpoint training metrics use fixed selected weights, so they may differ from that epoch's history.</p>
+<h3 id="ablation">5.1 Matched-parameter ablation</h3>
+<p>The main CNN has more parameters than LSTM and Transformer. The ablation asks a question: does CNN win because of its spatial design or because of its size? The hypothesis: with about 25k parameters for each model, CNN still has the highest macro-F1.</p>
+<div aria-label="Matched-parameter ablation design" class="table-scroll" role="region" tabindex="0"><table class="numeric">
+<caption>Changed factor: model size only. LSTM already has about 25k parameters, so its main runs are reused.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Change</th><th scope="col">Main parameters</th><th scope="col">Ablation parameters</th></tr></thead>
+<tbody>
+<tr><th scope="row">MLPBudget25k</th><td>Hidden layer 256 → 31</td><td>203,530</td><td>24,655</td></tr>
+<tr><th scope="row">CNNBudget25k</th><td>Dense layer 64 → 13; same convolutions</td><td>105,866</td><td>25,337</td></tr>
+<tr><th scope="row">LSTM</th><td>No change; runs from <code>outputs/</code> reused</td><td>24,714</td><td>24,714</td></tr>
+<tr><th scope="row">TransformerBudget25k</th><td>Width 32 → 36; feed-forward 64 → 72; four heads, two layers</td><td>19,530</td><td>24,274</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Fixed factors:</strong> split, seeds 42–46, preprocessing, optimizer, learning rate, batch size, 16 epochs, checkpoint rule and hardware (CPU, four threads).</li>
+<li><strong>Decision rule:</strong> a difference between two models is supported only if the gap between their mean test macro-F1 is larger than the larger of their two seed SDs. Validation macro-F1 only selects the checkpoints.</li>
+</ul>
+<p>Validation results are a check. They do not change the decision. <a href="assignment1_results.html#10-ablation-matched-parameter-budget">Ablation results</a>. <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train_budget.py">Ablation source</a></p>
 </section>
 <section id="metrics">
-<h2 id="section-5">Loss, metrics and timing</h2>
+<h2 id="section-6">6. Loss, metrics and timing</h2>
 <p>For logits <code>z</code> and target <code>y</code>, cross-entropy is <code>−z[y] + log(Σₖ exp(z[k]))</code>. Batch loss is averaged; epoch loss weights batches by image count. Prediction uses <code>argmax(z)</code> without post-processing.</p>
 <ul>
 <li><strong>Accuracy:</strong> correct predictions divided by the number of images.</li>
@@ -129,23 +309,34 @@ parameters = (784 × 256 + 256) + (256 × 10 + 10)
 <p>Inference measures batched CPU throughput, not single-request latency. Measurements appear in <a href="assignment1_results.html">results and analysis</a>.</p>
 </section>
 <section id="environment">
-<h2 id="section-6">Recorded environment</h2>
-<p>All runs record Python 3.12.13, PyTorch 2.14.0, NumPy 2.5.3 and scikit-learn 1.9.1 on <code>macOS-26.6.2-arm64-arm-64bit</code>, using four CPU threads. Processor model and memory are not recorded. Notebook and plotting dependencies are pinned below.</p>
+<h2 id="section-7">7. Recorded environment</h2>
+<p>The runs use two recorded environments. Both use PyTorch 2.14.0, scikit-learn 1.9.1, four CPU threads and float32 computation.</p>
+<ul>
+<li><strong>Main and ablation runs:</strong> the 25 main runs (4 Oct 2026) and the 15 ablation runs (5 Oct 2026) record Python 3.11.16, NumPy 2.4.6 and <code>macOS-15.6.1-arm64-arm-64bit</code> (commits <code>3c06e59</code> and <code>92f65c7</code>).</li>
+<li><strong>Extension runs and post-results analysis:</strong> the 45 extension runs (26 Oct 2026) and the post-results analysis record Python 3.12.13, NumPy 2.5.3 and macOS 26.7.1 arm64 (commit <code>4f6a1f5</code> with the extension code, committed later as <code>7bde7de</code>).</li>
+</ul>
+<p>Timings are compared only within one environment. A difference between an extension run and a main run combines the changed factor with a software change. Processor model and memory are not recorded.</p>
 <p><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/requirements.txt">Pinned dependencies</a></p>
 </section>
 <section id="reproduce">
-<h2 id="section-7">Reproduce the experiment</h2>
-<p>From the <code>dl-co3133</code> repository root. Training creates new timestamped folders; evaluation refreshes metrics and predictions in every saved model folder containing <code>best.pt</code>.</p>
-<h3 id="full-run">Train and evaluate all five models</h3>
-<pre><code>python3.12 -m venv .venv
+<h2 id="section-8">8. Reproduce the experiment</h2>
+<p>Run all commands from the <code>dl-co3133</code> repository root. Training creates new timestamped folders. Evaluation writes metrics and predictions for each saved folder that has <code>best.pt</code> but no <code>metrics.json</code>. It skips folders that it evaluated before.</p>
+<h3 id="full-run">8.1 Train and evaluate all models</h3>
+<pre><code>python3.11 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python Assignment1/download.py
 .venv/bin/python Assignment1/data_loader.py
 .venv/bin/python Assignment1/train.py
 .venv/bin/python Assignment1/evaluate.py</code></pre>
-<p>The loader prints split sizes, tensor shapes and normalization statistics. Training order: Linear, MLP, CNN, LSTM, Transformer.</p>
-<h3 id="m1-run">Train and evaluate only the M1 baselines</h3>
-<p>After setup and data download, train Linear and MLP with the same settings, resetting the seed before each model.</p>
+<p>The loader prints split sizes, tensor shapes and normalization statistics. <code>train.py</code> trains 14 models × seeds 42–46 = 70 runs. For each seed, it trains Linear, MLP, CNN, LSTM and Transformer, then GRU, LSTMColumns, TransformerPatch7, TransformerRows and the five Augmented models, in that order. <code>evaluate.py</code> evaluates all 70 runs. Output folders go to <code>Assignment1/outputs/</code>.</p>
+<h3 id="analysis-run">8.2 Run the post-results analysis</h3>
+<p>After the full run, run all cells of the analysis notebook. It reads the saved runs and trains nothing. It writes <code>Assignment1/outputs/robustness_scores.csv</code>.</p>
+<pre><code>.venv/bin/jupyter lab Assignment1/03_analysis.ipynb</code></pre>
+<h3 id="budget-run">8.3 Run the matched-parameter ablation</h3>
+<p>After the full run, train and evaluate the three ~25k models. The script prints the three parameter counts first. It then trains and evaluates 15 runs (3 models × seeds 42–46) and writes them to <code>Assignment1/outputs_budget/</code>. The LSTM rows come from <code>Assignment1/outputs/</code>.</p>
+<pre><code>.venv/bin/python Assignment1/train_budget.py</code></pre>
+<h3 id="m1-run">8.4 Train and evaluate only the M1 baselines</h3>
+<p>This is the historical M1 command. After setup and data download, it trains Linear and MLP with seed 42 and the same settings. It resets the seed before each model.</p>
 <pre><code>.venv/bin/python - &lt;&lt;'PY'
 import sys
 sys.path.insert(0, "Assignment1")
@@ -159,8 +350,13 @@ for name, Model in [("Linear", LinearClassifier), ("MLP", MLP)]:
     folder = fit(Model(), name, seed=42)
     evaluate(Model(), folder)
 PY</code></pre>
-<h3 id="reload">Reconstruct a saved model without retraining</h3>
-<p>Reload the retained CNN with its saved split and normalization to measure test accuracy and macro-F1. Change <code>folder</code> for another model.</p>
+<h3 id="reload">8.5 Reconstruct a saved model without retraining</h3>
+<p>Reload the seed-42 CNN with its saved split and normalization. The script measures test accuracy and macro-F1. Change <code>folder</code> for another model or seed. For an ablation model, do these three steps:</p>
+<ol>
+<li>Import its class from <code>train_budget.py</code>, for example <code>from train_budget import CNNBudget</code>.</li>
+<li>Add the saved run name to <code>classes</code>, for example <code>"CNNBudget25k": CNNBudget</code>.</li>
+<li>Set <code>folder</code> to a run folder in <code>Assignment1/outputs_budget/</code>.</li>
+</ol>
 <pre><code>.venv/bin/python - &lt;&lt;'PY'
 import sys
 from pathlib import Path
@@ -176,7 +372,7 @@ from models.transformer import TransformerClassifier
 
 classes = {"Linear": LinearClassifier, "MLP": MLP, "CNN": CNN,
            "LSTM": LSTMClassifier, "Transformer": TransformerClassifier}
-folder = Path("Assignment1/outputs/CNN_seed42_20260921_102822_896256")
+folder = Path("Assignment1/outputs/CNN_seed42_20261004_112729_015620")
 saved = torch.load(folder / "best.pt", map_location="cpu", weights_only=True)
 info, data = saved["info"], saved["data"]
 torch.set_num_threads(info["threads"])
@@ -195,8 +391,8 @@ PY</code></pre>
 <p>Top-level <code>epoch</code> identifies saved weights; <code>info</code> describes the run and selected checkpoint, even in the final-weight file. Optimizer state is absent, so reloading does not restore Adam's training state.</p>
 </section>
 <section id="artifacts">
-<h2 id="section-8">Saved evidence</h2>
-<p>Each run is stored under <code>Assignment1/outputs/&lt;Model&gt;_seed42_&lt;timestamp&gt;/</code>.</p>
+<h2 id="section-9">9. Saved evidence</h2>
+<p>Each main run and each extension run is stored under <code>Assignment1/outputs/&lt;Model&gt;_seed&lt;S&gt;_&lt;timestamp&gt;/</code>. Each ablation run is stored under <code>Assignment1/outputs_budget/&lt;Model&gt;Budget25k_seed&lt;S&gt;_&lt;timestamp&gt;/</code>, with the same files.</p>
 <div aria-label="Experiment artifacts" class="table-scroll" role="region" tabindex="0"><table>
 <thead><tr><th scope="col">Artifact</th><th scope="col">What it records</th></tr></thead>
 <tbody>
@@ -209,12 +405,13 @@ PY</code></pre>
 <tr><th scope="row"><code>validation_predictions.npz</code></th><td>Source indices, raw validation images, labels, predictions and ten-class probabilities.</td></tr>
 <tr><th scope="row"><code>test_predictions.npz</code></th><td>Official test indices, labels, predictions and probabilities. Raw test images remain in the dataset.</td></tr>
 </tbody></table></div>
-<p>The results notebook reads the latest evaluated run per model and seed; its folder names identify the compared runs.</p>
-<p><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs">Saved run files</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/01_eda.ipynb">EDA notebook</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/02_results.ipynb">Results notebook</a></p>
+<p>The results step reads the latest evaluated run for each model and seed. Its folder list identifies the compared runs. The analysis saves its corruption scores for each model, seed and corruption in <code>Assignment1/outputs/robustness_scores.csv</code>.</p>
+<p><a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs">Saved run files</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment1/outputs_budget">Saved ablation runs</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/01_eda.ipynb">01_eda.ipynb</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/02_results.ipynb">02_results.ipynb</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/03_analysis.ipynb">03_analysis.ipynb</a> <a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/outputs/robustness_scores.csv">Robustness scores</a></p>
 </section>
 <section id="limits">
-<h2 id="section-9">Limitations</h2>
-<p>One seed, split and 16-epoch budget cannot establish training variability, a statistically reliable ranking or optimal configurations. Repeated seeds would permit mean and spread estimates.</p>
+<h2 id="section-10">10. Limitations</h2>
+<p>Five training seeds on one split measure training variability only. They do not give a test of statistical significance or uncertainty across datasets. One fixed 16-epoch budget without a hyperparameter search does not find optimal configurations. Transformer selects the final epoch (16) in 4 of 5 seeds, so a longer budget can change its score.</p>
+<p>The ablation matches parameter count only. It does not match compute: at about 25k parameters, mean fit time is 101.74 s for CNN and 4.37 s for MLP.</p>
 <p>Saved preprocessing and deterministic algorithms support repeatability, but software and hardware can affect results and timings. Small grayscale catalog images limit generalization to color, high-resolution detail and real-world scenes.</p>
 </section>
 </main>

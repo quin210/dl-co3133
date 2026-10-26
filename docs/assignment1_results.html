@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Model results and analysis · G-02 · CO3133</title>
-<meta name="description" content="Model results and analysis">
-<link rel="stylesheet" href="assets/assignment.css?v=2">
+<meta name="description" content="Model results and analysis: five models, five training seeds, error analysis and a matched-parameter ablation on Fashion-MNIST.">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
@@ -17,587 +17,337 @@
 <nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html">Main</a><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav>
 </div>
 <div class="wrap">
-<header><p class="kicker">Assignment 1</p><h1>Model results and analysis</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html" aria-current="page">Results &amp; errors</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/02_results.ipynb">Notebook (.ipynb)</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#1-saved-runs">1. Saved runs</a><a href="#2-validation-comparison">2. Validation comparison</a><a href="#3-held-out-test-results">3. Held-out test results</a><a href="#4-learning-curves">4. Learning curves</a><a href="#5-training-seed-variability">5. Training-seed variability</a><a href="#6-test-confusion-matrices">6. Test confusion matrices</a><a href="#7-inspect-predictions">7. Inspect predictions</a><a href="#8-discussion">8. Discussion</a></nav></header>
-<main id="main"><section><h2 id="1-saved-runs">1. Saved runs</h2><p>Five seed-42 runs share a 54,000/6,000/10,000 training/validation/test split and 16-epoch budget. Validation macro-F1 selects <code>best.pt</code>; <code>checkpoint.pt</code> retains the final epoch. All comparisons below use the selected weights.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>1. Saved runs</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Seed</th>
-<th scope="col">Run folder</th>
-</tr>
-</thead>
+<header><p class="kicker">Assignment 1</p><h1>Model results and analysis</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html" aria-current="page">Results &amp; errors</a><a href="assignment1_analysis.html">Post-results analysis</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/02_results.ipynb">02_results.ipynb</a><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train_budget.py">Ablation script (train_budget.py)</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#model-definitions">1. Models</a><a href="#1-saved-runs">2. Saved runs</a><a href="#2-validation-comparison">3. Validation comparison</a><a href="#3-held-out-test-results">4. Held-out test results</a><a href="#4-learning-curves">5. Learning curves</a><a href="#5-training-seed-variability">6. Training-seed variability</a><a href="#6-test-confusion-matrices">7. Test confusion matrices</a><a href="#7-inspect-predictions">8. Inspect predictions</a><a href="#8-error-analysis">9. Error analysis</a><a href="#9-discussion">10. Results discussion</a><a href="#10-ablation-matched-parameter-budget">11. Ablation</a></nav></header>
+<main id="main">
+<section><h2 id="model-definitions">1. Model definitions</h2><p>All five models receive normalized images <code>[B, 1, 28, 28]</code> and return ten raw logits <code>[B, 10]</code>. Cross-entropy receives the logits directly. Softmax gives class probabilities only after prediction. All models train for 16 epochs, and validation macro-F1 selects <code>best.pt</code>. There is no dropout, weight decay or augmentation. Gradient clipping limits the gradient norm to 5.</p>
+<div aria-label="Model definitions" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Model definitions. Parameter counts come from the saved seed-42 runs.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Input to the model</th><th scope="col">Layers</th><th scope="col">Parameters</th></tr></thead>
 <tbody>
-<tr>
-<td>Linear</td>
-<td>42</td>
-<td>Linear_seed42_20260921_102802_939301</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>42</td>
-<td>MLP_seed42_20260921_102809_962296</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>42</td>
-<td>CNN_seed42_20260921_102822_896256</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>42</td>
-<td>LSTM_seed42_20260921_102029_281098</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>42</td>
-<td>Transformer_seed42_20260921_102142_951597</td>
-</tr>
-</tbody>
-</table></div>
-</div></section><section><h2 id="2-validation-comparison">2. Validation comparison</h2><p>Accuracy and macro-F1 use the same selected checkpoint. The accuracy gap is training minus validation accuracy in percentage points, measured with those fixed weights.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>2. Validation comparison</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Accuracy (0–1)</th>
-<th scope="col">Macro-F1</th>
-<th scope="col">Selected epoch</th>
-<th scope="col">Epochs run</th>
-<th scope="col">Train–val gap (pp)</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>Flattened image, 784 values</td><td><code>Linear(784, 10)</code>. No hidden layer and no nonlinear activation. This is the baseline.</td><td>7,850</td></tr>
+<tr><th scope="row">MLP</th><td>Flattened image, 784 values</td><td><code>784 → 256 → 10</code>, ReLU after the hidden layer. Dense layers do not encode spatial neighborhoods.</td><td>203,530</td></tr>
+<tr><th scope="row">CNN</th><td>Image, <code>1 × 28 × 28</code></td><td>Two padded <code>3 × 3</code> convolutions (16 and 32 channels), each with ReLU and <code>2 × 2</code> max-pooling: <code>16 × 14 × 14 → 32 × 7 × 7</code>. Then <code>1568 → 64 → 10</code>.</td><td>105,866</td></tr>
+<tr><th scope="row">LSTM</th><td>28 rows of 28 pixels, top to bottom</td><td>One unidirectional LSTM layer, hidden size 64. The final hidden state <code>[B, 64]</code> goes to <code>Linear(64, 10)</code>.</td><td>24,714</td></tr>
+<tr><th scope="row">Transformer</th><td>49 patches of <code>4 × 4</code> pixels</td><td>Patch projection <code>16 → 32</code> plus learned positions. Two encoder layers, four heads of eight features, feedforward <code>32 → 64 → 32</code>. Mean of the 49 tokens, then <code>Linear(32, 10)</code>.</td><td>19,530</td></tr>
+</tbody></table></div>
+<p>The full definitions, shapes and code links are on the <a href="assignment1_methods.html#models">Methods page</a>.</p>
+</section>
+
+<section><h2 id="1-saved-runs">2. Saved runs</h2><p>The page uses the latest evaluated run for each model and training seed. Seed 42 is the predefined primary run. The main comparison and the model selection use seed 42. Seeds 43–46 measure training variability only, and they do not change the model selection.</p>
+<p>Each run completes 16 epochs. <code>best.pt</code> keeps the weights with the highest validation macro-F1. <code>checkpoint.pt</code> keeps the final epoch-16 training checkpoint. Evaluation and all predictions on this page use <code>best.pt</code>. We report test results after the selection.</p>
+<div aria-label="Saved runs" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>1. Saved runs: 5 models × 5 training seeds, all trained on 4 October 2026</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Seed</th><th scope="col">Run folder</th></tr></thead>
 <tbody>
-<tr>
-<th scope="row">Linear</th>
-<td>0.8653</td>
-<td>0.8658</td>
-<td>12</td>
-<td>16</td>
-<td>0.2944</td>
-</tr>
-<tr>
-<th scope="row">MLP</th>
-<td>0.9068</td>
-<td>0.9070</td>
-<td>14</td>
-<td>16</td>
-<td>3.9111</td>
-</tr>
-<tr>
-<th scope="row">CNN</th>
-<td>0.9227</td>
-<td>0.9233</td>
-<td>14</td>
-<td>16</td>
-<td>2.9037</td>
-</tr>
-<tr>
-<th scope="row">LSTM</th>
-<td>0.9008</td>
-<td>0.9007</td>
-<td>16</td>
-<td>16</td>
-<td>0.8778</td>
-</tr>
-<tr>
-<th scope="row">Transformer</th>
-<td>0.8837</td>
-<td>0.8830</td>
-<td>16</td>
-<td>16</td>
-<td>0.8241</td>
-</tr>
-</tbody>
-</table></div>
-</div><p>CNN has the highest validation macro-F1, <strong>0.9233</strong>, and is selected at epoch 14. Its validation accuracy is <strong>92.27%</strong>, compared with <strong>90.68%</strong> for MLP and <strong>86.53%</strong> for Linear. The MLP improves validation accuracy by 4.15 percentage points over the linear baseline.</p>
-<p>At the selected weights, the training-minus-validation accuracy gap is 3.91 points for MLP and 2.90 for CNN. LSTM and Transformer have smaller gaps, 0.88 and 0.82 points, but also lower validation scores; a small gap alone does not identify the strongest model. Linear's gap is 0.29 points on this split.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>Model size and measured CPU cost</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Parameters</th>
-<th scope="col">Training (s)</th>
-<th scope="col">Validation ms per image</th>
-<th scope="col">Test ms per image</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>42</td><td>Linear_seed42_20261004_112711_707300</td></tr>
+<tr><th scope="row">Linear</th><td>43</td><td>Linear_seed43_20261004_113159_558288</td></tr>
+<tr><th scope="row">Linear</th><td>44</td><td>Linear_seed44_20261004_113639_845914</td></tr>
+<tr><th scope="row">Linear</th><td>45</td><td>Linear_seed45_20261004_114119_111436</td></tr>
+<tr><th scope="row">Linear</th><td>46</td><td>Linear_seed46_20261004_114549_854057</td></tr>
+<tr><th scope="row">MLP</th><td>42</td><td>MLP_seed42_20261004_112718_608623</td></tr>
+<tr><th scope="row">MLP</th><td>43</td><td>MLP_seed43_20261004_113204_238449</td></tr>
+<tr><th scope="row">MLP</th><td>44</td><td>MLP_seed44_20261004_113644_269789</td></tr>
+<tr><th scope="row">MLP</th><td>45</td><td>MLP_seed45_20261004_114123_603342</td></tr>
+<tr><th scope="row">MLP</th><td>46</td><td>MLP_seed46_20261004_114554_221176</td></tr>
+<tr><th scope="row">CNN</th><td>42</td><td>CNN_seed42_20261004_112729_015620</td></tr>
+<tr><th scope="row">CNN</th><td>43</td><td>CNN_seed43_20261004_113212_161432</td></tr>
+<tr><th scope="row">CNN</th><td>44</td><td>CNN_seed44_20261004_113652_522684</td></tr>
+<tr><th scope="row">CNN</th><td>45</td><td>CNN_seed45_20261004_114131_753001</td></tr>
+<tr><th scope="row">CNN</th><td>46</td><td>CNN_seed46_20261004_114602_169724</td></tr>
+<tr><th scope="row">LSTM</th><td>42</td><td>LSTM_seed42_20261004_112923_087239</td></tr>
+<tr><th scope="row">LSTM</th><td>43</td><td>LSTM_seed43_20261004_113401_995939</td></tr>
+<tr><th scope="row">LSTM</th><td>44</td><td>LSTM_seed44_20261004_113842_321863</td></tr>
+<tr><th scope="row">LSTM</th><td>45</td><td>LSTM_seed45_20261004_114314_531323</td></tr>
+<tr><th scope="row">LSTM</th><td>46</td><td>LSTM_seed46_20261004_114745_165922</td></tr>
+<tr><th scope="row">Transformer</th><td>42</td><td>Transformer_seed42_20261004_113011_320991</td></tr>
+<tr><th scope="row">Transformer</th><td>43</td><td>Transformer_seed43_20261004_113450_196969</td></tr>
+<tr><th scope="row">Transformer</th><td>44</td><td>Transformer_seed44_20261004_113931_387198</td></tr>
+<tr><th scope="row">Transformer</th><td>45</td><td>Transformer_seed45_20261004_114403_210884</td></tr>
+<tr><th scope="row">Transformer</th><td>46</td><td>Transformer_seed46_20261004_114833_528269</td></tr>
+</tbody></table></div>
+<p>There are 25 evaluated runs: five models × five training seeds (42, 43, 44, 45 and 46). All runs share the 54,000/6,000 training/validation split and the official 10,000-image test set. All 25 runs complete 16 epochs. One environment trained all 25 main runs: Python 3.11.16 and PyTorch 2.14.0. The <a href="assignment1_runs.html#seed-runs">Run history</a> lists every run.</p>
+</section>
+
+<section><h2 id="2-validation-comparison">3. Validation comparison</h2><p>Accuracy and macro-F1 use the same selected checkpoint. The accuracy gap is training accuracy minus validation accuracy, in percentage points (pp). The gap uses those fixed weights. All values are for seed 42.</p>
+<div aria-label="Validation comparison" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>2. Validation comparison, seed 42. Accuracy and macro-F1 on a 0–1 scale.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Accuracy</th><th scope="col">Macro-F1</th><th scope="col">Selected epoch</th><th scope="col">Epochs run</th><th scope="col">Train–validation gap (pp)</th></tr></thead>
 <tbody>
-<tr>
-<th scope="row">Linear</th>
-<td>7850</td>
-<td>5.9364</td>
-<td>0.0023</td>
-<td>0.0019</td>
-</tr>
-<tr>
-<th scope="row">MLP</th>
-<td>203530</td>
-<td>11.8839</td>
-<td>0.0028</td>
-<td>0.0024</td>
-</tr>
-<tr>
-<th scope="row">CNN</th>
-<td>105866</td>
-<td>151.3040</td>
-<td>0.0360</td>
-<td>0.0346</td>
-</tr>
-<tr>
-<th scope="row">LSTM</th>
-<td>24714</td>
-<td>70.1982</td>
-<td>0.0379</td>
-<td>0.0372</td>
-</tr>
-<tr>
-<th scope="row">Transformer</th>
-<td>19530</td>
-<td>137.8495</td>
-<td>0.0697</td>
-<td>0.0720</td>
-</tr>
-</tbody>
-</table></div>
-</div><p>Linear is smallest at 7,850 parameters. CNN has 105,866 parameters, about <strong>52% of MLP's 203,530</strong>, but its measured test inference takes <strong>0.0346 ms/image</strong>, versus <strong>0.0024 ms/image</strong> for MLP. Shared convolution weights reduce parameter count without eliminating repeated spatial computation. LSTM and Transformer are smaller still, yet their recurrent and attention operations cost more than MLP inference here.</p>
-<p>Training and inference ran sequentially on CPU with <strong>four PyTorch threads</strong>. Fit times in model order are Linear 5.94 s, MLP 11.88 s, CNN 151.30 s, LSTM 70.20 s and Transformer 137.85 s. Every model completed 16 epochs. Fit time includes validation and checkpoint work as well as parameter updates.</p>
-<p>Inference uses one warm-up pass followed by the median of three complete passes, including batching, forward computation and argmax, excluding metric calculation. These are batched throughput times per image, not single-image request latency. One training seed and one completed fit per model do not establish runtime variability.</p>
-</section><section><h2 id="3-held-out-test-results">3. Held-out test results</h2><p>The official test set evaluates the validation-selected checkpoints.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>3. Held-out test results</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Loss</th>
-<th scope="col">Accuracy (0–1)</th>
-<th scope="col">Macro-F1</th>
-<th scope="col">Inference (ms/image)</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>0.8653</td><td>0.8658</td><td>12</td><td>16</td><td>0.2944</td></tr>
+<tr><th scope="row">MLP</th><td>0.9073</td><td>0.9075</td><td>14</td><td>16</td><td>3.9389</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>0.9233</td><td>0.9237</td><td>13</td><td>16</td><td>2.5944</td></tr>
+<tr><th scope="row">LSTM</th><td>0.8965</td><td>0.8970</td><td>13</td><td>16</td><td>0.5889</td></tr>
+<tr><th scope="row">Transformer</th><td>0.8842</td><td>0.8833</td><td>16</td><td>16</td><td>0.7704</td></tr>
+</tbody></table></div>
+<aside class="idea"><p><strong>Selected by validation macro-F1:</strong> CNN.</p></aside>
+<p>CNN has the highest validation macro-F1, <strong>0.9237</strong>, at the selected epoch 13. Its validation accuracy is <strong>92.33%</strong>. MLP has <strong>90.73%</strong> and Linear has <strong>86.53%</strong>. The MLP increases validation accuracy by 4.20 percentage points over the linear baseline.</p>
+<p>At the selected weights, the training-minus-validation accuracy gap is 3.94 points for MLP and 2.59 points for CNN. LSTM and Transformer have smaller gaps, 0.59 and 0.77 points, but they also have lower validation scores. Thus, a small gap alone does not identify the strongest model. The Linear gap is 0.29 points on this split.</p>
+<div aria-label="Model size and measured CPU cost" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Model size and measured CPU cost, seed 42</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Parameters</th><th scope="col">Fit time (s)</th><th scope="col">Validation (ms/image)</th><th scope="col">Test (ms/image)</th></tr></thead>
 <tbody>
-<tr>
-<th scope="row">Linear</th>
-<td>0.4438</td>
-<td>0.8403</td>
-<td>0.8408</td>
-<td>0.0019</td>
-</tr>
-<tr>
-<th scope="row">MLP</th>
-<td>0.3505</td>
-<td>0.8877</td>
-<td>0.8878</td>
-<td>0.0024</td>
-</tr>
-<tr>
-<th scope="row">CNN</th>
-<td>0.2638</td>
-<td>0.9105</td>
-<td>0.9108</td>
-<td>0.0346</td>
-</tr>
-<tr>
-<th scope="row">LSTM</th>
-<td>0.3274</td>
-<td>0.8821</td>
-<td>0.8819</td>
-<td>0.0372</td>
-</tr>
-<tr>
-<th scope="row">Transformer</th>
-<td>0.3555</td>
-<td>0.8689</td>
-<td>0.8680</td>
-<td>0.0720</td>
-</tr>
-</tbody>
-</table></div>
-</div><p>The validation-selected CNN reaches <strong>91.05% test accuracy</strong> and <strong>0.9108 macro-F1</strong>, below its validation accuracy by 1.22 percentage points. The test accuracies are Linear 84.03%, MLP 88.77%, CNN 91.05%, LSTM 88.21% and Transformer 86.89%.</p>
-<p>MLP improves over Linear by <strong>4.74 percentage points</strong>; CNN adds <strong>2.28 points</strong> over MLP. The validation and test rankings agree in this run. These are results for these implementations and one training seed, not a universal ranking of architecture families.</p>
-</section><section><h2 id="4-learning-curves">4. Learning curves</h2><p>Dashed lines show training metrics during updates; solid lines show validation after each epoch. Vertical lines mark the selected checkpoints.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>4. Learning curves</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Run folder</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>7,850</td><td>5.3304</td><td>0.0013</td><td>0.0012</td></tr>
+<tr><th scope="row">MLP</th><td>203,530</td><td>9.4023</td><td>0.0019</td><td>0.0021</td></tr>
+<tr><th scope="row">CNN</th><td>105,866</td><td>111.5600</td><td>0.0276</td><td>0.0268</td></tr>
+<tr><th scope="row">LSTM</th><td>24,714</td><td>46.2154</td><td>0.0244</td><td>0.0223</td></tr>
+<tr><th scope="row">Transformer</th><td>19,530</td><td>103.2867</td><td>0.0553</td><td>0.0550</td></tr>
+</tbody></table></div>
+<p>Linear is the smallest model, with 7,850 parameters. CNN has 105,866 parameters, approximately <strong>52% of the 203,530 MLP parameters</strong>. But CNN test inference takes <strong>0.0268 ms/image</strong>, and MLP takes <strong>0.0021 ms/image</strong>. Shared convolution weights decrease the parameter count, but the spatial computation repeats at each image location. LSTM and Transformer are smaller again, but their recurrent and attention operations cost more than MLP inference here.</p>
+<p>Training and inference ran in sequence on CPU with <strong>four PyTorch threads</strong>. For seed 42, the fit times are Linear 5.33 s, MLP 9.40 s, CNN 111.56 s, LSTM 46.22 s and Transformer 103.29 s. Each model completed 16 epochs. Fit time includes validation and checkpoint work in addition to the parameter updates.</p>
+<p>Inference uses one warm-up pass, then the median of three complete passes. A pass includes batching, forward computation and argmax. It does not include the metric calculation. These values are batched throughput times per image, not single-image request latency. <a href="#5-training-seed-variability">Section 6</a> gives the mean fit times over five seeds. All timings come from one machine, so compare them only within this session.</p>
+</section>
+
+<section><h2 id="3-held-out-test-results">4. Held-out test results</h2><p>The official test set evaluates each checkpoint that validation selected before. The validation-selected model stays fixed when we read the test results.</p>
+<div aria-label="Held-out test results" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>3. Held-out test results, seed 42. Accuracy and macro-F1 on a 0–1 scale.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Loss</th><th scope="col">Accuracy</th><th scope="col">Macro-F1</th><th scope="col">Inference (ms/image)</th></tr></thead>
 <tbody>
-<tr>
-<td>Linear</td>
-<td>Linear_seed42_20260921_102802_939301</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>MLP_seed42_20260921_102809_962296</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>CNN_seed42_20260921_102822_896256</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>LSTM_seed42_20260921_102029_281098</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>Transformer_seed42_20260921_102142_951597</td>
-</tr>
-</tbody>
-</table></div>
-</div><figure id="linear-curves"><a aria-label="Open full-size figure: Linear — Learning curves" href="assets/assignment1_results/figure-16-00.png"><img alt="Linear — Learning curves; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-16-00.png"/></a><figcaption>Linear — Learning curves.</figcaption></figure><figure id="mlp-curves"><a aria-label="Open full-size figure: MLP — Learning curves" href="assets/assignment1_results/figure-16-01.png"><img alt="MLP — Learning curves; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-16-01.png"/></a><figcaption>MLP — Learning curves.</figcaption></figure><figure id="cnn-curves"><a aria-label="Open full-size figure: CNN — Learning curves" href="assets/assignment1_results/figure-16-02.png"><img alt="CNN — Learning curves; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-16-02.png"/></a><figcaption>CNN — Learning curves.</figcaption></figure><figure id="lstm-curves"><a aria-label="Open full-size figure: LSTM — Learning curves" href="assets/assignment1_results/figure-16-03.png"><img alt="LSTM — Learning curves; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-16-03.png"/></a><figcaption>LSTM — Learning curves.</figcaption></figure><figure id="transformer-curves"><a aria-label="Open full-size figure: Transformer — Learning curves" href="assets/assignment1_results/figure-16-04.png"><img alt="Transformer — Learning curves; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-16-04.png"/></a><figcaption>Transformer — Learning curves.</figcaption></figure><p>All models complete 16 epochs. Linear selects epoch 12: validation macro-F1 is 0.8658 there and 0.8577 at epoch 16, while validation loss rises from 0.3886 to 0.4003. MLP selects epoch 14; its training loss continues falling while validation loss rises from 0.2845 to 0.2897 by epoch 16. The later weights are not necessarily the better generalizing weights.</p>
-<p>CNN also selects epoch 14 even though epoch 16 has slightly lower validation loss and higher accuracy: its macro-F1 falls from 0.9233 to 0.9219. LSTM and Transformer select epoch 16. For Linear, MLP and CNN, <code>best.pt</code> and the final <code>checkpoint.pt</code> therefore contain weights from different epochs. Evaluation uses the former. Dashed training curves are collected during updates and differ from the fixed-checkpoint training metrics above.</p>
-<h3 id="4-1-validation-images">4.1 Validation images</h3><p>The table counts correct predictions across all 6,000 validation images. The gallery shows the first 16 for CNN: green titles mark correct predictions, red titles mark errors. IDs refer to the original training file.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>4.1 Validation images</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">Correct</th>
-<th scope="col">Total</th>
-<th scope="col">Accuracy (0–1)</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>0.4438</td><td>0.8403</td><td>0.8408</td><td>0.0012</td></tr>
+<tr><th scope="row">MLP</th><td>0.3463</td><td>0.8897</td><td>0.8899</td><td>0.0021</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>0.2621</td><td>0.9084</td><td>0.9088</td><td>0.0268</td></tr>
+<tr><th scope="row">LSTM</th><td>0.3384</td><td>0.8776</td><td>0.8781</td><td>0.0223</td></tr>
+<tr><th scope="row">Transformer</th><td>0.3571</td><td>0.8688</td><td>0.8673</td><td>0.0550</td></tr>
+</tbody></table></div>
+<p>The validation-selected CNN gets <strong>90.84% test accuracy</strong> and <strong>0.9088 macro-F1</strong>. This test accuracy is 1.49 percentage points below its validation accuracy. The test accuracies are Linear 84.03%, MLP 88.97%, CNN 90.84%, LSTM 87.76% and Transformer 86.88%.</p>
+<p>MLP is <strong>4.94 percentage points</strong> better than Linear, and CNN adds <strong>1.87 points</strong> over MLP. The validation ranking and the test ranking agree in this run. <a href="#5-training-seed-variability">Section 6</a> shows the same ranking for all five seeds. These results apply to these implementations. They are not a universal ranking of architecture families.</p>
+</section>
+
+<section><h2 id="4-learning-curves">5. Learning curves</h2><p>This section uses the seed-42 run of each model. Each run saves <code>learning_curves.png</code> with loss, accuracy and macro-F1 for each epoch. Dashed lines show training metrics that the run collects during the updates. Solid lines show validation after each epoch. The vertical line marks the selected checkpoint.</p>
+<div aria-label="Learning-curve runs" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Seed-42 runs used for the learning curves and validation images</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Run folder</th></tr></thead>
 <tbody>
-<tr>
-<th scope="row">Linear</th>
-<td>5192</td>
-<td>6000</td>
-<td>0.8653</td>
-</tr>
-<tr>
-<th scope="row">MLP</th>
-<td>5441</td>
-<td>6000</td>
-<td>0.9068</td>
-</tr>
-<tr>
-<th scope="row">CNN</th>
-<td>5536</td>
-<td>6000</td>
-<td>0.9227</td>
-</tr>
-<tr>
-<th scope="row">LSTM</th>
-<td>5405</td>
-<td>6000</td>
-<td>0.9008</td>
-</tr>
-<tr>
-<th scope="row">Transformer</th>
-<td>5302</td>
-<td>6000</td>
-<td>0.8837</td>
-</tr>
-</tbody>
-</table></div>
-</div><figure><a aria-label="Open full-size figure: 4.1 Validation images" href="assets/assignment1_results/figure-20-00.png"><img alt="4.1 Validation images; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-20-00.png"/></a><figcaption>4.1 Validation images.</figcaption></figure><p>The displayed CNN page contains 15 correct predictions out of 16. Ankle boot #23942 is predicted as Sneaker with 86.1% confidence, illustrating a confident footwear error even on this mostly correct page. File order determines the examples shown; the table above uses all 6,000 predictions per model and gives CNN 5,536 correct (92.27%).</p>
-</section><section><h2 id="5-training-seed-variability">5. Training-seed variability</h2><p>Each model has one evaluated training seed. These runs do not establish training-seed variability or statistical significance.</p>
-</section><section><h2 id="6-test-confusion-matrices">6. Test confusion matrices</h2><p>Rows are true classes; columns are predictions. Cell counts show how often each decision occurs. Compare clothing confusions with the visual similarities observed in EDA.</p>
-<figure id="linear-confusion"><a aria-label="Open full-size figure: Linear — Test confusion matrices" href="assets/assignment1_results/figure-27-00.png"><img alt="Linear — Test confusion matrices; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-27-00.png"/></a><figcaption>Linear — Test confusion matrices.</figcaption></figure><figure id="mlp-confusion"><a aria-label="Open full-size figure: MLP — Test confusion matrices" href="assets/assignment1_results/figure-27-01.png"><img alt="MLP — Test confusion matrices; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-27-01.png"/></a><figcaption>MLP — Test confusion matrices.</figcaption></figure><figure id="cnn-confusion"><a aria-label="Open full-size figure: CNN — Test confusion matrices" href="assets/assignment1_results/figure-27-02.png"><img alt="CNN — Test confusion matrices; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-27-02.png"/></a><figcaption>CNN — Test confusion matrices.</figcaption></figure><figure id="lstm-confusion"><a aria-label="Open full-size figure: LSTM — Test confusion matrices" href="assets/assignment1_results/figure-27-03.png"><img alt="LSTM — Test confusion matrices; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-27-03.png"/></a><figcaption>LSTM — Test confusion matrices.</figcaption></figure><figure id="transformer-confusion"><a aria-label="Open full-size figure: Transformer — Test confusion matrices" href="assets/assignment1_results/figure-27-04.png"><img alt="Transformer — Test confusion matrices; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-27-04.png"/></a><figcaption>Transformer — Test confusion matrices.</figcaption></figure><p>All five models make substantial mistakes among T-shirt/top, Shirt, Pullover and Coat. This supports the EDA hypothesis that similar upper-body silhouettes create ambiguity. CNN reduces Pullover → Coat errors from Linear's 130 to 53, but its largest error is T-shirt/top → Shirt, with 165 cases. Better overall performance does not improve every class pair: MLP makes 135 errors in that direction.</p>
-<p>Each true class contains 1,000 test images, so the displayed counts also convert directly to within-class percentages by dividing by ten. Shirt can attract many false positives even when true shirts are recognized correctly.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>Per-class test F1</caption>
-<thead>
-<tr>
-<th scope="col">Class / model</th>
-<th scope="col">Linear</th>
-<th scope="col">Mlp</th>
-<th scope="col">Cnn</th>
-<th scope="col">Lstm</th>
-<th scope="col">Transformer</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>Linear_seed42_20261004_112711_707300</td></tr>
+<tr><th scope="row">MLP</th><td>MLP_seed42_20261004_112718_608623</td></tr>
+<tr><th scope="row">CNN</th><td>CNN_seed42_20261004_112729_015620</td></tr>
+<tr><th scope="row">LSTM</th><td>LSTM_seed42_20261004_112923_087239</td></tr>
+<tr><th scope="row">Transformer</th><td>Transformer_seed42_20261004_113011_320991</td></tr>
+</tbody></table></div>
+<figure id="linear-curves"><a aria-label="Open full-size figure: Linear learning curves, seed 42" href="assets/assignment1_results/linear_learning_curves.png"><img alt="Linear learning curves for seed 42: loss, accuracy and macro-F1 against epochs 1 to 16, with the selected epoch 12 marked." loading="lazy" src="assets/assignment1_results/linear_learning_curves.png"></a><figcaption>Selected epoch 12.</figcaption></figure>
+<figure id="mlp-curves"><a aria-label="Open full-size figure: MLP learning curves, seed 42" href="assets/assignment1_results/mlp_learning_curves.png"><img alt="MLP learning curves for seed 42: loss, accuracy and macro-F1 against epochs 1 to 16, with the selected epoch 14 marked." loading="lazy" src="assets/assignment1_results/mlp_learning_curves.png"></a><figcaption>Selected epoch 14.</figcaption></figure>
+<figure id="cnn-curves"><a aria-label="Open full-size figure: CNN learning curves, seed 42" href="assets/assignment1_results/cnn_learning_curves.png"><img alt="CNN learning curves for seed 42: loss, accuracy and macro-F1 against epochs 1 to 16, with the selected epoch 13 marked." loading="lazy" src="assets/assignment1_results/cnn_learning_curves.png"></a><figcaption>Selected epoch 13.</figcaption></figure>
+<figure id="lstm-curves"><a aria-label="Open full-size figure: LSTM learning curves, seed 42" href="assets/assignment1_results/lstm_learning_curves.png"><img alt="LSTM learning curves for seed 42: loss, accuracy and macro-F1 against epochs 1 to 16, with the selected epoch 13 marked." loading="lazy" src="assets/assignment1_results/lstm_learning_curves.png"></a><figcaption>Selected epoch 13.</figcaption></figure>
+<figure id="transformer-curves"><a aria-label="Open full-size figure: Transformer learning curves, seed 42" href="assets/assignment1_results/transformer_learning_curves.png"><img alt="Transformer learning curves for seed 42: loss, accuracy and macro-F1 against epochs 1 to 16, with the selected epoch 16 marked." loading="lazy" src="assets/assignment1_results/transformer_learning_curves.png"></a><figcaption>Selected epoch 16, the final epoch.</figcaption></figure>
+<div aria-label="Selected epoch and final epoch" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Validation loss and macro-F1 at the selected epoch and at epoch 16, seed 42 (from <code>history.csv</code>)</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Selected epoch</th><th scope="col">Loss, selected</th><th scope="col">Loss, epoch 16</th><th scope="col">Macro-F1, selected</th><th scope="col">Macro-F1, epoch 16</th></tr></thead>
 <tbody>
-<tr>
-<th scope="row">T-shirt/top</th>
-<td>0.797</td>
-<td>0.832</td>
-<td>0.836</td>
-<td>0.815</td>
-<td>0.803</td>
-</tr>
-<tr>
-<th scope="row">Trouser</th>
-<td>0.967</td>
-<td>0.982</td>
-<td>0.987</td>
-<td>0.977</td>
-<td>0.977</td>
-</tr>
-<tr>
-<th scope="row">Pullover</th>
-<td>0.731</td>
-<td>0.811</td>
-<td>0.869</td>
-<td>0.815</td>
-<td>0.782</td>
-</tr>
-<tr>
-<th scope="row">Dress</th>
-<td>0.851</td>
-<td>0.900</td>
-<td>0.910</td>
-<td>0.883</td>
-<td>0.876</td>
-</tr>
-<tr>
-<th scope="row">Coat</th>
-<td>0.746</td>
-<td>0.806</td>
-<td>0.870</td>
-<td>0.812</td>
-<td>0.778</td>
-</tr>
-<tr>
-<th scope="row">Sandal</th>
-<td>0.928</td>
-<td>0.960</td>
-<td>0.976</td>
-<td>0.965</td>
-<td>0.966</td>
-</tr>
-<tr>
-<th scope="row">Shirt</th>
-<td>0.589</td>
-<td>0.710</td>
-<td>0.756</td>
-<td>0.670</td>
-<td>0.650</td>
-</tr>
-<tr>
-<th scope="row">Sneaker</th>
-<td>0.919</td>
-<td>0.950</td>
-<td>0.955</td>
-<td>0.951</td>
-<td>0.941</td>
-</tr>
-<tr>
-<th scope="row">Bag</th>
-<td>0.937</td>
-<td>0.965</td>
-<td>0.980</td>
-<td>0.969</td>
-<td>0.954</td>
-</tr>
-<tr>
-<th scope="row">Ankle boot</th>
-<td>0.941</td>
-<td>0.963</td>
-<td>0.969</td>
-<td>0.962</td>
-<td>0.953</td>
-</tr>
-</tbody>
-</table></div>
-</div><figure><a aria-label="Open full-size figure: Per-class test F1" href="assets/assignment1_results/figure-29-01.png"><img alt="Per-class test F1; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-29-01.png"/></a><figcaption>Per-class test F1.</figcaption></figure><p>Shirt is the weakest class for every model: F1 ranges from <strong>0.589</strong> for Linear to <strong>0.756</strong> for CNN. CNN's Trouser F1 is <strong>0.987</strong> and Bag F1 is <strong>0.980</strong>, showing how much the difficulty varies despite equal class counts. CNN improves Shirt F1 over MLP's 0.710, but substantial overlap among upper-body garments remains. Macro-F1 retains that weak class's contribution instead of reporting only the overall success rate.</p>
-<div>
-<div aria-label="Report data table" class="table-scroll" role="region" tabindex="0"><table><caption>Five most frequent directional test errors per model</caption>
-<thead>
-<tr>
-<th scope="col">Model</th>
-<th scope="col">True</th>
-<th scope="col">Predicted</th>
-<th scope="col">Count</th>
-<th scope="col">Class error rate</th>
-</tr>
-</thead>
+<tr><th scope="row">Linear</th><td>12</td><td>0.3886</td><td>0.4003</td><td>0.8658</td><td>0.8577</td></tr>
+<tr><th scope="row">MLP</th><td>14</td><td>0.2870</td><td>0.2942</td><td>0.9075</td><td>0.9023</td></tr>
+<tr><th scope="row">CNN</th><td>13</td><td>0.2210</td><td>0.2284</td><td>0.9237</td><td>0.9210</td></tr>
+<tr><th scope="row">LSTM</th><td>13</td><td>0.3001</td><td>0.2942</td><td>0.8970</td><td>0.8963</td></tr>
+<tr><th scope="row">Transformer</th><td>16</td><td>0.3158</td><td>0.3158</td><td>0.8833</td><td>0.8833</td></tr>
+</tbody></table></div>
+<p>All models complete 16 epochs. Linear selects epoch 12. Its validation macro-F1 is 0.8658 at epoch 12 and 0.8577 at epoch 16, and its validation loss increases from 0.3886 to 0.4003. MLP selects epoch 14. Its training loss continues to decrease, but its validation loss increases from 0.2870 to 0.2942 by epoch 16. Thus, the later weights do not always generalize better.</p>
+<p>CNN selects epoch 13. By epoch 16, its validation loss increases from 0.2210 to 0.2284, and its macro-F1 decreases from 0.9237 to 0.9210. LSTM gets 0.8970 at epoch 13 and at epoch 15, and the earliest-tie rule keeps epoch 13. Transformer selects epoch 16, the final epoch of the fixed schedule. Thus, its optimization possibly did not converge. Read its score as a result of the 16-epoch setting, not as the maximum that the architecture can get.</p>
+<p>For Linear, MLP, CNN and LSTM, <code>best.pt</code> and the final <code>checkpoint.pt</code> contain weights from different epochs. Evaluation uses <code>best.pt</code>. The dashed training curves come from the updates, so they are different from the fixed-checkpoint training metrics in <a href="#2-validation-comparison">Section 3</a>.</p>
+
+<h3 id="4-1-validation-images">5.1 Validation images</h3><p>Each saved validation file contains all 6,000 raw images with their original training-file IDs, labels, predictions and probabilities. The table counts the correct predictions at the selected checkpoint of each model. The gallery shows the first 16 validation images for CNN, the validation-selected model. Green titles are correct predictions. Red titles are incorrect predictions.</p>
+<div aria-label="Validation images" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>4.1 Correct validation predictions at the selected checkpoint, seed 42. Accuracy on a 0–1 scale.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Correct</th><th scope="col">Total</th><th scope="col">Accuracy</th></tr></thead>
 <tbody>
-<tr>
-<td>Linear</td>
-<td>T-shirt/top</td>
-<td>Shirt</td>
-<td>147</td>
-<td>0.147</td>
-</tr>
-<tr>
-<td>Linear</td>
-<td>Pullover</td>
-<td>Coat</td>
-<td>130</td>
-<td>0.130</td>
-</tr>
-<tr>
-<td>Linear</td>
-<td>Shirt</td>
-<td>T-shirt/top</td>
-<td>121</td>
-<td>0.121</td>
-</tr>
-<tr>
-<td>Linear</td>
-<td>Shirt</td>
-<td>Pullover</td>
-<td>119</td>
-<td>0.119</td>
-</tr>
-<tr>
-<td>Linear</td>
-<td>Shirt</td>
-<td>Coat</td>
-<td>114</td>
-<td>0.114</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>T-shirt/top</td>
-<td>Shirt</td>
-<td>135</td>
-<td>0.135</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>Shirt</td>
-<td>T-shirt/top</td>
-<td>97</td>
-<td>0.097</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>Coat</td>
-<td>Pullover</td>
-<td>90</td>
-<td>0.090</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>Pullover</td>
-<td>Coat</td>
-<td>80</td>
-<td>0.080</td>
-</tr>
-<tr>
-<td>MLP</td>
-<td>Shirt</td>
-<td>Pullover</td>
-<td>78</td>
-<td>0.078</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>T-shirt/top</td>
-<td>Shirt</td>
-<td>165</td>
-<td>0.165</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>Pullover</td>
-<td>Shirt</td>
-<td>71</td>
-<td>0.071</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>Shirt</td>
-<td>T-shirt/top</td>
-<td>55</td>
-<td>0.055</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>Coat</td>
-<td>Shirt</td>
-<td>54</td>
-<td>0.054</td>
-</tr>
-<tr>
-<td>CNN</td>
-<td>Pullover</td>
-<td>Coat</td>
-<td>53</td>
-<td>0.053</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>T-shirt/top</td>
-<td>Shirt</td>
-<td>152</td>
-<td>0.152</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>Shirt</td>
-<td>Coat</td>
-<td>116</td>
-<td>0.116</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>Shirt</td>
-<td>T-shirt/top</td>
-<td>106</td>
-<td>0.106</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>Pullover</td>
-<td>Coat</td>
-<td>99</td>
-<td>0.099</td>
-</tr>
-<tr>
-<td>LSTM</td>
-<td>Pullover</td>
-<td>Shirt</td>
-<td>72</td>
-<td>0.072</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>T-shirt/top</td>
-<td>Shirt</td>
-<td>159</td>
-<td>0.159</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>Coat</td>
-<td>Pullover</td>
-<td>146</td>
-<td>0.146</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>Shirt</td>
-<td>Pullover</td>
-<td>110</td>
-<td>0.110</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>Shirt</td>
-<td>T-shirt/top</td>
-<td>100</td>
-<td>0.100</td>
-</tr>
-<tr>
-<td>Transformer</td>
-<td>Shirt</td>
-<td>Coat</td>
-<td>94</td>
-<td>0.094</td>
-</tr>
-</tbody>
-</table></div>
-</div><p>CNN's five most frequent directional errors are T-shirt/top → Shirt (165; 16.5% of true T-shirts), Pullover → Shirt (71), Shirt → T-shirt/top (55), Coat → Shirt (54) and Pullover → Coat (53). Four of these five involve Shirt. The reverse Shirt → T-shirt/top direction is much less frequent than T-shirt/top → Shirt, so treating the pair as a symmetric error would hide useful information.</p>
-</section><section><h2 id="7-inspect-predictions">7. Inspect predictions</h2><p>For each model, show four correct predictions in test-file order, four lowest-confidence correct predictions, and four incorrect predictions in test-file order. Confidence is the largest softmax probability; it is not a calibrated guarantee. IDs refer to the official test image file.</p>
-<figure id="linear-examples"><a aria-label="Open full-size figure: Linear — Inspect predictions" href="assets/assignment1_results/figure-35-00.png"><img alt="Linear — Inspect predictions; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-35-00.png"/></a><figcaption>Linear — Inspect predictions.</figcaption></figure><figure id="mlp-examples"><a aria-label="Open full-size figure: MLP — Inspect predictions" href="assets/assignment1_results/figure-35-01.png"><img alt="MLP — Inspect predictions; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-35-01.png"/></a><figcaption>MLP — Inspect predictions.</figcaption></figure><figure id="cnn-examples"><a aria-label="Open full-size figure: CNN — Inspect predictions" href="assets/assignment1_results/figure-35-02.png"><img alt="CNN — Inspect predictions; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-35-02.png"/></a><figcaption>CNN — Inspect predictions.</figcaption></figure><figure id="lstm-examples"><a aria-label="Open full-size figure: LSTM — Inspect predictions" href="assets/assignment1_results/figure-35-03.png"><img alt="LSTM — Inspect predictions; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-35-03.png"/></a><figcaption>LSTM — Inspect predictions.</figcaption></figure><figure id="transformer-examples"><a aria-label="Open full-size figure: Transformer — Inspect predictions" href="assets/assignment1_results/figure-35-04.png"><img alt="Transformer — Inspect predictions; saved experiment output." loading="lazy" src="assets/assignment1_results/figure-35-04.png"/></a><figcaption>Transformer — Inspect predictions.</figcaption></figure><p>CNN correctly recognizes the first boot, printed pullover and two trousers, whose broad silhouettes are visible. Its low-confidence correct cases include Shirt #3829 at 30.2% and Dress #6676 at 33.5%; the pictured garments have unusual or indistinct outlines. They show that a correct class can win with low confidence.</p>
-<p>CNN misclassifies Sneaker #12 as Sandal at 95.7% and Ankle boot #23 as Sandal at 99.9%. The latter image has a heel and large dark opening, giving it features that resemble a sandal despite its supplied label. Transformer makes the same two footwear mistakes, at 89.5% and 98.6%. CNN also labels dark Coat #25 as Pullover and sleeveless T-shirt #27 as Shirt. These examples illustrate visual ambiguity without establishing that the dataset labels are wrong.</p>
-<p>Transformer's lowest-confidence correct example is the same asymmetric Shirt #3829, at 21.4%. Its difficult group also contains Coat #1462 at 27.1%, a short garment with a front opening, and two other shirts. All four are upper-body garments with features shared across categories. Softmax confidence can be high on mistakes and low on correct decisions. The first four errors are a deterministic inspection sample, not a representative estimate of the overall error distribution.</p>
-</section><section><h2 id="8-discussion">8. Discussion</h2><p>The 256-unit MLP adds nonlinear features to the flattened 784-pixel representation and improves test accuracy from <strong>84.03% to 88.77%</strong> over Linear. Both lose explicit two-dimensional neighborhood structure, but the MLP can combine pixels nonlinearly. The models also differ in parameter count and computation, so the comparison does not isolate nonlinearity as the sole cause of the gain.</p>
-<p><strong>CNN is the validation-selected candidate.</strong> Its local 3 × 3 filters and pooling exploit spatial structure, reaching <strong>91.05% test accuracy</strong> and <strong>0.9108 macro-F1</strong>. Against MLP it gains 2.28 accuracy points with roughly half as many parameters, at about 14 times the measured batched CPU inference time per image. CNN is the stronger accuracy choice here; MLP offers a useful inference-cost trade-off. The sequential fit takes 151.30 s for CNN versus 11.88 s for MLP over the same 16-epoch budget; inference and training costs should be assessed separately.</p>
-<p>LSTM reads 28 image rows sequentially and summarizes them in a final hidden state. It reaches <strong>88.21%</strong> test accuracy with 24,714 parameters, but is slower at inference than MLP and reaches its best validation result only at the 16-epoch limit. Transformer attends over 49 patches of 4 × 4 pixels with learned positions, reaching <strong>86.89%</strong> with 19,530 parameters. These compact sequence models have different spatial assumptions and optimization needs; their current scores do not show that sequence models cannot learn images or that more training must improve them.</p>
-<p>The persistent limitation is upper-body clothing ambiguity. Shirt remains CNN's weakest class, and <strong>165 true T-shirts are predicted as shirts</strong>. The inspected footwear mistakes also show that high softmax confidence does not guarantee a correct label. This links the result analysis back to EDA's overlapping silhouettes while keeping descriptive image similarity separate from measured classification errors.</p>
-<p>First repeat the unchanged setup with additional seeds. Then use training and validation to test a longer LSTM training budget and modest image shifts or weight decay for the nonlinear models. These are proposed experiments, not measured improvements; their settings should not be chosen from test performance. The current comparison uses one split, one training seed and a fixed 16-epoch budget, with no architecture-specific tuning.</p>
-</section></main>
-<nav class="page-turn" aria-label="Report reading order"><a href="assignment1_methods.html"><small>Previous</small>Methods &amp; reproduction</a><a href="assignment1_runs.html"><small>Next</small>Run history</a></nav>
+<tr><th scope="row">Linear</th><td>5,192</td><td>6,000</td><td>0.8653</td></tr>
+<tr><th scope="row">MLP</th><td>5,444</td><td>6,000</td><td>0.9073</td></tr>
+<tr><th scope="row">CNN</th><td>5,540</td><td>6,000</td><td>0.9233</td></tr>
+<tr><th scope="row">LSTM</th><td>5,379</td><td>6,000</td><td>0.8965</td></tr>
+<tr><th scope="row">Transformer</th><td>5,305</td><td>6,000</td><td>0.8842</td></tr>
+</tbody></table></div>
+<figure id="cnn-validation-images"><a aria-label="Open full-size figure: CNN validation images 1 to 16" href="assets/assignment1_results/cnn_validation_images.png"><img alt="Grid of the first 16 CNN validation images with ID, true class, predicted class and confidence. Fifteen titles are green; Ankle boot ID 23942, predicted as Sneaker, is red." loading="lazy" src="assets/assignment1_results/cnn_validation_images.png"></a><figcaption>Seed 42. Green: correct. Red: incorrect.</figcaption></figure>
+<p>The CNN page shows 15 correct predictions out of 16. CNN predicts Ankle boot #23942 as Sneaker with 95.8% confidence. This is a confident footwear error on a page that is almost all correct. The file order sets which examples show. The table uses all 6,000 predictions of each model, and CNN gets 5,540 correct (92.33%).</p>
+</section>
+
+<section><h2 id="5-training-seed-variability">6. Training-seed variability</h2><p>Each model has the latest completed run for seeds 42–46 on the shared data split. The sample standard deviation (SD) needs a minimum of two different seeds. The SD measures training variability on this split. It does not measure uncertainty across datasets.</p>
+<div aria-label="Validation scores per seed" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Validation accuracy and macro-F1 for each training seed, 0–1 scale</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Metric</th><th scope="col">Seed 42</th><th scope="col">Seed 43</th><th scope="col">Seed 44</th><th scope="col">Seed 45</th><th scope="col">Seed 46</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>Accuracy</td><td>0.8653</td><td>0.8652</td><td>0.8647</td><td>0.8660</td><td>0.8645</td></tr>
+<tr><th scope="row">Linear</th><td>Macro-F1</td><td>0.8658</td><td>0.8658</td><td>0.8645</td><td>0.8650</td><td>0.8644</td></tr>
+<tr><th scope="row">MLP</th><td>Accuracy</td><td>0.9073</td><td>0.9037</td><td>0.9048</td><td>0.9053</td><td>0.9060</td></tr>
+<tr><th scope="row">MLP</th><td>Macro-F1</td><td>0.9075</td><td>0.9034</td><td>0.9042</td><td>0.9051</td><td>0.9065</td></tr>
+<tr><th scope="row">CNN</th><td>Accuracy</td><td>0.9233</td><td>0.9272</td><td>0.9238</td><td>0.9247</td><td>0.9287</td></tr>
+<tr><th scope="row">CNN</th><td>Macro-F1</td><td>0.9237</td><td>0.9270</td><td>0.9240</td><td>0.9249</td><td>0.9286</td></tr>
+<tr><th scope="row">LSTM</th><td>Accuracy</td><td>0.8965</td><td>0.8997</td><td>0.8995</td><td>0.8967</td><td>0.8980</td></tr>
+<tr><th scope="row">LSTM</th><td>Macro-F1</td><td>0.8970</td><td>0.8991</td><td>0.8994</td><td>0.8970</td><td>0.8977</td></tr>
+<tr><th scope="row">Transformer</th><td>Accuracy</td><td>0.8842</td><td>0.8892</td><td>0.8862</td><td>0.8870</td><td>0.8808</td></tr>
+<tr><th scope="row">Transformer</th><td>Macro-F1</td><td>0.8833</td><td>0.8877</td><td>0.8864</td><td>0.8869</td><td>0.8796</td></tr>
+</tbody></table></div>
+<div aria-label="Validation summary over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Validation summary over five seeds, 0–1 scale</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Runs</th><th scope="col">Accuracy mean</th><th scope="col">Accuracy SD</th><th scope="col">Macro-F1 mean</th><th scope="col">Macro-F1 SD</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>5</td><td>0.8651</td><td>0.0006</td><td>0.8651</td><td>0.0007</td></tr>
+<tr><th scope="row">MLP</th><td>5</td><td>0.9054</td><td>0.0014</td><td>0.9054</td><td>0.0017</td></tr>
+<tr><th scope="row">CNN</th><td>5</td><td>0.9255</td><td>0.0023</td><td>0.9256</td><td>0.0021</td></tr>
+<tr><th scope="row">LSTM</th><td>5</td><td>0.8981</td><td>0.0015</td><td>0.8980</td><td>0.0011</td></tr>
+<tr><th scope="row">Transformer</th><td>5</td><td>0.8855</td><td>0.0031</td><td>0.8848</td><td>0.0033</td></tr>
+</tbody></table></div>
+<div aria-label="Test summary over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test summary over seeds 42–46. Accuracy and macro-F1 in %, as mean ± SD over the five seeds. Fit time in s.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Runs</th><th scope="col">Accuracy (%), mean ± SD</th><th scope="col">Macro-F1 (%), mean ± SD</th><th scope="col">Mean fit time (s)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>5</td><td>84.17 ± 0.08</td><td>84.15 ± 0.11</td><td>4.15</td></tr>
+<tr><th scope="row">MLP</th><td>5</td><td>88.77 ± 0.26</td><td>88.77 ± 0.23</td><td>7.77</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>5</td><td>91.26 ± 0.28</td><td>91.27 ± 0.27</td><td>105.36</td></tr>
+<tr><th scope="row">LSTM</th><td>5</td><td>88.11 ± 0.25</td><td>88.10 ± 0.21</td><td>46.37</td></tr>
+<tr><th scope="row">Transformer</th><td>5</td><td>87.15 ± 0.39</td><td>87.06 ± 0.36</td><td>102.85</td></tr>
+</tbody></table></div>
+<div aria-label="Paired test macro-F1 differences" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Paired test macro-F1 differences by seed, in percentage points (A − B)</caption>
+<thead><tr><th scope="col">Comparison</th><th scope="col">Seeds</th><th scope="col">Mean difference (pp)</th><th scope="col">Minimum (pp)</th><th scope="col">Maximum (pp)</th><th scope="col">A better</th></tr></thead>
+<tbody>
+<tr><th scope="row">MLP − Linear</th><td>5</td><td>4.62</td><td>4.31</td><td>4.92</td><td>5/5</td></tr>
+<tr><th scope="row">CNN − MLP</th><td>5</td><td>2.50</td><td>1.89</td><td>2.86</td><td>5/5</td></tr>
+<tr><th scope="row">LSTM − MLP</th><td>5</td><td>−0.66</td><td>−1.18</td><td>−0.14</td><td>0/5</td></tr>
+<tr><th scope="row">CNN − LSTM</th><td>5</td><td>3.16</td><td>3.01</td><td>3.36</td><td>5/5</td></tr>
+<tr><th scope="row">LSTM − Transformer</th><td>5</td><td>1.04</td><td>0.48</td><td>1.57</td><td>5/5</td></tr>
+</tbody></table></div>
+<p>Each model has five evaluated training seeds (42–46). Validation macro-F1 changes little within a model. Its SD is between 0.07 percentage points (Linear) and 0.33 percentage points (Transformer). Test macro-F1 (mean ± SD, %) is Linear 84.15 ± 0.11, MLP 88.77 ± 0.23, CNN 91.27 ± 0.27, LSTM 88.10 ± 0.21 and Transformer 87.06 ± 0.36.</p>
+<p>When we pair the runs by seed, CNN is better than MLP by 2.50 points on average (range 1.89 to 2.86), in 5/5 seeds. MLP is better than Linear by 4.62 points, in 5/5 seeds. LSTM is below MLP in each seed (0.66 points on average) and above Transformer in each seed (1.04 points on average). Thus, the ranking CNN &gt; MLP &gt; LSTM &gt; Transformer &gt; Linear is the same for all five seeds. This result measures training variability on one split. We do not use five seeds to claim statistical significance.</p>
+</section>
+
+<section><h2 id="6-test-confusion-matrices">7. Test confusion matrices</h2><p>Rows are the true classes, and columns are the predictions. Each cell gives the number of test images for that decision. Each model predicts all 10,000 test images (seed 42). Each row has 1,000 images. Compare the clothing confusions with the visual similarities in the <a href="assignment1_eda.html">data exploration</a>.</p>
+<div class="figure-grid">
+<figure id="linear-confusion"><a aria-label="Open full-size figure: Linear test confusion matrix" href="assets/assignment1_results/linear_confusion.png"><img alt="Linear test confusion matrix: 10 by 10 counts of true class against predicted class, seed 42." loading="lazy" src="assets/assignment1_results/linear_confusion.png"></a></figure>
+<figure id="mlp-confusion"><a aria-label="Open full-size figure: MLP test confusion matrix" href="assets/assignment1_results/mlp_confusion.png"><img alt="MLP test confusion matrix: 10 by 10 counts of true class against predicted class, seed 42." loading="lazy" src="assets/assignment1_results/mlp_confusion.png"></a></figure>
+<figure id="cnn-confusion"><a aria-label="Open full-size figure: CNN test confusion matrix" href="assets/assignment1_results/cnn_confusion.png"><img alt="CNN test confusion matrix: 10 by 10 counts of true class against predicted class, seed 42." loading="lazy" src="assets/assignment1_results/cnn_confusion.png"></a></figure>
+<figure id="lstm-confusion"><a aria-label="Open full-size figure: LSTM test confusion matrix" href="assets/assignment1_results/lstm_confusion.png"><img alt="LSTM test confusion matrix: 10 by 10 counts of true class against predicted class, seed 42." loading="lazy" src="assets/assignment1_results/lstm_confusion.png"></a></figure>
+<figure id="transformer-confusion"><a aria-label="Open full-size figure: Transformer test confusion matrix" href="assets/assignment1_results/transformer_confusion.png"><img alt="Transformer test confusion matrix: 10 by 10 counts of true class against predicted class, seed 42." loading="lazy" src="assets/assignment1_results/transformer_confusion.png"></a></figure>
+</div>
+<p>All five models make many errors between T-shirt/top, Shirt, Pullover and Coat. This result supports the EDA hypothesis: similar upper-body silhouettes cause ambiguity. CNN decreases the Pullover → Coat errors from 130 (Linear) to 75. But the largest CNN error is Shirt → T-shirt/top, with 104 cases. A better overall score does not improve all class pairs equally: MLP still makes 143 T-shirt/top → Shirt errors, and Linear makes 147.</p>
+<p>Each true class has 1,000 test images. Thus, divide a count by ten to get the percentage within the class. Shirt can get many false positives, also when the model recognizes most true shirts correctly.</p>
+<div aria-label="Per-class test F1" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Per-class test F1, seed 42, 0–1 scale</caption>
+<thead><tr><th scope="col">Class</th><th scope="col">Linear</th><th scope="col">MLP</th><th scope="col">CNN</th><th scope="col">LSTM</th><th scope="col">Transformer</th></tr></thead>
+<tbody>
+<tr><th scope="row">T-shirt/top</th><td>0.797</td><td>0.835</td><td>0.866</td><td>0.813</td><td>0.809</td></tr>
+<tr><th scope="row">Trouser</th><td>0.967</td><td>0.983</td><td>0.984</td><td>0.972</td><td>0.977</td></tr>
+<tr><th scope="row">Pullover</th><td>0.731</td><td>0.814</td><td>0.852</td><td>0.805</td><td>0.784</td></tr>
+<tr><th scope="row">Dress</th><td>0.851</td><td>0.897</td><td>0.908</td><td>0.879</td><td>0.875</td></tr>
+<tr><th scope="row">Coat</th><td>0.746</td><td>0.816</td><td>0.860</td><td>0.810</td><td>0.776</td></tr>
+<tr><th scope="row">Sandal</th><td>0.928</td><td>0.955</td><td>0.972</td><td>0.958</td><td>0.965</td></tr>
+<tr class="selected-epoch"><th scope="row">Shirt</th><td>0.589</td><td>0.722</td><td>0.745</td><td>0.672</td><td>0.641</td></tr>
+<tr><th scope="row">Sneaker</th><td>0.919</td><td>0.945</td><td>0.954</td><td>0.945</td><td>0.941</td></tr>
+<tr><th scope="row">Bag</th><td>0.937</td><td>0.971</td><td>0.982</td><td>0.967</td><td>0.951</td></tr>
+<tr><th scope="row">Ankle boot</th><td>0.941</td><td>0.962</td><td>0.965</td><td>0.960</td><td>0.955</td></tr>
+</tbody></table></div>
+<figure id="per-class-f1"><a aria-label="Open full-size figure: Per-class test F1" href="assets/assignment1_results/per_class_f1.png"><img alt="Line chart of per-class test F1 for the five models across the ten classes. All models have their lowest F1 on Shirt." loading="lazy" src="assets/assignment1_results/per_class_f1.png"></a><figcaption>Seed 42.</figcaption></figure>
+<p>Shirt is the weakest class for each model. Its F1 is between <strong>0.589</strong> (Linear) and <strong>0.745</strong> (CNN). The CNN F1 is <strong>0.984</strong> for Trouser and <strong>0.982</strong> for Bag. Thus, the difficulty changes much between classes, although the class counts are equal. CNN improves Shirt F1 over the MLP value of 0.722, but much overlap between upper-body garments stays. Macro-F1 keeps the contribution of this weak class. Overall accuracy alone does not show it.</p>
+<div aria-label="Most frequent directional test errors" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Five most frequent directional test errors for each model, seed 42. Class error rate on a 0–1 scale.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">True</th><th scope="col">Predicted</th><th scope="col">Count</th><th scope="col">Class error rate</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>T-shirt/top</td><td>Shirt</td><td>147</td><td>0.147</td></tr>
+<tr><th scope="row">Linear</th><td>Pullover</td><td>Coat</td><td>130</td><td>0.130</td></tr>
+<tr><th scope="row">Linear</th><td>Shirt</td><td>T-shirt/top</td><td>121</td><td>0.121</td></tr>
+<tr><th scope="row">Linear</th><td>Shirt</td><td>Pullover</td><td>119</td><td>0.119</td></tr>
+<tr><th scope="row">Linear</th><td>Shirt</td><td>Coat</td><td>114</td><td>0.114</td></tr>
+<tr><th scope="row">MLP</th><td>T-shirt/top</td><td>Shirt</td><td>143</td><td>0.143</td></tr>
+<tr><th scope="row">MLP</th><td>Coat</td><td>Pullover</td><td>106</td><td>0.106</td></tr>
+<tr><th scope="row">MLP</th><td>Shirt</td><td>T-shirt/top</td><td>84</td><td>0.084</td></tr>
+<tr><th scope="row">MLP</th><td>Shirt</td><td>Pullover</td><td>82</td><td>0.082</td></tr>
+<tr><th scope="row">MLP</th><td>Pullover</td><td>Coat</td><td>73</td><td>0.073</td></tr>
+<tr><th scope="row">CNN</th><td>Shirt</td><td>T-shirt/top</td><td>104</td><td>0.104</td></tr>
+<tr><th scope="row">CNN</th><td>T-shirt/top</td><td>Shirt</td><td>94</td><td>0.094</td></tr>
+<tr><th scope="row">CNN</th><td>Pullover</td><td>Shirt</td><td>83</td><td>0.083</td></tr>
+<tr><th scope="row">CNN</th><td>Pullover</td><td>Coat</td><td>75</td><td>0.075</td></tr>
+<tr><th scope="row">CNN</th><td>Coat</td><td>Shirt</td><td>66</td><td>0.066</td></tr>
+<tr><th scope="row">LSTM</th><td>Shirt</td><td>T-shirt/top</td><td>137</td><td>0.137</td></tr>
+<tr><th scope="row">LSTM</th><td>T-shirt/top</td><td>Shirt</td><td>129</td><td>0.129</td></tr>
+<tr><th scope="row">LSTM</th><td>Pullover</td><td>Shirt</td><td>104</td><td>0.104</td></tr>
+<tr><th scope="row">LSTM</th><td>Coat</td><td>Shirt</td><td>84</td><td>0.084</td></tr>
+<tr><th scope="row">LSTM</th><td>Coat</td><td>Pullover</td><td>82</td><td>0.082</td></tr>
+<tr><th scope="row">Transformer</th><td>Coat</td><td>Pullover</td><td>148</td><td>0.148</td></tr>
+<tr><th scope="row">Transformer</th><td>T-shirt/top</td><td>Shirt</td><td>142</td><td>0.142</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>Pullover</td><td>118</td><td>0.118</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>T-shirt/top</td><td>108</td><td>0.108</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>Coat</td><td>100</td><td>0.100</td></tr>
+</tbody></table></div>
+<p>The five most frequent CNN errors are Shirt → T-shirt/top (104; 10.4% of true shirts), T-shirt/top → Shirt (94), Pullover → Shirt (83), Pullover → Coat (75) and Coat → Shirt (66). Four of these five errors include Shirt. For CNN, the two T-shirt/Shirt directions have similar counts (104 and 94). Linear and MLP make many more T-shirt/top → Shirt errors than Shirt → T-shirt/top errors (147 and 121; 143 and 84). Thus, it is important to read the errors by direction.</p>
+</section>
+
+<section><h2 id="7-inspect-predictions">8. Inspect predictions</h2><p>Each gallery shows three rows for one model (seed 42). Row 1 shows the first four correct predictions in test-file order. Row 2 shows the four correct predictions with the lowest confidence. Row 3 shows the first four incorrect predictions in test-file order. Confidence is the largest softmax probability, and it is not a calibrated guarantee. The IDs refer to the official test image file.</p>
+<figure id="linear-examples"><a aria-label="Open full-size figure: Linear test predictions" href="assets/assignment1_results/linear_predictions.png"><img alt="Linear test prediction gallery: four correct, four lowest-confidence correct and four incorrect test images with ID, true class, predicted class and confidence." loading="lazy" src="assets/assignment1_results/linear_predictions.png"></a></figure>
+<figure id="mlp-examples"><a aria-label="Open full-size figure: MLP test predictions" href="assets/assignment1_results/mlp_predictions.png"><img alt="MLP test prediction gallery: four correct, four lowest-confidence correct and four incorrect test images with ID, true class, predicted class and confidence." loading="lazy" src="assets/assignment1_results/mlp_predictions.png"></a></figure>
+<figure id="cnn-examples"><a aria-label="Open full-size figure: CNN test predictions" href="assets/assignment1_results/cnn_predictions.png"><img alt="CNN test prediction gallery: four correct, four lowest-confidence correct and four incorrect test images with ID, true class, predicted class and confidence." loading="lazy" src="assets/assignment1_results/cnn_predictions.png"></a></figure>
+<figure id="lstm-examples"><a aria-label="Open full-size figure: LSTM test predictions" href="assets/assignment1_results/lstm_predictions.png"><img alt="LSTM test prediction gallery: four correct, four lowest-confidence correct and four incorrect test images with ID, true class, predicted class and confidence." loading="lazy" src="assets/assignment1_results/lstm_predictions.png"></a></figure>
+<figure id="transformer-examples"><a aria-label="Open full-size figure: Transformer test predictions" href="assets/assignment1_results/transformer_predictions.png"><img alt="Transformer test prediction gallery: four correct, four lowest-confidence correct and four incorrect test images with ID, true class, predicted class and confidence." loading="lazy" src="assets/assignment1_results/transformer_predictions.png"></a></figure>
+<p>CNN correctly recognizes the first boot, the printed pullover and two trousers, which have clear, broad silhouettes. Its low-confidence correct cases include Dress #4167 at 23.0% and Coat #5167 at 34.4%. These garments have plain, long outlines that several classes share. They show that the correct class can win with low confidence.</p>
+<p>Transformer predicts Sneaker #12 as Sandal at 84.9% and Ankle boot #23 as Sandal at 97.0%. Image #23 has a heel and a large dark opening, so it has features similar to a sandal, although its label is Ankle boot. CNN also misses #23 (Sneaker, 46.5%). CNN predicts Sandal #21 as Sneaker (71.3%), dark Coat #25 as Pullover (43.3%) and narrow Dress #32 as Trouser (53.1%). These examples show visual ambiguity. They do not prove that the dataset labels are wrong.</p>
+<p>The correct Transformer example with the lowest confidence is T-shirt/top #8420 at 25.4%, an image with overlapping garments. Its difficult row also contains Dress #7809 at 28.8%, Shirt #2588 at 28.9% and Dress #7109 at 30.2%. These garments have features that other categories also have. Softmax confidence can be high on errors and low on correct decisions. The first four errors are a fixed inspection sample. They do not estimate the overall error distribution.</p>
+</section>
+
+<section><h2 id="8-error-analysis">9. Error analysis</h2><p>This section puts the seed-42 test errors into groups of similar classes. The <em>upper-body</em> group is T-shirt/top, Pullover, Coat and Shirt. The <em>footwear</em> group is Sandal, Sneaker and Ankle boot. An upper-body error has the true class and the predicted class both in the upper-body group. A footwear error has both classes in the footwear group. All other errors are <em>other</em>. A <em>confident error</em> is an error with confidence 0.9 or higher. Confident errors overlap the three groups.</p>
+<div aria-label="Error-group counts" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test errors by group, seed 42 (number of images out of 10,000)</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">All errors</th><th scope="col">Upper-body</th><th scope="col">Footwear</th><th scope="col">Other</th><th scope="col">Confident (p ≥ 0.9)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>1,597</td><td>964</td><td>199</td><td>434</td><td>157</td></tr>
+<tr><th scope="row">MLP</th><td>1,103</td><td>701</td><td>132</td><td>270</td><td>246</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>916</td><td>582</td><td>106</td><td>228</td><td>184</td></tr>
+<tr><th scope="row">LSTM</th><td>1,224</td><td>767</td><td>132</td><td>325</td><td>135</td></tr>
+<tr><th scope="row">Transformer</th><td>1,312</td><td>806</td><td>131</td><td>375</td><td>135</td></tr>
+</tbody></table></div>
+<div aria-label="Error-group shares" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Share of all test errors in each group, seed 42, 0–1 scale</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Upper-body</th><th scope="col">Footwear</th><th scope="col">Other</th><th scope="col">Confident (p ≥ 0.9)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>0.604</td><td>0.125</td><td>0.272</td><td>0.098</td></tr>
+<tr><th scope="row">MLP</th><td>0.636</td><td>0.120</td><td>0.245</td><td>0.223</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>0.635</td><td>0.116</td><td>0.249</td><td>0.201</td></tr>
+<tr><th scope="row">LSTM</th><td>0.627</td><td>0.108</td><td>0.266</td><td>0.110</td></tr>
+<tr><th scope="row">Transformer</th><td>0.614</td><td>0.100</td><td>0.286</td><td>0.103</td></tr>
+</tbody></table></div>
+<figure id="cnn-confident-upper-body"><a aria-label="Open full-size figure: CNN most confident upper-body errors" href="assets/assignment1_results/cnn_confident_upper_body_errors.png"><img alt="Six CNN test images with the most confident upper-body errors, each with ID, true class, predicted class and confidence, seed 42." loading="lazy" src="assets/assignment1_results/cnn_confident_upper_body_errors.png"></a></figure>
+<figure id="cnn-confident-footwear"><a aria-label="Open full-size figure: CNN most confident footwear errors" href="assets/assignment1_results/cnn_confident_footwear_errors.png"><img alt="Six CNN test images with the most confident footwear errors, each with ID, true class, predicted class and confidence, seed 42." loading="lazy" src="assets/assignment1_results/cnn_confident_footwear_errors.png"></a></figure>
+<ul>
+<li><strong>Most errors are upper-body confusions for each model.</strong> Approximately 60–64% of the errors are between T-shirt/top, Pullover, Coat and Shirt. Footwear confusions are another 10–13%.</li>
+<li><strong>Better models make fewer errors, but the error pattern stays similar.</strong> CNN decreases the upper-body errors from 964 (Linear) to 582. But their share of all errors stays almost the same.</li>
+<li><strong>Strong models can also be confidently wrong.</strong> Approximately 20% of the CNN errors and 22% of the MLP errors have confidence 0.9 or higher. Thus, high confidence does not always mean a correct prediction.</li>
+<li><strong>Many confident errors are visually ambiguous.</strong> Shirts can look like T-shirts. At the low 28 × 28 resolution, it is difficult to separate sandals, sneakers and ankle boots.</li>
+</ul>
+<div aria-label="Error groups, causes and improvement ideas" class="table-scroll" role="region" tabindex="0"><table><caption>CNN error groups, hypothesized causes and improvement ideas, seed 42. The ideas are proposals; we did not measure them.</caption>
+<thead><tr><th scope="col">Group</th><th scope="col">Description</th><th scope="col">Share of CNN errors</th><th scope="col">Examples (test ID)</th><th scope="col">Hypothesized cause</th><th scope="col">Improvement idea</th><th scope="col">Expected effect</th></tr></thead>
+<tbody>
+<tr><th scope="row">Upper-body garments</th><td>T-shirt/top, Pullover, Coat and Shirt confused</td><td>63.5% (582)</td><td>#5806, #2856, #6926</td><td>Similar outlines. Collars and buttons cover only a few pixels.</td><td>Small image shifts as augmentation; a wider CNN</td><td>Augmentation can make the model less sensitive to small changes in position. A wider CNN can learn more detailed features that separate similar garments.</td></tr>
+<tr><th scope="row">Footwear</th><td>Sandal, Sneaker and Ankle boot confused</td><td>11.6% (106)</td><td>#8292, #7584, #2914</td><td>Similar low shapes. Straps and ankle height are thin details.</td><td>Small image shifts as augmentation; a wider CNN</td><td>These methods can help the model find small differences in shape, such as straps, soles and ankle height.</td></tr>
+<tr><th scope="row">Other</th><td>All remaining errors</td><td>24.9% (228)</td><td>–</td><td>Not analyzed in detail</td><td>More error inspection</td><td>A separate inspection can show confusion patterns that the two main groups do not include.</td></tr>
+<tr><th scope="row"><em>Confident errors</em> (overlap the rows above)</th><td>Wrong with confidence ≥ 0.9</td><td>20.1% (184)</td><td>#5806, #7584</td><td>High-confidence mistakes occur. Calibration was not measured.</td><td>Temperature scaling fitted on validation</td><td>Temperature scaling can make the confidence agree better with the actual correctness. It does not change the predicted class, so it does not improve accuracy.</td></tr>
+</tbody></table></div>
+</section>
+
+<section><h2 id="9-discussion">10. Results discussion</h2><p>The 256-unit MLP adds nonlinear features to the flattened 784-pixel input. Over five seeds, it increases the mean test macro-F1 from <strong>84.15% to 88.77%</strong> over Linear. Both models lose the explicit two-dimensional neighborhood structure, but the MLP can combine pixels nonlinearly. The two models also have different parameter counts and computation. Thus, this comparison does not prove that nonlinearity alone causes the gain.</p>
+<p><strong>CNN is the validation-selected model in the predefined primary run (seed 42).</strong> Its local 3 × 3 filters and pooling use the spatial structure of the image. CNN gets <strong>91.27 ± 0.27%</strong> mean test macro-F1. It is 2.50 macro-F1 points better than MLP (better in all five seeds) with approximately half the parameters. But its measured batched CPU inference time is approximately 13 times the MLP time per image. CNN is the better choice for accuracy here. MLP gives a useful trade-off for inference cost. On average, the sequential fit takes approximately 105 s for CNN and 8 s for MLP, with the same 16-epoch schedule. Examine the inference cost and the training cost separately.</p>
+<p>LSTM reads the 28 image rows in sequence and keeps a summary in its final hidden state. It gets <strong>88.10%</strong> mean test macro-F1 with 24,714 parameters. This is 0.66 points below MLP in each seed, and LSTM inference is slower than MLP inference. Transformer uses attention over 49 patches of 4 × 4 pixels with learned positions. It gets <strong>87.06%</strong> with 19,530 parameters, and it selects its final epoch for seed 42. These compact sequence models have different spatial assumptions and optimization needs. Their current scores do not show that sequence models cannot learn images. They also do not show that more training will improve them.</p>
+<p>The main limitation that stays is the ambiguity between upper-body garments. Shirt is still the weakest CNN class. CNN still confuses Shirt and T-shirt/top in both directions (<strong>104 and 94</strong> test images, seed 42). The footwear errors in <a href="#7-inspect-predictions">Section 8</a> also show that high softmax confidence does not guarantee a correct label. This result agrees with the overlapping silhouettes in the EDA. But visual similarity is a description, and the classification errors are a measurement. We keep the two separate.</p>
+<p>As a next step, use the training and validation data to test a longer Transformer schedule. Also test small image shifts or weight decay for the nonlinear models. These are proposed experiments, not measured improvements. Do not select their settings from the test results. The current comparison uses one split, five training seeds and a fixed 16-epoch schedule, with no tuning for each architecture. <a href="#10-ablation-matched-parameter-budget">Section 11</a> examines one alternative explanation: the parameter count.</p>
+</section>
+
+<section><h2 id="10-ablation-matched-parameter-budget">11. Ablation: matched parameter budget (~25k)</h2>
+<dl class="facts">
+<div><dt>Question</dt><dd>Does CNN win because of its spatial design (convolutions), or because it has more parameters than LSTM and Transformer?</dd></div>
+<div><dt>Hypothesis</dt><dd>When each model has approximately 25k parameters, CNN still has the highest macro-F1.</dd></div>
+<div><dt>Changed</dt><dd>Model size only. MLP hidden layer 31 units (was 256). CNN dense layer 13 units (was 64) with the same convolutions. Transformer width 36 (was 32) and feedforward size 72 (was 64). The existing LSTM runs (24,714 parameters) are used again.</dd></div>
+<div><dt>Fixed</dt><dd>Split, seeds 42–46, preprocessing, optimizer, learning rate, batch size, 16 epochs, checkpoint rule and hardware.</dd></div>
+</dl>
+<p>The script <a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/train_budget.py"><code>train_budget.py</code></a> trained 15 new runs (3 models × 5 seeds) into <code>outputs_budget/</code>. The <a href="assignment1_methods.html#budget-run">Methods page</a> gives the command. The <a href="assignment1_runs.html#budget-runs">Run history</a> lists the runs.</p>
+<div aria-label="Matched-budget summary" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Matched-budget summary, mean over seeds 42–46. Macro-F1 in %, inference in ms/image.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Parameters</th><th scope="col">Validation macro-F1 (%)</th><th scope="col">Test macro-F1 (%), mean ± SD</th><th scope="col">Test (ms/image)</th></tr></thead>
+<tbody>
+<tr><th scope="row">MLPBudget25k</th><td>24,655</td><td>88.914</td><td>87.008 ± 0.302</td><td>0.002</td></tr>
+<tr class="selected-epoch"><th scope="row">CNNBudget25k</th><td>25,337</td><td>91.537</td><td>90.506 ± 0.341</td><td>0.029</td></tr>
+<tr><th scope="row">LSTM</th><td>24,714</td><td>89.804</td><td>88.102 ± 0.209</td><td>0.022</td></tr>
+<tr><th scope="row">TransformerBudget25k</th><td>24,274</td><td>88.362</td><td>86.997 ± 0.542</td><td>0.071</td></tr>
+</tbody></table></div>
+<div aria-label="Paired comparison at matched budget" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>CNNBudget25k minus each other model, paired by seed, in percentage points. Test macro-F1 gives the decision. Validation macro-F1 is a check.</caption>
+<thead><tr><th scope="col">Comparison</th><th scope="col">Test mean difference (pp)</th><th scope="col">Test range (pp)</th><th scope="col">CNN better (test)</th><th scope="col">Validation mean difference (pp)</th></tr></thead>
+<tbody>
+<tr><th scope="row">CNN − MLPBudget25k</th><td>+3.50</td><td>+2.46 to +4.02</td><td>5/5 seeds</td><td>+2.62 (5/5)</td></tr>
+<tr><th scope="row">CNN − LSTM</th><td>+2.40</td><td>+1.55 to +2.91</td><td>5/5 seeds</td><td>+1.73 (5/5)</td></tr>
+<tr><th scope="row">CNN − TransformerBudget25k</th><td>+3.51</td><td>+2.84 to +4.51</td><td>5/5 seeds</td><td>+3.18 (5/5)</td></tr>
+</tbody></table></div>
+<aside class="idea"><p><strong>Decision rule:</strong> a difference between two models is supported only if the gap between their mean test macro-F1 is larger than the larger of their two seed SDs. Validation macro-F1 only selects the checkpoints.</p></aside>
+<p>With approximately 25k parameters for each model, CNN has the highest mean test macro-F1 (90.51). Paired by seed, its test macro-F1 is higher than that of each other model in <strong>5/5 seeds</strong>. On average, it is <strong>3.50 points</strong> above MLP, <strong>2.40 points</strong> above LSTM and <strong>3.51 points</strong> above Transformer. Each gap is larger than the larger seed SD of the two models (0.54 or less). Validation macro-F1 agrees in 5/5 seeds (2.62, 1.73 and 3.18 points). Thus, the larger parameter count does not explain the CNN lead in the main comparison.</p>
+<div aria-label="Effect of model size on test macro-F1" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Effect of model size on test macro-F1 (mean over seeds 42–46, %)</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Main-comparison parameters</th><th scope="col">~25k parameters</th><th scope="col">Main-comparison test macro-F1 (%)</th><th scope="col">~25k test macro-F1 (%)</th><th scope="col">Change (points)</th></tr></thead>
+<tbody>
+<tr><th scope="row">MLP</th><td>203,530</td><td>24,655</td><td>88.77</td><td>87.01</td><td>−1.76</td></tr>
+<tr><th scope="row">CNN</th><td>105,866</td><td>25,337</td><td>91.27</td><td>90.51</td><td>−0.76</td></tr>
+<tr><th scope="row">Transformer</th><td>19,530</td><td>24,274</td><td>87.06</td><td>87.00</td><td>−0.06</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>MLP decreases the most.</strong> From 203,530 to 24,655 parameters, its test macro-F1 decreases from 88.77% to 87.01% (−1.76 points).</li>
+<li><strong>CNN decreases much less.</strong> From 105,866 to 25,337 parameters, its test macro-F1 decreases from 91.27% to 90.51% (−0.76 points). The small CNN is still better than the full-size MLP.</li>
+<li><strong>Transformer does not improve with more parameters.</strong> Note: the ~25k Transformer is larger than the main-comparison Transformer. A 24% larger Transformer (19,530 to 24,274 parameters) gets 87.00%, and the main-comparison model gets 87.06%. This difference is smaller than the seed SD (0.36 and 0.54 points), so the data does not support it. The larger model also changes two settings: width 32 to 36 and feedforward size 64 to 72. Thus, this small test does not show what limits the Transformer.</li>
+</ul>
+</section>
+</main>
+<nav class="page-turn" aria-label="Report reading order"><a href="assignment1_methods.html"><small>Previous</small>Methods &amp; reproduction</a><a href="assignment1_analysis.html"><small>Next</small>Post-results analysis</a></nav>
 </div>
 </body>
 </html>

@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Post-results analysis · G-02 · CO3133</title>
+<meta name="description" content="Post-results analysis: five-seed errors, noise implementation, robustness to corruptions, interpretability, LSTM and GRU, input representation and shift and noise augmentation on Fashion-MNIST.">
+<link rel="stylesheet" href="assets/assignment.css?v=3">
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="course-bar" role="banner"><div class="course-bar-inner">
+<a class="course-brand" href="index.html">G-02 Assignment Home</a>
+<nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html" aria-current="location">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></div>
+<div class="milestone-bar">
+<nav class="milestone-nav" aria-label="Assignment 1 milestones"><a class="report-button" href="assignment1.html">Main</a><a class="report-button" href="assignment1_M1.html">M1 Report</a><a class="report-button" href="assignment1_M2.html">M2 Final</a></nav>
+</div>
+<div class="wrap">
+<header><p class="kicker">Assignment 1</p><h1>Post-results analysis</h1><nav class="chapter-nav" aria-label="Assignment 1 reports"><a href="assignment1_eda.html">Data exploration</a><a href="assignment1_methods.html">Methods &amp; reproduction</a><a href="assignment1_results.html">Results &amp; errors</a><a href="assignment1_analysis.html" aria-current="page">Post-results analysis</a><a href="assignment1_runs.html">Run history</a></nav><div class="source-options"><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/03_analysis.ipynb">03_analysis.ipynb</a><a class="source-link" href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/outputs/robustness_scores.csv">Robustness scores (.csv)</a></div><nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#1-five-seed-errors">1. Five-seed test errors</a><a href="#noise-implementation">2. Noise implementation</a><a href="#2-robustness">3. Robustness under corruption</a><a href="#3-interpretability">4. Interpretability</a><a href="#4-lstm-vs-gru">5. LSTM and GRU</a><a href="#5-representation-ablation">6. Representation ablation</a><a href="#6-augmentation">7. Shift and noise augmentation</a><a href="#7-summary">8. Summary</a></nav></header>
+<main id="main">
+<section><h2 id="1-five-seed-errors">1. Five-seed test errors</h2><p>This step loads the 25 main runs (five models × seeds 42–46) and the 10,000 test images.</p>
+<p>The step trains nothing. The <a href="assignment1_results.html">results</a> show confusion matrices, per-class F1 and errors for seed 42 only. Here, each value is an aggregate over seeds 42–46: mean ± sample standard deviation (SD).</p>
+<div aria-label="Per-class test F1 over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Per-class test F1, mean ± SD over seeds 42–46, 0–1 scale</caption>
+<thead><tr><th scope="col">Class</th><th scope="col">Linear</th><th scope="col">MLP</th><th scope="col">CNN</th><th scope="col">LSTM</th><th scope="col">Transformer</th></tr></thead>
+<tbody>
+<tr><th scope="row">T-shirt/top</th><td>0.804 ± 0.006</td><td>0.838 ± 0.006</td><td>0.866 ± 0.003</td><td>0.817 ± 0.006</td><td>0.819 ± 0.007</td></tr>
+<tr><th scope="row">Trouser</th><td>0.967 ± 0.002</td><td>0.981 ± 0.002</td><td>0.986 ± 0.002</td><td>0.975 ± 0.002</td><td>0.977 ± 0.001</td></tr>
+<tr><th scope="row">Pullover</th><td>0.724 ± 0.009</td><td>0.806 ± 0.007</td><td>0.860 ± 0.007</td><td>0.805 ± 0.010</td><td>0.788 ± 0.014</td></tr>
+<tr><th scope="row">Dress</th><td>0.848 ± 0.005</td><td>0.890 ± 0.005</td><td>0.912 ± 0.004</td><td>0.880 ± 0.005</td><td>0.876 ± 0.004</td></tr>
+<tr><th scope="row">Coat</th><td>0.746 ± 0.005</td><td>0.815 ± 0.006</td><td>0.860 ± 0.005</td><td>0.804 ± 0.007</td><td>0.787 ± 0.013</td></tr>
+<tr><th scope="row">Sandal</th><td>0.928 ± 0.004</td><td>0.961 ± 0.006</td><td>0.977 ± 0.005</td><td>0.965 ± 0.005</td><td>0.961 ± 0.003</td></tr>
+<tr class="selected-epoch"><th scope="row">Shirt</th><td>0.599 ± 0.009</td><td>0.712 ± 0.008</td><td>0.751 ± 0.007</td><td>0.679 ± 0.008</td><td>0.650 ± 0.013</td></tr>
+<tr><th scope="row">Sneaker</th><td>0.919 ± 0.004</td><td>0.947 ± 0.006</td><td>0.961 ± 0.006</td><td>0.950 ± 0.005</td><td>0.940 ± 0.003</td></tr>
+<tr><th scope="row">Bag</th><td>0.937 ± 0.002</td><td>0.972 ± 0.002</td><td>0.983 ± 0.001</td><td>0.970 ± 0.002</td><td>0.956 ± 0.004</td></tr>
+<tr><th scope="row">Ankle boot</th><td>0.943 ± 0.003</td><td>0.956 ± 0.004</td><td>0.970 ± 0.004</td><td>0.964 ± 0.003</td><td>0.953 ± 0.003</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Shirt is the weakest class in all 25 runs.</strong> Its mean F1 is between <strong>0.599</strong> (Linear) and <strong>0.751</strong> (CNN).</li>
+<li>Trouser is the easiest class, with F1 from 0.967 to 0.986. CNN has the highest mean F1 for all ten classes.</li>
+<li>The SDs are 0.014 or less. Thus, the seed-42 per-class scores were representative.</li>
+<li>Shirt is in three of the five <a href="assignment1_eda.html#8-2-which-average-silhouettes-are-closest">closest class-mean pairs</a> of the EDA (Pullover 0.096, Coat 0.107, T-shirt/top 0.132). In the <a href="assignment1_eda.html#10-1-a-nonlinear-view-with-t-sne">t-SNE view</a>, Shirt mixes with the other upper-body classes, and Trouser makes a compact group.</li>
+</ul>
+<p>Each confusion matrix gives the mean count over the five seeds, rounded to an integer. Rows are the true classes, and columns are the predictions. Each row has 1,000 test images.</p>
+<div class="figure-grid">
+<figure id="linear-confusion-5-seeds"><a aria-label="Open full-size figure: Linear test confusion matrix, mean of 5 seeds" href="assets/assignment1_analysis/linear_confusion_5_seeds.png"><img alt="Linear test confusion matrix: 10 by 10 mean counts over seeds 42 to 46, true class against predicted class." loading="lazy" src="assets/assignment1_analysis/linear_confusion_5_seeds.png"></a></figure>
+<figure id="mlp-confusion-5-seeds"><a aria-label="Open full-size figure: MLP test confusion matrix, mean of 5 seeds" href="assets/assignment1_analysis/mlp_confusion_5_seeds.png"><img alt="MLP test confusion matrix: 10 by 10 mean counts over seeds 42 to 46, true class against predicted class." loading="lazy" src="assets/assignment1_analysis/mlp_confusion_5_seeds.png"></a></figure>
+<figure id="cnn-confusion-5-seeds"><a aria-label="Open full-size figure: CNN test confusion matrix, mean of 5 seeds" href="assets/assignment1_analysis/cnn_confusion_5_seeds.png"><img alt="CNN test confusion matrix: 10 by 10 mean counts over seeds 42 to 46, true class against predicted class." loading="lazy" src="assets/assignment1_analysis/cnn_confusion_5_seeds.png"></a></figure>
+<figure id="lstm-confusion-5-seeds"><a aria-label="Open full-size figure: LSTM test confusion matrix, mean of 5 seeds" href="assets/assignment1_analysis/lstm_confusion_5_seeds.png"><img alt="LSTM test confusion matrix: 10 by 10 mean counts over seeds 42 to 46, true class against predicted class." loading="lazy" src="assets/assignment1_analysis/lstm_confusion_5_seeds.png"></a></figure>
+<figure id="transformer-confusion-5-seeds"><a aria-label="Open full-size figure: Transformer test confusion matrix, mean of 5 seeds" href="assets/assignment1_analysis/transformer_confusion_5_seeds.png"><img alt="Transformer test confusion matrix: 10 by 10 mean counts over seeds 42 to 46, true class against predicted class. The largest off-diagonal count is Shirt predicted as T-shirt/top, 147." loading="lazy" src="assets/assignment1_analysis/transformer_confusion_5_seeds.png"></a></figure>
+</div>
+<div aria-label="Most frequent directional errors over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Five most frequent directional test errors for each model, over seeds 42–46. Count: images, mean ± SD. Class error rate on a 0–1 scale. The last column counts the seeds that have this error in their own top five.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">True</th><th scope="col">Predicted</th><th scope="col">Count, mean ± SD</th><th scope="col">Range</th><th scope="col">Class error rate</th><th scope="col">In the seed's top five</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>Pullover</td><td>Coat</td><td>136.0 ± 24.2</td><td>100–166</td><td>0.136</td><td>4/5</td></tr>
+<tr><th scope="row">Linear</th><td>Shirt</td><td>T-shirt/top</td><td>130.4 ± 18.1</td><td>115–160</td><td>0.130</td><td>5/5</td></tr>
+<tr><th scope="row">Linear</th><td>T-shirt/top</td><td>Shirt</td><td>118.2 ± 22.0</td><td>86–147</td><td>0.118</td><td>4/5</td></tr>
+<tr><th scope="row">Linear</th><td>Pullover</td><td>Shirt</td><td>111.6 ± 23.0</td><td>88–145</td><td>0.112</td><td>3/5</td></tr>
+<tr><th scope="row">Linear</th><td>Shirt</td><td>Pullover</td><td>105.6 ± 16.5</td><td>90–126</td><td>0.106</td><td>3/5</td></tr>
+<tr><th scope="row">MLP</th><td>Shirt</td><td>T-shirt/top</td><td>116.6 ± 32.6</td><td>84–167</td><td>0.117</td><td>5/5</td></tr>
+<tr><th scope="row">MLP</th><td>T-shirt/top</td><td>Shirt</td><td>101.2 ± 38.0</td><td>59–143</td><td>0.101</td><td>4/5</td></tr>
+<tr><th scope="row">MLP</th><td>Pullover</td><td>Coat</td><td>94.2 ± 22.7</td><td>70–124</td><td>0.094</td><td>4/5</td></tr>
+<tr><th scope="row">MLP</th><td>Coat</td><td>Pullover</td><td>76.8 ± 21.1</td><td>50–106</td><td>0.077</td><td>3/5</td></tr>
+<tr><th scope="row">MLP</th><td>Shirt</td><td>Pullover</td><td>76.2 ± 6.4</td><td>67–82</td><td>0.076</td><td>3/5</td></tr>
+<tr><th scope="row">CNN</th><td>Shirt</td><td>T-shirt/top</td><td>102.8 ± 15.6</td><td>82–126</td><td>0.103</td><td>5/5</td></tr>
+<tr><th scope="row">CNN</th><td>T-shirt/top</td><td>Shirt</td><td>88.6 ± 9.5</td><td>73–98</td><td>0.089</td><td>5/5</td></tr>
+<tr><th scope="row">CNN</th><td>Pullover</td><td>Shirt</td><td>69.8 ± 11.9</td><td>53–83</td><td>0.070</td><td>4/5</td></tr>
+<tr><th scope="row">CNN</th><td>Coat</td><td>Shirt</td><td>61.4 ± 18.2</td><td>45–91</td><td>0.061</td><td>2/5</td></tr>
+<tr><th scope="row">CNN</th><td>Shirt</td><td>Coat</td><td>55.4 ± 15.0</td><td>31–72</td><td>0.055</td><td>3/5</td></tr>
+<tr><th scope="row">LSTM</th><td>Shirt</td><td>T-shirt/top</td><td>147.0 ± 17.0</td><td>124–168</td><td>0.147</td><td>5/5</td></tr>
+<tr><th scope="row">LSTM</th><td>T-shirt/top</td><td>Shirt</td><td>115.2 ± 25.4</td><td>88–152</td><td>0.115</td><td>5/5</td></tr>
+<tr><th scope="row">LSTM</th><td>Coat</td><td>Pullover</td><td>96.8 ± 22.0</td><td>67–117</td><td>0.097</td><td>4/5</td></tr>
+<tr><th scope="row">LSTM</th><td>Pullover</td><td>Shirt</td><td>80.4 ± 15.9</td><td>64–104</td><td>0.080</td><td>3/5</td></tr>
+<tr><th scope="row">LSTM</th><td>Pullover</td><td>Coat</td><td>77.8 ± 22.3</td><td>60–116</td><td>0.078</td><td>1/5</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>T-shirt/top</td><td>146.8 ± 37.5</td><td>108–192</td><td>0.147</td><td>5/5</td></tr>
+<tr><th scope="row">Transformer</th><td>Pullover</td><td>Coat</td><td>109.2 ± 22.4</td><td>76–135</td><td>0.109</td><td>4/5</td></tr>
+<tr><th scope="row">Transformer</th><td>T-shirt/top</td><td>Shirt</td><td>98.6 ± 38.1</td><td>59–142</td><td>0.099</td><td>4/5</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>Coat</td><td>90.8 ± 12.8</td><td>72–105</td><td>0.091</td><td>5/5</td></tr>
+<tr><th scope="row">Transformer</th><td>Shirt</td><td>Pullover</td><td>85.4 ± 22.6</td><td>60–118</td><td>0.085</td><td>3/5</td></tr>
+</tbody></table></div>
+<ul>
+<li>All 25 directional errors in the table are between the four upper-body classes. Shirt → T-shirt/top is in the top five of each seed for each model (5/5).</li>
+<li><strong>The EDA ranking does not predict the error size.</strong> Pullover–Coat has the closest class means (0.088), and it is the largest Linear error (<strong>136.0</strong>). But T-shirt/top–Shirt is only the fourth closest pair (0.132), and Shirt → T-shirt/top is the largest error for the other four models.</li>
+<li>The CNN top five has no Pullover–Coat pair. All five CNN pairs include Shirt.</li>
+<li><strong>The direction depends on the seed.</strong> Single directional counts change much more than the total errors. The MLP T-shirt/top → Shirt count is between <strong>59 and 143</strong>. In the seed-42 results, seed 42 has more T-shirt/top → Shirt errors. The five-seed means show the opposite direction.</li>
+</ul>
+<h3 id="1-1-error-groups">1.1 Error groups and stable errors</h3><p>The groups are the same as on the <a href="assignment1_results.html#8-error-analysis">Results page</a>. Upper-body is T-shirt/top, Pullover, Coat and Shirt. Footwear is Sandal, Sneaker and Ankle boot. A <em>stable error</em> is a test image that the model misclassifies in all five seeds.</p>
+<div aria-label="Error groups and stable errors over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test errors by group, mean ± SD over seeds 42–46 (images out of 10,000; the value in brackets is the share of all errors), and error stability over the same seeds</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">All errors</th><th scope="col">Upper-body</th><th scope="col">Footwear</th><th scope="col">Other</th><th scope="col">Confident (p ≥ 0.9)</th><th scope="col">Wrong in ≥ 1 seed</th><th scope="col">Wrong in all 5 seeds</th><th scope="col">Wrong in all 5 seeds, upper-body</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>1,583.4 ± 8</td><td>939 ± 20 (59.3%)</td><td>196 ± 8 (12.4%)</td><td>449 ± 21 (28.3%)</td><td>158 ± 9 (10.0%)</td><td>2,007</td><td>1,175</td><td>860</td></tr>
+<tr><th scope="row">MLP</th><td>1,123.4 ± 26</td><td>706 ± 15 (62.8%)</td><td>131 ± 13 (11.6%)</td><td>287 ± 14 (25.5%)</td><td>259 ± 43 (23.1%)</td><td>1,836</td><td>559</td><td>421</td></tr>
+<tr class="selected-epoch"><th scope="row">CNN</th><td>874.4 ± 28</td><td>568 ± 21 (65.0%)</td><td>89 ± 14 (10.2%)</td><td>217 ± 10 (24.8%)</td><td>220 ± 32 (25.1%)</td><td>1,642</td><td>318</td><td>242</td></tr>
+<tr><th scope="row">LSTM</th><td>1,189.4 ± 25</td><td>757 ± 20 (63.6%)</td><td>114 ± 14 (9.6%)</td><td>318 ± 5 (26.8%)</td><td>158 ± 25 (13.3%)</td><td>1,962</td><td>595</td><td>450</td></tr>
+<tr><th scope="row">Transformer</th><td>1,285.2 ± 39</td><td>794 ± 29 (61.7%)</td><td>139 ± 7 (10.8%)</td><td>353 ± 20 (27.5%)</td><td>134 ± 12 (10.4%)</td><td>2,260</td><td>512</td><td>391</td></tr>
+</tbody></table></div>
+<ul>
+<li>Upper-body confusions are <strong>59.3–65.0%</strong> of the errors for each model. Footwear confusions are only 9.6–12.4%. This agrees with the smaller sandal–sneaker mixing in the EDA t-SNE.</li>
+<li>Confident errors (p ≥ 0.9) are 25.1% of the CNN errors and 23.1% of the MLP errors. For Linear, LSTM and Transformer, they are 10.0–13.3%.</li>
+<li>Linear repeats most of its errors: <strong>1,175</strong> of approximately 1,583 per seed are wrong in all 5 seeds. Its convex loss is the likely cause. We did not test this. For CNN, only 318 of approximately 874 errors repeat.</li>
+<li><strong>146 test images</strong> are wrong in all 25 runs. By true class, they are Shirt 48, Pullover 35, T-shirt/top 19, Coat 15, Dress 13, Ankle boot 8, Trouser 3, Bag 3, Sneaker 2 and Sandal 0. The ambiguity is likely in these images, not in one model.</li>
+</ul>
+<h3 id="1-2-gallery-images">1.2 Gallery images over five seeds</h3><p>The table counts the seeds that misclassify each test image from the <a href="assignment1_results.html#7-inspect-predictions">seed-42 galleries</a> in the results.</p>
+<div aria-label="Gallery images over five seeds" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Seeds (out of 5) that misclassify each gallery image</caption>
+<thead><tr><th scope="col">Test ID</th><th scope="col">True class</th><th scope="col">Linear</th><th scope="col">MLP</th><th scope="col">CNN</th><th scope="col">LSTM</th><th scope="col">Transformer</th></tr></thead>
+<tbody>
+<tr><th scope="row">5806, 2856, 9133<br>6926, 2506<br>9574<br>2914<br>23</th><td>Shirt<br>T-shirt/top<br>Pullover<br>Sneaker<br>Ankle boot</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td></tr>
+<tr><th scope="row">8292</th><td>Sandal</td><td>5/5</td><td>5/5</td><td>5/5</td><td>3/5</td><td>5/5</td></tr>
+<tr><th scope="row">7584</th><td>Sandal</td><td>0/5</td><td>3/5</td><td>4/5</td><td>4/5</td><td>1/5</td></tr>
+<tr><th scope="row">12</th><td>Sneaker</td><td>5/5</td><td>5/5</td><td>2/5</td><td>1/5</td><td>5/5</td></tr>
+<tr><th scope="row">21</th><td>Sandal</td><td>0/5</td><td>0/5</td><td>2/5</td><td>1/5</td><td>2/5</td></tr>
+<tr><th scope="row">25</th><td>Coat</td><td>5/5</td><td>3/5</td><td>4/5</td><td>5/5</td><td>4/5</td></tr>
+<tr><th scope="row">32</th><td>Dress</td><td>0/5</td><td>0/5</td><td>2/5</td><td>0/5</td><td>0/5</td></tr>
+<tr><th scope="row">4167</th><td>Dress</td><td>0/5</td><td>1/5</td><td>0/5</td><td>0/5</td><td>0/5</td></tr>
+<tr><th scope="row">5167</th><td>Coat</td><td>5/5</td><td>4/5</td><td>3/5</td><td>5/5</td><td>5/5</td></tr>
+<tr><th scope="row">8420</th><td>T-shirt/top</td><td>0/5</td><td>0/5</td><td>0/5</td><td>0/5</td><td>1/5</td></tr>
+</tbody></table></div>
+<ul>
+<li>Eight images are wrong for each model in each seed (first row). Six of them are the six most confident CNN upper-body errors in the seed-42 galleries (#5806 … #9133). The other two are Sneaker #2914 and Ankle boot #23.</li>
+<li>These errors are properties of the images. They agree with the upper-body mixing and the sandal–sneaker mixing in the EDA t-SNE.</li>
+<li>The other gallery errors are seed noise. CNN misclassifies #12, #21 and #32 in only 2/5 seeds. Dress #4167 and T-shirt/top #8420 are wrong in a maximum of 1/5 seeds for each model.</li>
+<li>A single-seed gallery mixes the two types of error. Thus, one gallery cannot separate them.</li>
+</ul>
+<p>These errors come from clean test images. The next sections change the test images and measure how each model fails.</p>
+</section>
+
+<section><h2 id="noise-implementation">2. Noise implementation</h2><p>Noise occurs in two places: as a test-time corruption in this analysis (Section 3) and as a training-time augmentation (Section 7). This section gives the exact rule for each, from the code.</p>
+<p>The <a href="assignment1_eda.html#6-pixel-intensity-distribution">EDA</a> shows that 50.2143% of all training pixels are exactly 0. Thus, the background is always black in training. Noise changes this background into grey speckle that no model saw in training. A 3 × 3 filter sees only 9 pixels and a 4 × 4 patch only 16, but a dense layer adds all 784. Thus, noise also tests the inductive bias of each model.</p>
+<h3 id="2-1-test-time-noise">2.1 Test-time noise</h3><p>The robustness evaluation makes the noisy test images in four steps:</p>
+<ol>
+<li>Scale each test pixel to [0, 1]: <code>x = pixel / 255</code>, as float32.</li>
+<li>Draw <code>ε ~ N(0, σ²)</code> independently for each pixel. The generator is <code>np.random.default_rng(0)</code>, and the analysis makes it again for each σ. Thus, each σ has one fixed draw, and all models and seeds get the same noisy images.</li>
+<li>Add the noise and clip: <code>x' = clip(x + ε, 0, 1)</code>.</li>
+<li>Normalize <code>x'</code> with the training mean and SD that the run saved in <code>best.pt</code>, as for clean images.</li>
+</ol>
+<p>The levels are σ = 0.05, 0.10 and 0.20 on the [0, 1] scale. These are 13, 26 and 51 of 255 grey levels.</p>
+<h3 id="2-2-training-time-noise">2.2 Training-time noise</h3><p><a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/augmented.py"><code>models/augmented.py</code></a> adds noise inside the <code>forward()</code> method of each <code>Augmented*</code> model:</p>
+<ol>
+<li>Apply the noise only in training mode (<code>self.training</code>). Validation and test images stay clean.</li>
+<li>Apply the random shift first (Section 7). Then apply the noise to the shifted image.</li>
+<li>For each image, add noise with probability 0.5 (<code>torch.rand &lt; 0.5</code>).</li>
+<li>Draw new noise for each batch with <code>torch.randn_like</code>. <code>train.py</code> calls <code>set_seed</code> (<code>torch.manual_seed</code>) with the training seed before each run. The shift, the noise mask and the noise all use this global torch generator.</li>
+<li>Use the noise SD 0.10 on the [0, 1] scale. The images are already normalized, so the code uses <code>0.10 / STD</code> (approximately 0.283). <code>STD</code> is the training SD, 0.3531597432932429.</li>
+<li>Clamp the result to <code>[LOW, HIGH]</code>, the normalized values of 0 and 1. The code computes <code>LOW</code> and <code>HIGH</code> in float32, so the background is exactly a normalized 0 pixel.</li>
+</ol>
+<div aria-label="Test-time noise and training-time noise" class="table-scroll" role="region" tabindex="0"><table><caption>Test-time noise (Section 3) and training-time noise (Section 7)</caption>
+<thead><tr><th scope="col">Setting</th><th scope="col">Test-time noise</th><th scope="col">Training-time noise</th></tr></thead>
+<tbody>
+<tr><th scope="row">Code</th><td>Robustness evaluation</td><td><code>models/augmented.py</code>, <code>augment()</code></td></tr>
+<tr><th scope="row">Pixel scale</th><td>[0, 1], before normalization</td><td>Normalized, after the data loader</td></tr>
+<tr><th scope="row">Noise SD</th><td>σ = 0.05, 0.10, 0.20</td><td>0.10 only (<code>0.10 / STD</code> on the normalized scale)</td></tr>
+<tr><th scope="row">Images with noise</th><td>All 10,000 test images</td><td>Each training image, with probability 0.5 (independent per image)</td></tr>
+<tr><th scope="row">Randomness</th><td>One fixed draw per σ, <code>default_rng(0)</code></td><td>A new draw for each batch, from the training seed</td></tr>
+<tr><th scope="row">Range limit</th><td><code>clip(x + ε, 0, 1)</code></td><td><code>clamp(LOW, HIGH)</code>, the same range after normalization</td></tr>
+<tr><th scope="row">Other change</th><td>None</td><td>Random shift of −2 to 2 px before the noise</td></tr>
+</tbody></table></div>
+<p>The pixel rule is the same in the two cases: Gaussian noise for each pixel, clipped to the valid range. Only the scale, the level and the randomness are different.</p>
+</section>
+
+<section><h2 id="2-robustness">3. Robustness under corruption</h2><p>This step evaluates the 25 checkpoints on corrupted test images.</p>
+<dl class="facts">
+<div><dt>Aim</dt><dd>Find how the inductive bias of each representation changes the failure when the test images change.</dd></div>
+<div><dt>Hypothesis</dt><dd>CNN tolerates small shifts better than the flattened-input models. LSTM reads rows in sequence, so it tolerates vertical shifts better than horizontal shifts.</dd></div>
+<div><dt>Fixed</dt><dd>The 25 checkpoints and their training-split normalization. Noise and squares use fixed random seeds, so each model and seed gets the same images.</dd></div>
+<div><dt>Metric</dt><dd>Test macro-F1 (%), mean ± SD over seeds. The drop from the clean score is paired by seed. Shift scores are the mean of the four directions.</dd></div>
+</dl>
+<p>A <strong>corruption</strong> is a fixed change to the pixels of a test image before the model gets it. <code>x(i, j)</code> is the pixel in row <code>i</code> and column <code>j</code>, scaled to [0, 1]. The background is 0. The analysis normalizes the corrupted image <code>x'</code> in the same way as a clean image.</p>
+<div aria-label="Corruption definitions" class="table-scroll" role="region" tabindex="0"><table><caption>Corruption definitions</caption>
+<thead><tr><th scope="col">Corruption</th><th scope="col">Rule for each pixel</th><th scope="col">Levels</th><th scope="col">What it imitates</th></tr></thead>
+<tbody>
+<tr><th scope="row">Noise</th><td><code>x' = clip(x + ε, 0, 1)</code>, <code>ε ~ N(0, σ²)</code> (<a href="#noise-implementation">Section 2</a>)</td><td>σ = 0.05, 0.10, 0.20</td><td>Sensor noise. The black background becomes grey speckle.</td></tr>
+<tr><th scope="row">Shift</th><td><code>x'(i, j) = x(i − dy, j − dx)</code>. Pixels that come in from outside are 0.</td><td>1, 2, 3 px up, down, left, right</td><td>A garment that is not at the center</td></tr>
+<tr><th scope="row">Occlusion</th><td><code>x' = 0</code> in one k × k square at a random position (generator seed 1)</td><td>k = 8 (8% of the image), 12 (18%)</td><td>Part of the garment is hidden</td></tr>
+<tr><th scope="row">Contrast</th><td><code>x' = c · x</code></td><td>c = 0.75, 0.5</td><td>A darker photo. The background stays 0.</td></tr>
+</tbody></table></div>
+<p>The analysis loaded 500 model × seed × corruption cases. When it computed the scores, each clean score was equal to the value in <code>metrics.json</code>. It saves the scores one time in <code>outputs/robustness_scores.csv</code>, and later runs do not compute them again.</p>
+<figure id="corruption-examples"><a aria-label="Open full-size figure: Test ID 25 under each corruption" href="assets/assignment1_analysis/corruption_examples.png"><img alt="Ten versions of test image 25, a Coat: clean; noise sigma 0.05, 0.1 and 0.2; shift 3 px right; shift 3 px down; black squares 8 by 8 and 12 by 12; contrast times 0.75 and times 0.5." loading="lazy" src="assets/assignment1_analysis/corruption_examples.png"></a></figure>
+<div aria-label="Robustness scores" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test macro-F1 (%) under each corruption, mean ± SD over seeds 42–46. In brackets: the drop from the clean score in pp, paired by seed, at the strongest level of each corruption. The last column gives the best model in each seed.</caption>
+<thead><tr><th scope="col">Corruption</th><th scope="col">Level</th><th scope="col">Linear</th><th scope="col">MLP</th><th scope="col">CNN</th><th scope="col">LSTM</th><th scope="col">Transformer</th><th scope="col">Best model per seed</th></tr></thead>
+<tbody>
+<tr><th scope="row">Clean</th><td>–</td><td>84.15 ± 0.11</td><td>88.77 ± 0.23</td><td>91.27 ± 0.27</td><td>88.10 ± 0.21</td><td>87.06 ± 0.36</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Noise</th><td>σ = 0.05</td><td>83.76 ± 0.09</td><td>88.44 ± 0.23</td><td>89.58 ± 0.64</td><td>87.79 ± 0.24</td><td>86.07 ± 0.28</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Noise</th><td>σ = 0.10</td><td>82.85 ± 0.13</td><td>87.76 ± 0.21</td><td>84.47 ± 1.37</td><td>86.62 ± 0.44</td><td>82.41 ± 0.59</td><td>MLP 5/5</td></tr>
+<tr><th scope="row">Noise</th><td>σ = 0.20</td><td>80.22 ± 0.64 (−3.92)</td><td>85.21 ± 0.28 (−3.56)</td><td>65.89 ± 3.66 (−25.38)</td><td>77.28 ± 2.98 (−10.82)</td><td>59.88 ± 4.24 (−27.18)</td><td>MLP 5/5</td></tr>
+<tr><th scope="row">Shift</th><td>1 px</td><td>76.00 ± 0.23</td><td>81.96 ± 0.23</td><td>88.56 ± 0.18</td><td>82.92 ± 0.78</td><td>81.38 ± 1.24</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Shift</th><td>2 px</td><td>59.79 ± 0.55 (−24.35)</td><td>65.06 ± 0.98 (−23.71)</td><td>81.08 ± 0.84 (−10.18)</td><td>64.64 ± 1.10 (−23.46)</td><td>68.52 ± 2.34 (−18.54)</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Shift</th><td>3 px</td><td>42.85 ± 0.82</td><td>47.41 ± 1.62</td><td>67.38 ± 1.76</td><td>51.95 ± 1.32</td><td>55.51 ± 2.11</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Occlusion</th><td>8 × 8</td><td>76.91 ± 0.22</td><td>79.90 ± 0.46</td><td>83.45 ± 0.78</td><td>77.23 ± 0.63</td><td>73.17 ± 2.01</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Occlusion</th><td>12 × 12</td><td>66.19 ± 0.31 (−17.95)</td><td>67.20 ± 1.29 (−21.56)</td><td>72.85 ± 1.75 (−18.41)</td><td>62.70 ± 1.44 (−25.41)</td><td>51.27 ± 4.01 (−35.79)</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Contrast</th><td>× 0.75</td><td>83.05 ± 0.37</td><td>87.93 ± 0.33</td><td>90.38 ± 0.30</td><td>86.61 ± 0.38</td><td>86.62 ± 0.55</td><td>CNN 5/5</td></tr>
+<tr><th scope="row">Contrast</th><td>× 0.5</td><td>73.37 ± 1.04 (−10.77)</td><td>81.93 ± 1.63 (−6.84)</td><td>86.66 ± 1.17 (−4.61)</td><td>80.44 ± 0.89 (−7.66)</td><td>83.44 ± 0.41 (−3.62)</td><td>CNN 5/5</td></tr>
+</tbody></table></div>
+<p>The table that follows splits each shift level by axis.</p>
+<div aria-label="Shift by axis" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test macro-F1 (%) under shifts by axis, mean over seeds and over the two directions of each axis</caption>
+<thead><tr><th scope="col">Shift</th><th scope="col">Axis</th><th scope="col">Linear</th><th scope="col">MLP</th><th scope="col">CNN</th><th scope="col">LSTM</th><th scope="col">Transformer</th></tr></thead>
+<tbody>
+<tr><th scope="row">1 px</th><td>Horizontal</td><td>74.67</td><td>80.88</td><td>88.58</td><td>80.27</td><td>80.62</td></tr>
+<tr><th scope="row">1 px</th><td>Vertical</td><td>77.33</td><td>83.04</td><td>88.55</td><td>85.57</td><td>82.15</td></tr>
+<tr><th scope="row">2 px</th><td>Horizontal</td><td>51.92</td><td>57.97</td><td>79.74</td><td>48.90</td><td>62.70</td></tr>
+<tr><th scope="row">2 px</th><td>Vertical</td><td>67.66</td><td>72.15</td><td>82.42</td><td>80.39</td><td>74.34</td></tr>
+<tr><th scope="row">3 px</th><td>Horizontal</td><td>29.18</td><td>34.97</td><td>58.86</td><td>27.93</td><td>44.11</td></tr>
+<tr><th scope="row">3 px</th><td>Vertical</td><td>56.52</td><td>59.85</td><td>75.90</td><td>75.96</td><td>66.92</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>CNN is the most robust model</strong> for shifts, occlusion and decreased contrast in all five seeds.</li>
+<li><strong>Noise reverses the ranking.</strong> From σ = 0.10, MLP is best in all five seeds (87.76 against 84.47 for CNN). At σ = 0.20, Transformer loses <strong>27.18</strong> points and CNN 25.38, but Linear and MLP lose less than 4. Noise changes the black background (Section 2) into grey speckle. A 3 × 3 filter or a 4 × 4 patch can react to local speckle, but a dense layer averages over all 784 pixels. We did not test this.</li>
+<li><strong>Shifts cause large drops for flattened inputs.</strong> A 2-pixel shift costs Linear 24.35 points, MLP 23.71 and LSTM 23.46, but CNN only 10.18. The EDA mean image shows where clothing usually is in the frame. A model that connects each weight to one pixel position likely uses that fixed position.</li>
+<li><strong>LSTM follows its row design.</strong> A vertical 3-pixel shift only moves rows in the sequence. LSTM keeps <strong>75.96%</strong>, close to CNN (75.90%). A horizontal shift changes each row vector, and LSTM falls to <strong>27.93%</strong>, the lowest of all models.</li>
+<li><strong>Contrast causes the largest drop for Linear (10.77) and the smallest for Transformer (3.62).</strong> Half contrast keeps the background at 0 but scales the garment. The Linear score is a weighted sum of raw intensities, so it likely changes with brightness. The EDA shows that brightness is different between classes. The layer normalization in the Transformer can remove the scale (not tested).</li>
+<li><strong>Transformer is the least stable.</strong> It loses <strong>35.79</strong> points under 12 × 12 occlusion, and it has the largest seed SDs (up to 4.24).</li>
+</ul>
+<p>The next section looks inside the models to find the pixels and rows that each model uses.</p>
+</section>
+
+<section><h2 id="3-interpretability">4. Interpretability</h2><p>This step applies three methods to the 25 checkpoints:</p>
+<ul>
+<li><strong>Occlusion sensitivity (all models):</strong> 300 test images (30 for each class, sampled with seed 0). A 4 × 4 patch is set to the background value at stride 2 (169 positions). The value of each pixel is the mean drop in true-class probability over the patches that cover it.</li>
+<li><strong>LSTM row probe:</strong> the trained classifier reads the hidden state after each row on the full test set. Nothing is trained again.</li>
+<li><strong>Transformer attention:</strong> the analysis computes the attention weights of the two layers again from the encoder. A check against <code>forward()</code> confirms them.</li>
+</ul>
+<div aria-label="Occlusion map statistics" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Occlusion-map statistics, mean ± SD over seeds 42–46. Seed agreement r: mean correlation of the maps between seed pairs. Half-mass pixels: share of the 784 pixels that holds half of the positive evidence. Top, middle, bottom: share of positive evidence in each third of the image height (upper-body garments only). The half-mass and band columns use only images whose map has positive evidence: a maximum of 300 images, and a maximum of 120 upper-body images for the bands. The analysis did not record the retained counts.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Seed agreement r</th><th scope="col">Images</th><th scope="col">Half-mass pixels (%)</th><th scope="col">Top, rows 0–8 (%)</th><th scope="col">Middle, rows 9–18 (%)</th><th scope="col">Bottom, rows 19–27 (%)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>0.97 ± 0.02</td><td>297</td><td>7.3 ± 0.2</td><td>43.3 ± 1.0</td><td>30.6 ± 0.8</td><td>26.1 ± 0.5</td></tr>
+<tr><th scope="row">MLP</th><td>0.76 ± 0.02</td><td>247</td><td>5.3 ± 0.1</td><td>42.6 ± 0.7</td><td>26.6 ± 0.8</td><td>30.8 ± 0.7</td></tr>
+<tr><th scope="row">CNN</th><td>0.56 ± 0.02</td><td>264</td><td>5.8 ± 0.3</td><td>32.4 ± 2.1</td><td>36.4 ± 2.9</td><td>31.2 ± 3.8</td></tr>
+<tr><th scope="row">LSTM</th><td>0.57 ± 0.02</td><td>300</td><td>6.0 ± 0.2</td><td>44.9 ± 2.3</td><td>22.8 ± 1.5</td><td>32.3 ± 2.5</td></tr>
+<tr><th scope="row">Transformer</th><td>0.46 ± 0.02</td><td>300</td><td>8.3 ± 0.3</td><td>36.0 ± 1.3</td><td>36.3 ± 1.6</td><td>27.7 ± 1.0</td></tr>
+</tbody></table></div>
+<p>The <em>Images</em> column gives the number of images in the seed-agreement correlation. A fully confident model gives a flat map, so the correlation skips images that are flat in one or more seeds.</p>
+<figure id="occlusion-maps"><a aria-label="Open full-size figure: Occlusion sensitivity maps, seed 42" href="assets/assignment1_analysis/occlusion_maps.png"><img alt="Grid of occlusion sensitivity maps for four test images (Shirt 5806, Ankle boot 23, Sandal 21, Coat 25) and the five models, seed 42. Brighter pixels show a larger drop in true-class probability. For Ankle boot 23, most models are bright at the sole, the toe and the heel edges." loading="lazy" src="assets/assignment1_analysis/occlusion_maps.png"></a><figcaption>Rows: test IDs 5806 (Shirt), 23 (Ankle boot), 21 (Sandal) and 25 (Coat), from the seed-42 galleries in the results.</figcaption></figure>
+<ul>
+<li><strong>Explanations depend on the seed.</strong> Linear maps are almost identical between seeds (r = <strong>0.97</strong>). CNN, LSTM and Transformer agree only at r = 0.46–0.57. This agrees with Section 1: Linear repeats its errors between seeds, but the other models change their errors. Thus, a map from one seed does not show the reasoning of the model family. MLP and CNN are fully confident on some images and give flat maps, so we excluded those images.</li>
+<li><strong>Upper-body evidence is at the top.</strong> For upper-body garments, Linear, MLP and LSTM put <strong>42.6–44.9%</strong> of their positive evidence in the top third (rows 0–8: collar, shoulders, sleeves). CNN puts 32.4% there and Transformer 36.0%. The EDA says that necklines and openings separate the close upper-body pairs, but these details can be small at 28 × 28. This can be one reason why Shirt stays the weakest class.</li>
+<li><strong>Concentration.</strong> Half of the evidence is in <strong>5.3%</strong> of the pixels for MLP and in 8.3% for Transformer. Pixel-specific evidence agrees with the large shift drops for flattened models in Section 3.</li>
+<li><strong>Example.</strong> All runs misclassify Ankle boot #23. For this image, most models use the sole and the edges of the toe and heel. A sandal can also have these parts (not tested).</li>
+</ul>
+<h3 id="4-1-lstm-row-probe">4.1 LSTM row probe</h3><p>The probe measures the LSTM accuracy after each number of rows and the row where each prediction becomes final.</p>
+<div aria-label="LSTM accuracy by rows read" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>LSTM test accuracy (%) after each number of rows read, mean ± SD over seeds 42–46</caption>
+<thead><tr><th scope="col">Rows read</th><th scope="col">Accuracy (%)</th></tr></thead>
+<tbody>
+<tr><th scope="row">7</th><td>20.78 ± 2.97</td></tr>
+<tr><th scope="row">14</th><td>39.84 ± 2.09</td></tr>
+<tr><th scope="row">18</th><td>54.91 ± 2.94</td></tr>
+<tr><th scope="row">21</th><td>68.89 ± 2.17</td></tr>
+<tr><th scope="row">24</th><td>82.59 ± 0.49</td></tr>
+<tr><th scope="row">26</th><td>85.82 ± 0.31</td></tr>
+<tr><th scope="row">28</th><td>88.11 ± 0.25</td></tr>
+</tbody></table></div>
+<div aria-label="Row where the LSTM prediction becomes final" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Row after which the LSTM prediction does not change again: median over the images of each class, then mean over seeds 42–46</caption>
+<thead><tr><th scope="col">Class</th><th scope="col">Row where the prediction becomes final</th><th scope="col">Seed range</th></tr></thead>
+<tbody>
+<tr><th scope="row">Bag</th><td>10.8</td><td>8–13</td></tr>
+<tr><th scope="row">Dress</th><td>11.2</td><td>7–13</td></tr>
+<tr><th scope="row">Trouser</th><td>12.4</td><td>11–13</td></tr>
+<tr><th scope="row">Sandal</th><td>16.2</td><td>10–20</td></tr>
+<tr><th scope="row">Ankle boot</th><td>17.6</td><td>12–22</td></tr>
+<tr><th scope="row">Coat</th><td>18.3</td><td>17–20</td></tr>
+<tr><th scope="row">Pullover</th><td>19.6</td><td>18–21</td></tr>
+<tr><th scope="row">T-shirt/top</th><td>20.0</td><td>19–21</td></tr>
+<tr><th scope="row">Sneaker</th><td>22.2</td><td>21–23</td></tr>
+<tr class="selected-epoch"><th scope="row">Shirt</th><td>23.4</td><td>22–24</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>LSTM decides late.</strong> The accuracy is <strong>39.84%</strong> after 14 rows (half of the image). LSTM gets its test accuracy (88.11%) only after row 28.</li>
+<li>Bag, Dress and Trouser become final after approximately 11–12 rows. Their outline is likely visible early. This agrees with the compact Trouser group in the EDA t-SNE.</li>
+<li><strong>Shirt becomes final last (row 23.4).</strong> This agrees with Section 1: Shirt is the weakest LSTM class, and Shirt → T-shirt/top is its largest error. The cue that separates Shirt can be in the lower rows only. We did not test this.</li>
+<li>The classifier trained only on the last hidden state. Thus, the early readings show less than the hidden state contains.</li>
+</ul>
+<h3 id="4-2-transformer-attention">4.2 Transformer attention</h3><p>The attention statistics measure how local and how selective each layer is.</p>
+<div aria-label="Transformer attention statistics" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Transformer attention by layer, mean ± SD over seeds 42–46. Distance in patches on the 7 × 7 grid. Entropy: 1.0 is uniform attention over all 49 patches.</caption>
+<thead><tr><th scope="col">Layer</th><th scope="col">Mean distance (patches)</th><th scope="col">Entropy</th><th scope="col">Lowest head entropy</th><th scope="col">Uniform distance (patches)</th></tr></thead>
+<tbody>
+<tr><th scope="row">1</th><td>3.57 ± 0.04</td><td>0.870 ± 0.023</td><td>0.819</td><td>3.609</td></tr>
+<tr><th scope="row">2</th><td>3.63 ± 0.05</td><td>0.488 ± 0.027</td><td>0.409</td><td>3.609</td></tr>
+</tbody></table></div>
+<div aria-label="Attention rollout by band" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Attention rollout weight in each band of patch rows, mean ± SD over seeds 42–46, against the area share of the band</caption>
+<thead><tr><th scope="col">Band</th><th scope="col">Rollout weight (%)</th><th scope="col">Area share (%)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Top 2 patch rows</th><td>30.5 ± 0.8</td><td>28.6</td></tr>
+<tr><th scope="row">Middle 3</th><td>41.4 ± 0.5</td><td>42.9</td></tr>
+<tr><th scope="row">Bottom 2</th><td>28.1 ± 0.6</td><td>28.6</td></tr>
+</tbody></table></div>
+<ul>
+<li>Layer 1 attention is almost uniform (entropy <strong>0.870</strong>). Layer 2 is more selective (0.488), but its mean attention distance (3.63 patches) is not shorter than that of uniform attention (3.609).</li>
+<li>Rollout gives each band almost its area share (top 30.5% against 28.6%). This agrees with the occlusion maps: Transformer puts 36.0% of its evidence in the top third, less than Linear, MLP and LSTM.</li>
+<li>These statistics do not show local attention like the fixed locality of CNN filters. The mean-pooled output is almost an average of patch features.</li>
+<li><strong>Link to Section 3.</strong> With almost uniform mixing, one corrupted patch can change all patches. This can explain the large drops under noise (27.18) and 12 × 12 occlusion (35.79). It can also explain the low seed agreement (r = 0.46). We did not test these links.</li>
+</ul>
+<p>Sections 5–7 use more runs to test these findings. The same <code>train.py</code> trained them, and <code>evaluate.py</code> evaluated them with the same protocol. The <a href="assignment1_runs.html#extension-runs">Run history</a> lists these runs.</p>
+</section>
+
+<section><h2 id="4-lstm-vs-gru">5. LSTM and GRU</h2><p>This step replaces the LSTM cell with a GRU cell and keeps all other settings.</p>
+<p>GRU removes the LSTM cell state and keeps one hidden state. A reset gate sets how much of the previous state goes into the candidate. An update gate <code>u</code> mixes the two: <code>h_t = (1 − u_t) ⊙ h̃_t + u_t ⊙ h_{t−1}</code>. When <code>u ≈ 1</code>, the model copies the state forward, as the LSTM forget path does (RNN slides, Sections 4–5). <a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/gru.py"><code>models/gru.py</code></a> replaces <code>nn.LSTM</code> with <code>nn.GRU</code> and changes nothing else: 28 rows of 28 pixels, hidden size 64.</p>
+<dl class="facts">
+<div><dt>Hypothesis</dt><dd>With 24% fewer parameters (18,698 against 24,714), GRU gets the same score as LSTM, and it has the same row-order robustness.</dd></div>
+<div><dt>Note</dt><dd>We do not compare the training and inference times of these runs.</dd></div>
+</dl>
+<div aria-label="LSTM and GRU summary" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>LSTM and GRU over seeds 42–46. Macro-F1 in %, mean ± SD. Paired gap: GRU − LSTM test macro-F1 by seed, mean [minimum, maximum] in pp.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Parameters</th><th scope="col">Validation macro-F1 (%)</th><th scope="col">Test macro-F1 (%)</th><th scope="col">Test median (%)</th><th scope="col">Selected epochs (seeds 42–46)</th><th scope="col">Paired gap (pp)</th><th scope="col">GRU better</th></tr></thead>
+<tbody>
+<tr><th scope="row">LSTM</th><td>24,714</td><td>89.80 ± 0.11</td><td>88.10 ± 0.21</td><td>88.11</td><td>13, 16, 15, 13, 14</td><td>–</td><td>–</td></tr>
+<tr class="selected-epoch"><th scope="row">GRU</th><td>18,698</td><td>90.32 ± 0.14</td><td>88.88 ± 0.20</td><td>88.81</td><td>16, 16, 14, 15, 16</td><td>+0.78 [0.55, 1.36]</td><td>5/5</td></tr>
+</tbody></table></div>
+<div aria-label="LSTM and GRU robustness" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test macro-F1 (%) under corruptions, mean ± SD over seeds 42–46. Shift directions are averaged in each axis.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Clean</th><th scope="col">Noise σ = 0.20</th><th scope="col">Shift 2 px horizontal</th><th scope="col">Shift 2 px vertical</th><th scope="col">Square 12 × 12</th><th scope="col">Contrast × 0.5</th></tr></thead>
+<tbody>
+<tr><th scope="row">LSTM</th><td>88.10 ± 0.21</td><td>77.28 ± 2.98</td><td>48.90 ± 1.88</td><td>80.39 ± 0.46</td><td>62.70 ± 1.44</td><td>80.44 ± 0.89</td></tr>
+<tr><th scope="row">GRU</th><td>88.88 ± 0.20</td><td>81.99 ± 0.91</td><td>53.00 ± 3.63</td><td>81.68 ± 0.26</td><td>63.50 ± 0.73</td><td>83.01 ± 0.93</td></tr>
+</tbody></table></div>
+<div aria-label="LSTM and GRU row probe" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test accuracy (%) after each number of rows read, mean ± SD over seeds 42–46</caption>
+<thead><tr><th scope="col">Rows read</th><th scope="col">7</th><th scope="col">14</th><th scope="col">18</th><th scope="col">21</th><th scope="col">24</th><th scope="col">28</th></tr></thead>
+<tbody>
+<tr><th scope="row">LSTM</th><td>20.78 ± 2.97</td><td>39.84 ± 2.09</td><td>54.91 ± 2.94</td><td>68.89 ± 2.17</td><td>82.59 ± 0.49</td><td>88.11 ± 0.25</td></tr>
+<tr><th scope="row">GRU</th><td>19.37 ± 3.28</td><td>41.39 ± 3.03</td><td>58.21 ± 1.84</td><td>73.16 ± 1.28</td><td>83.22 ± 0.54</td><td>88.96 ± 0.19</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>GRU is better than LSTM with fewer parameters.</strong> GRU gets <strong>88.88 ± 0.20</strong> and LSTM <strong>88.10 ± 0.21</strong>. The gap is <strong>+0.78 pp</strong>, GRU is better in <strong>5/5</strong> seeds, and the smallest paired gap is 0.55 pp. The gap is larger than the two seed SDs, so the data supports the difference. GRU has <strong>18,698</strong> parameters and LSTM has 24,714. Thus, the "same score" part of the hypothesis is false, and the result is better for GRU.</li>
+<li><strong>GRU can be under-trained.</strong> GRU selects epoch <strong>16 in 3/5</strong> seeds, and LSTM in 1/5. GRU also has the higher validation score (90.32 against 89.80). One possible cause: GRU optimizes faster in the fixed 16-epoch budget. The update gate can act as a gated skip (<code>u ≈ 1</code> copies <code>h</code>), and this gives a short gradient path over 28 steps. We did not test this mechanism. The slides say that the better cell depends on the task and the dataset, so this result applies only to this setup.</li>
+<li><strong>GRU keeps the LSTM row-order asymmetry.</strong> Under a 2-pixel vertical shift, GRU keeps <strong>81.68 ± 0.26</strong>. A horizontal shift decreases GRU to <strong>53.00 ± 3.63</strong>. LSTM shows the same pattern (80.39 against 48.90). A vertical shift moves rows in the sequence, and a horizontal shift changes each row vector (Section 3). The cell type does not remove this weakness.</li>
+<li><strong>GRU is a little more robust, with one exception.</strong> The gaps over LSTM are larger than the seed SDs under noise σ = 0.20 (<strong>81.99 ± 0.91</strong> against 77.28 ± 2.98), horizontal shift, vertical shift and contrast × 0.5 (83.01 against 80.44). Under the 12 × 12 square (63.50 ± 0.73 against 62.70 ± 1.44), the gap is smaller than the SD, so the data does not support it.</li>
+<li><strong>GRU also decides late, but it collects evidence earlier.</strong> After 7 rows, the accuracy difference is not supported (19.37 against 20.78). After 18 and 21 rows, GRU is better (<strong>58.21 against 54.91</strong>, <strong>73.16 against 68.89</strong>), and these gaps are larger than the SDs. At row 14 (41.39 against 39.84), the gap is smaller than the SD.</li>
+</ul>
+<p>The cell type does not change the row-order weakness. The next section changes the input order.</p>
+</section>
+
+<section><h2 id="5-representation-ablation">6. Representation ablation</h2><p>This step gives the same architecture the same image, but cut in a different way. The encoder and the training settings are fixed. The number of tokens, the token size and the input projection change with the cut, so TransformerRows has 19,242 parameters against 19,530. The classes are in <a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/lstm.py"><code>models/lstm.py</code></a> and <a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/transformer.py"><code>models/transformer.py</code></a>.</p>
+<aside class="idea"><p><strong>Prediction:</strong> LSTMColumns reverses the LSTM shift asymmetry. It is strong under horizontal shifts and weak under vertical shifts.</p></aside>
+<div aria-label="Representation summary" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Representation models over seeds 42–46. LSTMColumns changes the LSTM input. TransformerPatch7 and TransformerRows change the Transformer input. Macro-F1 in %, mean ± SD. Paired gap: variant − base model (LSTM or Transformer) test macro-F1 by seed, mean [minimum, maximum] in pp.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Input sequence</th><th scope="col">Parameters</th><th scope="col">Validation macro-F1 (%)</th><th scope="col">Test macro-F1 (%)</th><th scope="col">Test median (%)</th><th scope="col">Selected epochs (seeds 42–46)</th><th scope="col">Paired gap (pp)</th><th scope="col">Variant better</th></tr></thead>
+<tbody>
+<tr><th scope="row">LSTM</th><td>Rows, top to bottom: 28 tokens × 28</td><td>24,714</td><td>89.80 ± 0.11</td><td>88.10 ± 0.21</td><td>88.11</td><td>13, 16, 15, 13, 14</td><td>–</td><td>–</td></tr>
+<tr><th scope="row">LSTMColumns</th><td>Columns, left to right: 28 tokens × 28</td><td>24,714</td><td>88.84 ± 0.22</td><td>87.36 ± 0.23</td><td>87.37</td><td>16, 16, 15, 14, 15</td><td>−0.75 [−1.26, −0.41]</td><td>0/5</td></tr>
+<tr><th scope="row">Transformer</th><td>4 × 4 patches: 49 tokens × 16</td><td>19,530</td><td>88.48 ± 0.33</td><td>87.06 ± 0.36</td><td>87.00</td><td>16, 16, 15, 16, 16</td><td>–</td><td>–</td></tr>
+<tr><th scope="row">TransformerPatch7</th><td>7 × 7 patches: 16 tokens × 49</td><td>19,530</td><td>88.47 ± 0.43</td><td>86.80 ± 0.43</td><td>86.98</td><td>15, 15, 16, 16, 15</td><td>−0.26 [−1.07, 0.38]</td><td>2/5</td></tr>
+<tr class="selected-epoch"><th scope="row">TransformerRows</th><td>Rows: 28 tokens × 28</td><td>19,242</td><td>89.91 ± 0.29</td><td>88.44 ± 0.31</td><td>88.40</td><td>15, 15, 13, 16, 14</td><td>+1.38 [0.59, 1.92]</td><td>5/5</td></tr>
+</tbody></table></div>
+<div aria-label="Representation robustness" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Test macro-F1 (%) under corruptions, mean ± SD over seeds 42–46. Shift directions are averaged in each axis.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Clean</th><th scope="col">Noise σ = 0.20</th><th scope="col">Shift 2 px horizontal</th><th scope="col">Shift 2 px vertical</th><th scope="col">Square 12 × 12</th><th scope="col">Contrast × 0.5</th></tr></thead>
+<tbody>
+<tr><th scope="row">LSTM</th><td>88.10 ± 0.21</td><td>77.28 ± 2.98</td><td>48.90 ± 1.88</td><td>80.39 ± 0.46</td><td>62.70 ± 1.44</td><td>80.44 ± 0.89</td></tr>
+<tr><th scope="row">LSTMColumns</th><td>87.36 ± 0.23</td><td>72.59 ± 2.46</td><td>80.74 ± 1.63</td><td>71.68 ± 1.14</td><td>54.72 ± 0.66</td><td>80.96 ± 0.61</td></tr>
+<tr><th scope="row">Transformer</th><td>87.06 ± 0.36</td><td>59.88 ± 4.24</td><td>62.70 ± 3.40</td><td>74.34 ± 1.66</td><td>51.27 ± 4.01</td><td>83.44 ± 0.41</td></tr>
+<tr><th scope="row">TransformerPatch7</th><td>86.80 ± 0.43</td><td>69.89 ± 1.26</td><td>54.96 ± 1.92</td><td>72.31 ± 1.13</td><td>64.98 ± 1.30</td><td>82.04 ± 1.84</td></tr>
+<tr><th scope="row">TransformerRows</th><td>88.44 ± 0.31</td><td>78.62 ± 1.32</td><td>53.67 ± 0.54</td><td>79.54 ± 0.39</td><td>62.25 ± 2.12</td><td>83.95 ± 1.23</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Rows are better than columns for LSTM.</strong> LSTMColumns gets <strong>87.36 ± 0.23</strong>. This is <strong>−0.75 pp</strong> below LSTM, and it is better in <strong>0/5</strong> seeds. The gap is larger than the SDs, so the data supports the difference. LSTMColumns also loses more under noise σ = 0.20 (72.59 against 77.28) and the 12 × 12 square (54.72 against 62.70). One likely cause: a row is a full horizontal profile, for example sleeve width, the gap between trouser legs or a flat shoe sole (EDA: the two-leg silhouette of trousers, the horizontal silhouette of footwear). If garments are approximately symmetric left to right, a column sequence reads two almost equal copies of the same profile. We did not test these two ideas.</li>
+<li><strong>The shift asymmetry reverses, as the prediction says.</strong> LSTMColumns keeps <strong>80.74 ± 1.63</strong> under a 2-pixel horizontal shift, but only <strong>71.68 ± 1.14</strong> under a vertical shift. LSTM gets 48.90 and 80.39. The cell, the parameters and the training are the same. Thus, the <strong>sequence direction</strong>, not the cell type, sets which shift causes damage. A shift along the sequence moves tokens in time. A shift across the sequence changes each token. GRU (Section 5) gives the same result from the other side.</li>
+<li><strong>Larger patches: clean difference not supported, robustness changes.</strong> TransformerPatch7 is <strong>−0.26 pp</strong> in clean macro-F1 (better in 2/5 seeds, SD up to 0.43). Thus, the clean difference is not supported. TransformerPatch7 is much more stable under noise (<strong>69.89 ± 1.26</strong> against 59.88 ± 4.24) and the 12 × 12 square (<strong>64.98 ± 1.30</strong> against 51.27 ± 4.01). It is weaker under horizontal shift (54.96 against 62.70). A 49-pixel token likely averages per-pixel noise better than a 16-pixel token. We did not test this mechanism.</li>
+<li><strong>Row tokens are the best Transformer input.</strong> TransformerRows is <strong>+1.38 pp</strong> over Transformer in <strong>5/5</strong> seeds (<strong>88.44 ± 0.31</strong>), with fewer parameters (19,242). It is also above LSTM (88.10 ± 0.21), but the gap only just passes the criterion. Approximately half of all training pixels are 0 (EDA). Thus, many 4 × 4 patches contain mostly background, but each row token holds a full profile. Section 4 showed almost uniform attention and a mean-pooled output, so the Transformer mostly averages its tokens. An average of informative row tokens is likely better than an average of patch tokens that are mostly background. This is a hypothesis.</li>
+<li><strong>Row tokens also bring the row weakness.</strong> TransformerRows is strong under noise (<strong>78.62 ± 1.32</strong>), vertical shift (<strong>79.54 ± 0.39</strong>) and the 12 × 12 square (62.25 against 51.27). Under horizontal shift, it falls to <strong>53.67 ± 0.54</strong>. This is near LSTM (48.90) and below the 4 × 4 Transformer (62.70). The token geometry, not attention or recurrence, sets this trade-off. No representation here is robust on the two shift axes. Only CNN is near this (Section 3).</li>
+</ul>
+<p>No input representation removes the shift weakness. The next section changes the training images.</p>
+</section>
+
+<section><h2 id="6-augmentation">7. Shift and noise augmentation</h2><p>This step trains all five models again with random shifts and noise on the training images. Section 3 showed two weaknesses: flattened models fail under shifts, and CNN and Transformer fail under noise. <a href="https://github.com/quin210/dl-co3133/blob/main/Assignment1/models/augmented.py"><code>models/augmented.py</code></a> changes each <strong>training</strong> image each time the loader draws it. Validation, test and checkpoint selection use clean images.</p>
+<div aria-label="Test-time corruption and training-time augmentation" class="table-scroll" role="region" tabindex="0"><table><caption>Test-time corruption (Section 3) and training-time augmentation (this section). <a href="#noise-implementation">Section 2</a> gives the full noise rule.</caption>
+<thead><tr><th scope="col">Setting</th><th scope="col">Test-time corruption</th><th scope="col">Training-time augmentation</th></tr></thead>
+<tbody>
+<tr><th scope="row">Shift</th><td>Fixed 1, 2 or 3 px in one direction</td><td>Always: random integer dy, dx in {−2, …, 2} px. 24 of 25 draws move the image.</td></tr>
+<tr><th scope="row">Noise</th><td>σ = 0.05, 0.10, 0.20 on each test image, one fixed draw (seed 0)</td><td>σ = 0.10 on each training image with probability 0.5, a new draw for each batch</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Name:</strong> this is shift and noise augmentation, not training with noise only. The two changes occur together, so we cannot separate their effects.</li>
+<li><strong>Aim:</strong> measure how much of each weakness the augmentation removes, and its cost on clean test images.</li>
+<li><strong>Note:</strong> σ = 0.10 is the training level. σ = 0.20 tests two times that level.</li>
+</ul>
+<div aria-label="Augmented model summary" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Augmented models over seeds 42–46. Macro-F1 in %, mean ± SD. Paired gap: augmented − base model clean test macro-F1 by seed, mean [minimum, maximum] in pp.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Parameters</th><th scope="col">Validation macro-F1 (%)</th><th scope="col">Test macro-F1 (%)</th><th scope="col">Test median (%)</th><th scope="col">Selected epochs (seeds 42–46)</th><th scope="col">Paired gap (pp)</th><th scope="col">Augmented better</th></tr></thead>
+<tbody>
+<tr><th scope="row">AugmentedLinear</th><td>7,850</td><td>80.36 ± 0.15</td><td>78.49 ± 0.24</td><td>78.56</td><td>15, 9, 16, 11, 16</td><td>−5.66 [−5.98, −5.47]</td><td>0/5</td></tr>
+<tr><th scope="row">AugmentedMLP</th><td>203,530</td><td>88.28 ± 0.13</td><td>86.78 ± 0.21</td><td>86.84</td><td>16, 14, 15, 15, 15</td><td>−1.98 [−2.37, −1.58]</td><td>0/5</td></tr>
+<tr class="selected-epoch"><th scope="row">AugmentedCNN</th><td>105,866</td><td>91.43 ± 0.32</td><td>90.35 ± 0.25</td><td>90.41</td><td>16, 15, 15, 13, 16</td><td>−0.92 [−1.17, −0.60]</td><td>0/5</td></tr>
+<tr><th scope="row">AugmentedLSTM</th><td>24,714</td><td>87.91 ± 0.19</td><td>86.48 ± 0.46</td><td>86.63</td><td>15, 16, 16, 12, 14</td><td>−1.62 [−2.27, −1.39]</td><td>0/5</td></tr>
+<tr><th scope="row">AugmentedTransformer</th><td>19,530</td><td>85.07 ± 0.63</td><td>84.03 ± 0.69</td><td>84.40</td><td>16, 15, 16, 16, 16</td><td>−3.03 [−3.95, −2.32]</td><td>0/5</td></tr>
+</tbody></table></div>
+<div aria-label="Base and augmented robustness" class="table-scroll" role="region" tabindex="0"><table class="numeric"><caption>Base and augmented models: test macro-F1 (%) under corruptions, mean ± SD over seeds 42–46. Shift directions are averaged in each axis.</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Clean</th><th scope="col">Noise σ = 0.05</th><th scope="col">Noise σ = 0.10</th><th scope="col">Noise σ = 0.20</th><th scope="col">Shift 2 px horizontal</th><th scope="col">Shift 2 px vertical</th><th scope="col">Square 12 × 12</th><th scope="col">Contrast × 0.5</th></tr></thead>
+<tbody>
+<tr><th scope="row">Linear</th><td>84.15 ± 0.11</td><td>83.76 ± 0.09</td><td>82.85 ± 0.13</td><td>80.22 ± 0.64</td><td>51.92 ± 1.02</td><td>67.66 ± 0.44</td><td>66.19 ± 0.31</td><td>73.37 ± 1.04</td></tr>
+<tr><th scope="row">AugmentedLinear</th><td>78.49 ± 0.24</td><td>78.01 ± 0.25</td><td>77.24 ± 0.11</td><td>74.92 ± 0.24</td><td>75.88 ± 0.36</td><td>74.86 ± 0.30</td><td>51.33 ± 0.51</td><td>57.77 ± 2.56</td></tr>
+<tr><th scope="row">MLP</th><td>88.77 ± 0.23</td><td>88.44 ± 0.23</td><td>87.76 ± 0.21</td><td>85.21 ± 0.28</td><td>57.97 ± 1.69</td><td>72.15 ± 0.30</td><td>67.20 ± 1.29</td><td>81.93 ± 1.63</td></tr>
+<tr><th scope="row">AugmentedMLP</th><td>86.78 ± 0.21</td><td>86.63 ± 0.21</td><td>86.23 ± 0.15</td><td>84.70 ± 0.14</td><td>85.76 ± 0.10</td><td>84.77 ± 0.30</td><td>61.56 ± 0.70</td><td>78.91 ± 1.77</td></tr>
+<tr><th scope="row">CNN</th><td>91.27 ± 0.27</td><td>89.58 ± 0.64</td><td>84.47 ± 1.37</td><td>65.89 ± 3.66</td><td>79.74 ± 1.56</td><td>82.42 ± 0.43</td><td>72.85 ± 1.75</td><td>86.66 ± 1.17</td></tr>
+<tr class="selected-epoch"><th scope="row">AugmentedCNN</th><td>90.35 ± 0.25</td><td>89.95 ± 0.19</td><td>88.93 ± 0.25</td><td>82.70 ± 1.08</td><td>89.51 ± 0.02</td><td>89.05 ± 0.30</td><td>70.48 ± 0.31</td><td>83.59 ± 1.35</td></tr>
+<tr><th scope="row">LSTM</th><td>88.10 ± 0.21</td><td>87.79 ± 0.24</td><td>86.62 ± 0.44</td><td>77.28 ± 2.98</td><td>48.90 ± 1.88</td><td>80.39 ± 0.46</td><td>62.70 ± 1.44</td><td>80.44 ± 0.89</td></tr>
+<tr><th scope="row">AugmentedLSTM</th><td>86.48 ± 0.46</td><td>86.35 ± 0.49</td><td>85.99 ± 0.51</td><td>83.32 ± 0.88</td><td>85.51 ± 0.50</td><td>85.21 ± 0.55</td><td>58.63 ± 1.26</td><td>79.37 ± 0.54</td></tr>
+<tr><th scope="row">Transformer</th><td>87.06 ± 0.36</td><td>86.07 ± 0.28</td><td>82.41 ± 0.59</td><td>59.88 ± 4.24</td><td>62.70 ± 3.40</td><td>74.34 ± 1.66</td><td>51.27 ± 4.01</td><td>83.44 ± 0.41</td></tr>
+<tr><th scope="row">AugmentedTransformer</th><td>84.03 ± 0.69</td><td>83.67 ± 0.59</td><td>82.81 ± 0.55</td><td>76.91 ± 1.91</td><td>83.09 ± 0.74</td><td>82.27 ± 0.85</td><td>48.74 ± 3.65</td><td>79.30 ± 1.64</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Augmentation costs clean accuracy in each seed.</strong> Clean test macro-F1 decreases for all five models in 5/5 seeds. CNN has the smallest cost (<strong>−0.92</strong> pp) and Linear the largest (<strong>−5.66</strong> pp). The other costs are LSTM −1.62, MLP −1.98 and Transformer −3.03.</li>
+<li><strong>The cost follows the inductive bias.</strong> Convolution and pooling already tolerate small shifts, so CNN pays the least. Linear has one fixed weight for each pixel and cannot represent shift invariance. Thus, it must spread one template over many positions. We did not test this mechanism.</li>
+<li><strong>The shift weakness is gone.</strong> For a horizontal 2 px shift, LSTM goes from <strong>48.90 to 85.51</strong>, MLP from 57.97 to 85.76 and Linear from 51.92 to 75.88. AugmentedCNN keeps <strong>89.51 ± 0.02</strong> under a horizontal shift and 89.05 under a vertical shift, near its clean 90.35. The LSTM row asymmetry also goes away: 85.51 horizontal against 85.21 vertical.</li>
+<li><strong>Noise robustness improves where it was weak.</strong> At σ = 0.20, two times the training σ, CNN goes from <strong>65.89 to 82.70</strong>, Transformer from 59.88 to 76.91 and LSTM from 77.28 to 83.32. Linear (80.22 → 74.92) and MLP (85.21 → 84.70) were already robust to noise, and they lose a little.</li>
+<li><strong>Occlusion and contrast become worse for all five models.</strong> With a 12 × 12 square, Linear goes from 66.19 to 51.33 and CNN from 72.85 to 70.48. With contrast × 0.5, Linear goes from <strong>73.37 to 57.77</strong> and CNN from 86.66 to 83.59. The gain applies only to the corruptions in training. Part of each decrease comes from the lower clean score. But the Linear contrast decrease is much larger than its clean decrease.</li>
+<li>Training noise makes the background grey, and shifts move the garment. The models can learn to treat faint pixels as noise. Thus, a darker garment can look like noise, and the contrast score can decrease. We did not test this mechanism.</li>
+<li><strong>The value depends on the deployment.</strong> The test set is clean, so the clean cost is real. The robustness gain is important only if real images have shifts or noise. AugmentedCNN is still the best augmented model on clean images (90.35).</li>
+<li><strong>The 16-epoch budget can be too short.</strong> 11 of 25 augmented runs select epoch 16, and AugmentedTransformer does this in 4 of 5 seeds. Part of the clean cost can come from the budget. We did not test this.</li>
+<li><strong>Note.</strong> <code>metrics.json</code> for these runs records <code>"augmentation": null</code>, because <code>train.fit</code> writes a fixed value. The real augmentation is the one in <code>models/augmented.py</code>.</li>
+</ul>
+</section>
+
+<section><h2 id="7-summary">8. Summary</h2><p>The table gives the main result of each section.</p>
+<div aria-label="Summary of results" class="table-scroll" role="region" tabindex="0"><table><caption>Summary: topics, results and evidence</caption>
+<thead><tr><th scope="col">Topic</th><th scope="col">Result</th><th scope="col">Evidence (section)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Best model</th><td>CNN: <strong>91.27 ± 0.27</strong> macro-F1, the best F1 in all ten classes, better than each other model in 5/5 seeds. It stays best at approximately 25k parameters (90.51, above the full MLP at 88.77). Its larger parameter count does not explain the lead.</td><td><a href="#1-five-seed-errors">§1</a>; results: <a href="assignment1_results.html#5-training-seed-variability">seed variability</a> and <a href="assignment1_results.html#10-ablation-matched-parameter-budget">matched-budget ablation</a></td></tr>
+<tr><th scope="row">Hardest class</th><td>Shirt is the weakest class in all 25 runs (F1 0.599 for Linear to 0.751 for CNN). Upper-body confusions are 59–65% of the errors. <strong>146 images</strong> are wrong in all 25 runs, and 48 of them are Shirts. The difficulty is in the data, not in one model.</td><td><a href="#1-five-seed-errors">§1</a></td></tr>
+<tr><th scope="row">Failure under corruption</th><td>CNN is the most robust under shift, occlusion and contrast in 5/5 seeds. Noise reverses the ranking: from σ = 0.10, MLP is best. At σ = 0.20, CNN and Transformer lose more than 25 pp. LSTM keeps 75.96 under a 3 px vertical shift, but only 27.93 under a horizontal shift.</td><td><a href="#noise-implementation">§2</a>, <a href="#2-robustness">§3</a></td></tr>
+<tr><th scope="row">Interpretability</th><td>Explanations depend on the seed: Linear maps agree at r = 0.97, and CNN, LSTM and Transformer only at 0.46–0.57. LSTM decides late (39.84% after 14 rows; Shirt becomes final last, row 23.4). Transformer layer-2 attention is not shorter-range than uniform attention (3.63 patches against 3.609).</td><td><a href="#3-interpretability">§4</a></td></tr>
+<tr><th scope="row">GRU and LSTM</th><td>GRU is better by <strong>+0.78 pp</strong> in 5/5 seeds with 24% fewer parameters (18,698 against 24,714). Its mean is above LSTM under each corruption in the table, for example noise σ = 0.20: 81.99 against 77.28. The 12 × 12 square gap is not supported.</td><td><a href="#4-lstm-vs-gru">§5</a></td></tr>
+<tr><th scope="row">Input representation</th><td>The cut of the image matters. Columns reverse the LSTM asymmetry: horizontal 2 px 48.90 → 80.74, vertical 80.39 → 71.68. TransformerRows gains +1.38 pp in 5/5 seeds. For TransformerPatch7, the clean macro-F1 difference is not supported (−0.26, 2/5), but it is better under occlusion (64.98 against 51.27).</td><td><a href="#5-representation-ablation">§6</a></td></tr>
+<tr><th scope="row">Augmentation trade-off</th><td>Clean macro-F1 decreases in 5/5 seeds, by −0.92 (CNN) to −5.66 (Linear). Shift and noise robustness increase strongly (CNN noise 65.89 → 82.70). Occlusion and contrast × 0.5 become worse for all models.</td><td><a href="#6-augmentation">§7</a></td></tr>
+</tbody></table></div>
+<h3 id="8-1-eda">8.1 EDA predictions and results</h3><p>The <a href="assignment1_eda.html">EDA</a> found the closest class means among Pullover, Coat and Shirt, and t-SNE mixed these classes. The models confirm this: upper-body errors are the largest group, and Shirt is always the weakest class. But the most frequent error is Shirt → T-shirt/top, and this pair is only the fourth closest in the EDA (RMS 0.132).</p>
+<p>The EDA did not test robustness, but two of its facts agree with the failures. First, approximately half of all pixels are exactly 0, so noise changes a large area that is background in training. Second, the mean image shows a fixed region where clothing usually is, and flattened models can use that region. These links are hypotheses, and we did not test them.</p>
+<h3 id="8-2-limitations">8.2 Limitations</h3>
+<ul>
+<li>All results come from one training/validation split, five seeds and a fixed 16-epoch budget. Transformer and many augmented runs select the last epoch, so they can be under-trained.</li>
+<li>The corruptions are synthetic and use fixed random seeds. We did not test the stated mechanisms, for example dense averaging against noise, attention range and the contrast loss after augmentation.</li>
+</ul>
+</section>
+</main>
+<nav class="page-turn" aria-label="Report reading order"><a href="assignment1_results.html"><small>Previous</small>Results &amp; errors</a><a href="assignment1_runs.html"><small>Next</small>Run history</a></nav>
+</div>
+</body>
+</html>
