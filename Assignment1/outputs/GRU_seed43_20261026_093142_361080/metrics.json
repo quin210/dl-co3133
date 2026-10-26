@@ -1,0 +1,49 @@
+{
+  "model": "GRU",
+  "model_class": "GRUClassifier",
+  "seed": 43,
+  "best_epoch": 16,
+  "epochs_run": 16,
+  "parameters": 18698,
+  "fit_seconds": 66.83981137501542,
+  "train": {
+    "loss": 0.2320391785038842,
+    "accuracy": 0.9153703703703704,
+    "macro_f1": 0.9145141677355701
+  },
+  "validation": {
+    "loss": 0.2768524840672811,
+    "accuracy": 0.9038333333333334,
+    "macro_f1": 0.9029842917557177,
+    "inference_ms": 0.031816493176544704
+  },
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "max_epochs": 16,
+  "clip_norm": 5.0,
+  "optimizer": "Adam",
+  "checkpoint_rule": "highest validation macro-F1; earliest tie",
+  "augmentation": null,
+  "scheduler": null,
+  "weight_decay": 0.0,
+  "device": "cpu",
+  "threads": 4,
+  "source_commit": "4f6a1f5e1c9318b5e91195b7f3347957df1c0f2f",
+  "source_uncommitted": true,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.14.0",
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1",
+    "platform": "macOS-26.7.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "timing": "epoch training, validation, history writes and best-weight copies",
+  "test": {
+    "loss": 0.3107221527993679,
+    "accuracy": 0.8893,
+    "macro_f1": 0.8881032292255806,
+    "inference_ms": 0.029836766596417874
+  },
+  "inference_timing": "median of 3 full passes after 1 warmup; DataLoader + forward + argmax; no metrics"
+}
