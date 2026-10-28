@@ -23,10 +23,3 @@ Instructor: Lê Thành Sách
 | A3 | Multimodal Deep Learning | 30% |
 
 
-
-
-## Links
-
-- Reports: `reports/`
-- Assignment pages: https://quin210.github.io/dl-co3133/
-- AI usage disclosure: [AI_USAGE.md](AI_USAGE.md)
