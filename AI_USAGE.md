@@ -82,6 +82,18 @@ editing**, not as substitutes for the group's own work. In particular:
   analysis was implemented and run by the group on the actual dataset, and its
   interpretation was checked against the produced outputs.
 
+## 5. Slide Preparation
+
+- **Purpose:** Support in preparing the presentation slides for Assignment 1.
+- **Stage:** After the experiments and report were finished.
+- **Scope of AI contribution:** Suggestions on slide structure and flow, and
+  wording/layout refinement of slide text drawn from the group's own report. No new
+  results, metrics, figures or claims were introduced by AI.
+- **How output was used and verified:** The group wrote and selected all slide content,
+  checked every number and figure on the slides against the report and the actual run
+  outputs, and rejected suggestions that changed meaning.
+- **Verification sources:** Group report; saved run outputs (`metrics.json`, `history.csv`).
+
 ---
 
 <!--
