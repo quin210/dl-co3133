@@ -18,4 +18,4 @@ runs/
 !/experiments/a1_m1/run_001/training/*/best.pt
 /experiments/a1_m1/run_001/eda/*.npz
 /experiments/a1_m1/run_001/eda/*.npy
-/experiments/a1_m1/run_001/gallery_indices.npy
+/experiments/a1_m1/run_001/gallery_indices.npyAssignment2/outputs_smoke/

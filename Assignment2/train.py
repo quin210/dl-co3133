@@ -1,3 +1,4 @@
+import argparse
 import copy
 import csv
 import json
@@ -13,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
 import torch
+import yaml
 from sklearn.metrics import accuracy_score, f1_score
 from torch import nn
 from torch.utils.data import DataLoader
@@ -21,20 +23,27 @@ from data_loader import get_data_loaders
 from models.cnn import CNN
 from models.resnet import ResNet18
 
-# the same batch size, seed and selection rule apply to every model
-BATCH_SIZE = 64
-CLIP_NORM = 5.0
-# M2 draft uses one seed; more seeds are added for the final report
-SEEDS = (42,)
-THREADS = 16
-DEVICE = torch.device("cpu")
+# every hyperparameter comes from configs/a2.yaml so reported runs trace back to one committed file
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "configs" / "a2.yaml"
+CONFIG = yaml.safe_load(CONFIG_PATH.read_text())
+SHARED = CONFIG["shared"]
+BATCH_SIZE = SHARED["batch_size"]
+CLIP_NORM = SHARED["clip_norm"]
+SEEDS = tuple(SHARED["seeds"])
+THREADS = SHARED["threads"]
+DEVICE = torch.device(SHARED["device"])
 OUTPUTS = Path(__file__).resolve().parent / "outputs"
+SMOKE_OUTPUTS = Path(__file__).resolve().parent / "outputs_smoke"
+
+def builder(settings):
+    if settings["model"] == "CNN":
+        return lambda: CNN()
+    if settings["model"] == "ResNet18":
+        return lambda: ResNet18(freeze_backbone=settings["freeze_backbone"])
+    raise ValueError("unknown model %r" % settings["model"])
+
 # epochs and learning rate differ because the models start from different weights
-RUNS = {
-    "CNN": {"build": lambda: CNN(), "epochs": 12, "lr": 1e-3},
-    "ResNet18Frozen": {"build": lambda: ResNet18(freeze_backbone=True), "epochs": 6, "lr": 1e-3},
-    "ResNet18FineTune": {"build": lambda: ResNet18(freeze_backbone=False), "epochs": 4, "lr": 1e-4},
-}
+RUNS = {name: dict(settings, build=builder(settings)) for name, settings in CONFIG["runs"].items()}
 
 def set_seed(seed):
     random.seed(seed)
@@ -42,13 +51,15 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.set_num_threads(THREADS)
 
-def run_epoch(model, loader, optimizer=None, log_every=0):
+def run_epoch(model, loader, optimizer=None, log_every=0, max_steps=0):
     training = optimizer is not None
     model.train(training)
     total_loss = 0.0
     labels, predictions = [], []
     with torch.set_grad_enabled(training):
         for step, (images, targets) in enumerate(loader, 1):
+            if max_steps and step > max_steps:
+                break
             images, targets = images.to(DEVICE), targets.to(DEVICE)
             if training:
                 optimizer.zero_grad(set_to_none=True)
@@ -88,21 +99,25 @@ def save_curves(history, folder, name, best_epoch):
     fig.savefig(folder / "learning_curves.png", dpi=150)
     plt.close(fig)
 
-def fit(name, seed=42):
+def fit(name, seed=42, smoke=False):
     settings = RUNS[name]
+    # smoke test: 1 epoch of a few batches, written to a separate folder that evaluate.py never reads
+    epochs = 1 if smoke else settings["epochs"]
+    max_steps = 5 if smoke else 0
     set_seed(seed)
     model = settings["build"]().to(DEVICE)
-    train_loader, val_loader, _, data = get_data_loaders(BATCH_SIZE, seed)
+    train_loader, val_loader, _, data = get_data_loaders(BATCH_SIZE, seed, augment=settings["augment"])
     trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
     optimizer = torch.optim.Adam(trainable, lr=settings["lr"])
-    folder = OUTPUTS / ("%s_seed%d_%s" % (name, seed, datetime.now().strftime("%Y%m%d_%H%M%S_%f")))
+    root = SMOKE_OUTPUTS if smoke else OUTPUTS
+    folder = root / ("%s_seed%d_%s" % (name, seed, datetime.now().strftime("%Y%m%d_%H%M%S_%f")))
     folder.mkdir(parents=True)
     history, best_state, best_f1, best_epoch = [], None, -1.0, 0
     start = time.perf_counter()
-    for epoch in range(1, settings["epochs"] + 1):
+    for epoch in range(1, epochs + 1):
         epoch_start = time.perf_counter()
-        train_metrics, _, _ = run_epoch(model, train_loader, optimizer, log_every=50)
-        val_metrics, _, _ = run_epoch(model, val_loader)
+        train_metrics, _, _ = run_epoch(model, train_loader, optimizer, log_every=50, max_steps=max_steps)
+        val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps)
         row = {"epoch": epoch}
         row.update({"train_" + key: value for key, value in train_metrics.items()})
         row.update({"val_" + key: value for key, value in val_metrics.items()})
@@ -123,23 +138,24 @@ def fit(name, seed=42):
     # final train metrics use the best weights without augmentation
     train_loader.dataset.augment = False
     fixed_train = DataLoader(train_loader.dataset, batch_size=BATCH_SIZE, shuffle=False)
-    train_metrics, _, _ = run_epoch(model, fixed_train)
-    val_metrics, _, _ = run_epoch(model, val_loader)
+    train_metrics, _, _ = run_epoch(model, fixed_train, max_steps=max_steps)
+    val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps)
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent,
                             capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=Path(__file__).parent,
                            capture_output=True, text=True).stdout.strip()
     info = {
         "model": name, "model_class": type(model).__name__, "seed": seed,
-        "best_epoch": best_epoch, "epochs_run": settings["epochs"],
+        "best_epoch": best_epoch, "epochs_run": epochs, "smoke_test": smoke,
         "parameters": sum(parameter.numel() for parameter in model.parameters()),
         "trainable_parameters": sum(parameter.numel() for parameter in trainable),
         "fit_seconds": fit_seconds, "train": train_metrics, "validation": val_metrics,
         "batch_size": BATCH_SIZE, "learning_rate": settings["lr"],
         "max_epochs": settings["epochs"], "clip_norm": CLIP_NORM,
-        "optimizer": "Adam", "checkpoint_rule": "highest validation macro-F1; earliest tie",
-        "augmentation": "random horizontal and vertical flip", "scheduler": None, "weight_decay": 0.0,
-        "pretrained": "ImageNet1K_V1" if name.startswith("ResNet") else None,
+        "optimizer": SHARED["optimizer"], "checkpoint_rule": SHARED["checkpoint_rule"],
+        "augment": settings["augment"], "augmentation": CONFIG["augmentations"][settings["augment"]],
+        "scheduler": SHARED["scheduler"], "weight_decay": SHARED["weight_decay"],
+        "pretrained": settings["pretrained"], "config_file": "configs/a2.yaml",
         "device": str(DEVICE), "threads": THREADS, "source_commit": commit,
         "source_uncommitted": bool(dirty),
         "environment": {"python": sys.version.split()[0], "torch": str(torch.__version__),
@@ -154,10 +170,18 @@ def fit(name, seed=42):
     return folder
 
 def main():
-    names = sys.argv[1:] or list(RUNS)
-    for seed in SEEDS:
+    parser = argparse.ArgumentParser(description="Train the Assignment 2 models listed in configs/a2.yaml")
+    parser.add_argument("models", nargs="*", help="run names from configs/a2.yaml (default: all)")
+    parser.add_argument("--seeds", type=int, nargs="+", default=list(SEEDS), help="override the seeds in the config")
+    parser.add_argument("--smoke", action="store_true", help="1 epoch of 5 batches per model, saved to outputs_smoke/")
+    args = parser.parse_args()
+    names = args.models or list(RUNS)
+    unknown = [name for name in names if name not in RUNS]
+    if unknown:
+        parser.error("unknown run(s) %s; choose from %s" % (unknown, list(RUNS)))
+    for seed in args.seeds:
         for name in names:
-            fit(name, seed)
+            fit(name, seed, smoke=args.smoke)
 
 if __name__ == "__main__":
     main()

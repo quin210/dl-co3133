@@ -1,0 +1,50 @@
+shared:
+  batch_size: 64
+  clip_norm: 5.0
+  seeds: [42, 43, 44, 45, 46]
+  threads: 14
+  device: cpu            
+  optimizer: Adam
+  weight_decay: 0.0
+  scheduler: null
+  checkpoint_rule: highest validation macro-F1; earliest tie
+  image_size: 224
+  normalisation: ImageNet mean and std
+
+augmentations:
+  none: no augmentation
+  flip: random horizontal and vertical flip (p=0.5 each)
+  strong: flip + RandomResizedCrop(224, scale 0.6-1.0, ratio 0.75-1.33) + ColorJitter(brightness 0.3, contrast 0.3, saturation 0.3, hue 0.05)
+
+runs:
+  CNN:
+    model: CNN
+    pretrained: null
+    epochs: 25        
+    lr: 1.0e-3
+    augment: flip
+
+  ResNet18Frozen:
+    model: ResNet18
+    freeze_backbone: true
+    pretrained: ImageNet1K_V1
+    epochs: 6
+    lr: 1.0e-3
+    augment: flip
+
+  ResNet18FineTune:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: flip
+
+
+  ResNet18FineTuneStrongAug:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: strong

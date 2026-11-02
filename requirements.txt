@@ -12,3 +12,4 @@ jupyterlab==4.6.3
 torchvision
 pillow
 huggingface_hub
+pyyaml
