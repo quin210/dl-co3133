@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import torch
 from torch.utils.data import DataLoader, Dataset
+from torchvision.transforms import v2
 
 ROOT = Path(__file__).resolve().parent.parent / "data" / "tomato"
 RAW = ROOT / "raw"
@@ -43,29 +44,58 @@ def read_tomato():
     cached = np.load(CACHE)
     return cached["images"], cached["labels"], cached["splits"], cached["paths"]
 
+# augmentation presets; "strong" is the A2 ablation and is described in configs/a2.yaml
+AUGMENTATIONS = ("none", "flip", "strong")
+STRONG = v2.Compose([
+    v2.RandomResizedCrop(SIZE, scale=(0.6, 1.0), ratio=(0.75, 1.33), antialias=True),
+    v2.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.05),
+])
+
+def check_augment(augment):
+    # older code passes True / False; map them to the presets
+    if augment is True:
+        return "flip"
+    if augment is False or augment is None:
+        return "none"
+    if augment not in AUGMENTATIONS:
+        raise ValueError("augment must be one of %s, got %r" % (AUGMENTATIONS, augment))
+    return augment
+
 class TomatoDataset(Dataset):
     # keep uint8 pixels and normalize per batch to save memory
-    def __init__(self, images, labels, augment=False):
+    def __init__(self, images, labels, augment="none"):
         self.images = torch.from_numpy(images).permute(0, 3, 1, 2)
         self.labels = torch.from_numpy(labels.astype(np.int64))
         self.augment = augment
         self.mean = torch.tensor(MEAN).view(3, 1, 1)
         self.std = torch.tensor(STD).view(3, 1, 1)
 
+    @property
+    def augment(self):
+        return self._augment
+
+    @augment.setter
+    def augment(self, value):
+        # train.py switches augmentation off with augment = False before the final train metrics
+        self._augment = check_augment(value)
+
     def __len__(self):
         return len(self.labels)
 
     def __getitem__(self, index):
         image = self.images[index]
-        if self.augment:
+        if self.augment in ("flip", "strong"):
             if torch.rand(1) < 0.5:
                 image = image.flip(2)
             if torch.rand(1) < 0.5:
                 image = image.flip(1)
+        if self.augment == "strong":
+            # operates on uint8 pixels before normalisation; randomness comes from the seeded torch RNG
+            image = STRONG(image)
         image = (image.float() / 255 - self.mean) / self.std
         return image, self.labels[index]
 
-def get_data_loaders(batch_size=64, seed=42, augment=True):
+def get_data_loaders(batch_size=64, seed=42, augment="flip"):
     images, labels, splits, _ = read_tomato()
     parts = [splits == split_id for split_id in range(3)]
     train = TomatoDataset(images[parts[0]], labels[parts[0]], augment)
@@ -76,7 +106,7 @@ def get_data_loaders(batch_size=64, seed=42, augment=True):
     val_loader = DataLoader(validation, batch_size=batch_size, shuffle=False, num_workers=0)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False, num_workers=0)
     metadata = {"split": "as published in the dataset repository", "train": len(train), "validation": len(validation),
-                "test": len(test), "mean": list(MEAN), "std": list(STD), "size": SIZE}
+                "test": len(test), "mean": list(MEAN), "std": list(STD), "size": SIZE, "augment": train.augment}
     return train_loader, val_loader, test_loader, metadata
 
 def main():

@@ -1,0 +1,997 @@
+  step 50/226 | loss 1.1126
+  step 100/226 | loss 0.8938
+  step 150/226 | loss 0.7585
+  step 200/226 | loss 0.8105
+CNN seed 42 epoch 01 | loss 1.0200/0.6184 | accuracy train 0.6770 val 0.7996 | val F1 0.7251 | 68s
+  step 50/226 | loss 0.6008
+  step 100/226 | loss 0.4492
+  step 150/226 | loss 0.7300
+  step 200/226 | loss 0.6354
+CNN seed 42 epoch 02 | loss 0.7041/0.5242 | accuracy train 0.7811 val 0.8241 | val F1 0.7380 | 69s
+  step 50/226 | loss 0.5647
+  step 100/226 | loss 0.6597
+  step 150/226 | loss 0.7174
+  step 200/226 | loss 0.5604
+CNN seed 42 epoch 03 | loss 0.6209/0.3829 | accuracy train 0.8078 val 0.8875 | val F1 0.8412 | 67s
+  step 50/226 | loss 0.5889
+  step 100/226 | loss 0.5288
+  step 150/226 | loss 0.4499
+  step 200/226 | loss 0.6731
+CNN seed 42 epoch 04 | loss 0.5541/0.4052 | accuracy train 0.8278 val 0.8786 | val F1 0.8326 | 68s
+  step 50/226 | loss 0.4267
+  step 100/226 | loss 0.4676
+  step 150/226 | loss 0.4397
+  step 200/226 | loss 0.6577
+CNN seed 42 epoch 05 | loss 0.5196/0.3476 | accuracy train 0.8411 val 0.9009 | val F1 0.8739 | 69s
+  step 50/226 | loss 0.4598
+  step 100/226 | loss 0.4723
+  step 150/226 | loss 0.4052
+  step 200/226 | loss 0.6561
+CNN seed 42 epoch 06 | loss 0.4852/0.3319 | accuracy train 0.8457 val 0.9020 | val F1 0.8676 | 69s
+  step 50/226 | loss 0.2427
+  step 100/226 | loss 0.5104
+  step 150/226 | loss 0.7053
+  step 200/226 | loss 0.5259
+CNN seed 42 epoch 07 | loss 0.4529/0.2770 | accuracy train 0.8592 val 0.9154 | val F1 0.8803 | 69s
+  step 50/226 | loss 0.4222
+  step 100/226 | loss 0.3761
+  step 150/226 | loss 0.3938
+  step 200/226 | loss 0.6373
+CNN seed 42 epoch 08 | loss 0.4341/0.3130 | accuracy train 0.8646 val 0.8976 | val F1 0.8473 | 68s
+  step 50/226 | loss 0.4148
+  step 100/226 | loss 0.2291
+  step 150/226 | loss 0.3560
+  step 200/226 | loss 0.3159
+CNN seed 42 epoch 09 | loss 0.4095/0.4452 | accuracy train 0.8698 val 0.8580 | val F1 0.8261 | 67s
+  step 50/226 | loss 0.4418
+  step 100/226 | loss 0.5238
+  step 150/226 | loss 0.2545
+  step 200/226 | loss 0.3351
+CNN seed 42 epoch 10 | loss 0.3898/0.2727 | accuracy train 0.8775 val 0.9148 | val F1 0.8823 | 67s
+  step 50/226 | loss 0.5110
+  step 100/226 | loss 0.4873
+  step 150/226 | loss 0.5197
+  step 200/226 | loss 0.3849
+CNN seed 42 epoch 11 | loss 0.3852/0.3164 | accuracy train 0.8764 val 0.8970 | val F1 0.8490 | 67s
+  step 50/226 | loss 0.4237
+  step 100/226 | loss 0.3779
+  step 150/226 | loss 0.6529
+  step 200/226 | loss 0.2708
+CNN seed 42 epoch 12 | loss 0.3727/0.2315 | accuracy train 0.8809 val 0.9287 | val F1 0.9038 | 67s
+  step 50/226 | loss 0.5578
+  step 100/226 | loss 0.4664
+  step 150/226 | loss 0.2413
+  step 200/226 | loss 0.3128
+CNN seed 42 epoch 13 | loss 0.3547/0.2602 | accuracy train 0.8874 val 0.9154 | val F1 0.8788 | 69s
+  step 50/226 | loss 0.4105
+  step 100/226 | loss 0.4262
+  step 150/226 | loss 0.2747
+  step 200/226 | loss 0.1035
+CNN seed 42 epoch 14 | loss 0.3300/0.2183 | accuracy train 0.8971 val 0.9276 | val F1 0.8995 | 69s
+  step 50/226 | loss 0.1807
+  step 100/226 | loss 0.3621
+  step 150/226 | loss 0.2760
+  step 200/226 | loss 0.3154
+CNN seed 42 epoch 15 | loss 0.3366/0.2456 | accuracy train 0.8940 val 0.9198 | val F1 0.8911 | 69s
+  step 50/226 | loss 0.2399
+  step 100/226 | loss 0.2920
+  step 150/226 | loss 0.2449
+  step 200/226 | loss 0.2551
+CNN seed 42 epoch 16 | loss 0.3146/0.2051 | accuracy train 0.8982 val 0.9343 | val F1 0.9126 | 69s
+  step 50/226 | loss 0.4199
+  step 100/226 | loss 0.1523
+  step 150/226 | loss 0.3775
+  step 200/226 | loss 0.2880
+CNN seed 42 epoch 17 | loss 0.3124/0.2069 | accuracy train 0.8985 val 0.9287 | val F1 0.8968 | 69s
+  step 50/226 | loss 0.4050
+  step 100/226 | loss 0.2699
+  step 150/226 | loss 0.4730
+  step 200/226 | loss 0.2588
+CNN seed 42 epoch 18 | loss 0.2951/0.2022 | accuracy train 0.9083 val 0.9360 | val F1 0.9077 | 69s
+  step 50/226 | loss 0.1631
+  step 100/226 | loss 0.3758
+  step 150/226 | loss 0.1467
+  step 200/226 | loss 0.4175
+CNN seed 42 epoch 19 | loss 0.3006/0.1758 | accuracy train 0.9050 val 0.9465 | val F1 0.9246 | 69s
+  step 50/226 | loss 0.2168
+  step 100/226 | loss 0.1982
+  step 150/226 | loss 0.1403
+  step 200/226 | loss 0.2586
+CNN seed 42 epoch 20 | loss 0.2869/0.1658 | accuracy train 0.9047 val 0.9482 | val F1 0.9276 | 69s
+  step 50/226 | loss 0.1971
+  step 100/226 | loss 0.3919
+  step 150/226 | loss 0.4403
+  step 200/226 | loss 0.1799
+CNN seed 42 epoch 21 | loss 0.2819/0.1558 | accuracy train 0.9093 val 0.9477 | val F1 0.9257 | 69s
+  step 50/226 | loss 0.1898
+  step 100/226 | loss 0.3625
+  step 150/226 | loss 0.2780
+  step 200/226 | loss 0.2522
+CNN seed 42 epoch 22 | loss 0.2742/0.1760 | accuracy train 0.9110 val 0.9421 | val F1 0.9155 | 69s
+  step 50/226 | loss 0.3251
+  step 100/226 | loss 0.3458
+  step 150/226 | loss 0.4830
+  step 200/226 | loss 0.1968
+CNN seed 42 epoch 23 | loss 0.2697/0.2105 | accuracy train 0.9127 val 0.9321 | val F1 0.9028 | 69s
+  step 50/226 | loss 0.2330
+  step 100/226 | loss 0.2117
+  step 150/226 | loss 0.2056
+  step 200/226 | loss 0.4272
+CNN seed 42 epoch 24 | loss 0.2635/0.1571 | accuracy train 0.9176 val 0.9538 | val F1 0.9355 | 69s
+  step 50/226 | loss 0.1245
+  step 100/226 | loss 0.3247
+  step 150/226 | loss 0.1421
+  step 200/226 | loss 0.1879
+CNN seed 42 epoch 25 | loss 0.2671/0.2016 | accuracy train 0.9142 val 0.9326 | val F1 0.9053 | 69s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/CNN_seed42_20261103_073310_915821
+  step 50/226 | loss 0.9201
+  step 100/226 | loss 0.6329
+  step 150/226 | loss 0.6935
+  step 200/226 | loss 0.5188
+ResNet18Frozen seed 42 epoch 01 | loss 0.8141/0.4787 | accuracy train 0.7570 val 0.8653 | val F1 0.8069 | 365s
+  step 50/226 | loss 0.3398
+  step 100/226 | loss 0.3975
+  step 150/226 | loss 0.4130
+  step 200/226 | loss 0.6604
+ResNet18Frozen seed 42 epoch 02 | loss 0.4594/0.3793 | accuracy train 0.8615 val 0.8920 | val F1 0.8475 | 364s
+  step 50/226 | loss 0.3445
+  step 100/226 | loss 0.3290
+  step 150/226 | loss 0.4610
+  step 200/226 | loss 0.2938
+ResNet18Frozen seed 42 epoch 03 | loss 0.3918/0.3372 | accuracy train 0.8804 val 0.9020 | val F1 0.8585 | 366s
+  step 50/226 | loss 0.3209
+  step 100/226 | loss 0.3889
+  step 150/226 | loss 0.4093
+  step 200/226 | loss 0.3910
+ResNet18Frozen seed 42 epoch 04 | loss 0.3508/0.3071 | accuracy train 0.8898 val 0.9076 | val F1 0.8697 | 364s
+  step 50/226 | loss 0.2768
+  step 100/226 | loss 0.2969
+  step 150/226 | loss 0.4548
+  step 200/226 | loss 0.3543
+ResNet18Frozen seed 42 epoch 05 | loss 0.3236/0.3032 | accuracy train 0.8991 val 0.9065 | val F1 0.8664 | 370s
+  step 50/226 | loss 0.3983
+  step 100/226 | loss 0.2893
+  step 150/226 | loss 0.3120
+  step 200/226 | loss 0.2851
+ResNet18Frozen seed 42 epoch 06 | loss 0.3069/0.2956 | accuracy train 0.9056 val 0.9076 | val F1 0.8664 | 363s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18Frozen_seed42_20261103_080229_966932
+  step 50/226 | loss 0.1975
+  step 100/226 | loss 0.1115
+  step 150/226 | loss 0.1611
+  step 200/226 | loss 0.1009
+ResNet18FineTune seed 42 epoch 01 | loss 0.2836/0.1691 | accuracy train 0.9077 val 0.9399 | val F1 0.9139 | 578s
+  step 50/226 | loss 0.0251
+  step 100/226 | loss 0.1093
+  step 150/226 | loss 0.1320
+  step 200/226 | loss 0.0331
+ResNet18FineTune seed 42 epoch 02 | loss 0.0975/0.0957 | accuracy train 0.9680 val 0.9705 | val F1 0.9576 | 578s
+  step 50/226 | loss 0.0303
+  step 100/226 | loss 0.0160
+  step 150/226 | loss 0.0288
+  step 200/226 | loss 0.0348
+ResNet18FineTune seed 42 epoch 03 | loss 0.0673/0.0847 | accuracy train 0.9785 val 0.9722 | val F1 0.9602 | 580s
+  step 50/226 | loss 0.0180
+  step 100/226 | loss 0.1199
+  step 150/226 | loss 0.0325
+  step 200/226 | loss 0.0306
+ResNet18FineTune seed 42 epoch 04 | loss 0.0570/0.0917 | accuracy train 0.9812 val 0.9744 | val F1 0.9620 | 581s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTune_seed42_20261103_084504_486039
+  step 50/226 | loss 0.3101
+  step 100/226 | loss 0.1430
+  step 150/226 | loss 0.2360
+  step 200/226 | loss 0.1936
+ResNet18FineTuneStrongAug seed 42 epoch 01 | loss 0.3350/0.1378 | accuracy train 0.8897 val 0.9538 | val F1 0.9385 | 661s
+  step 50/226 | loss 0.0663
+  step 100/226 | loss 0.1754
+  step 150/226 | loss 0.1743
+  step 200/226 | loss 0.1304
+ResNet18FineTuneStrongAug seed 42 epoch 02 | loss 0.1373/0.1337 | accuracy train 0.9554 val 0.9493 | val F1 0.9375 | 661s
+  step 50/226 | loss 0.0695
+  step 100/226 | loss 0.0669
+  step 150/226 | loss 0.0833
+  step 200/226 | loss 0.0726
+ResNet18FineTuneStrongAug seed 42 epoch 03 | loss 0.1036/0.1035 | accuracy train 0.9654 val 0.9649 | val F1 0.9534 | 669s
+  step 50/226 | loss 0.0604
+  step 100/226 | loss 0.1093
+  step 150/226 | loss 0.0995
+  step 200/226 | loss 0.0955
+ResNet18FineTuneStrongAug seed 42 epoch 04 | loss 0.0847/0.1181 | accuracy train 0.9715 val 0.9644 | val F1 0.9499 | 660s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTuneStrongAug_seed42_20261103_092948_629495
+  step 50/226 | loss 1.0213
+  step 100/226 | loss 0.8854
+  step 150/226 | loss 0.7941
+  step 200/226 | loss 0.6484
+CNN seed 43 epoch 01 | loss 1.0118/0.6656 | accuracy train 0.6838 val 0.7706 | val F1 0.6489 | 70s
+  step 50/226 | loss 0.8342
+  step 100/226 | loss 0.8291
+  step 150/226 | loss 0.5175
+  step 200/226 | loss 0.4143
+CNN seed 43 epoch 02 | loss 0.7203/0.4855 | accuracy train 0.7770 val 0.8474 | val F1 0.7508 | 71s
+  step 50/226 | loss 0.8088
+  step 100/226 | loss 0.5277
+  step 150/226 | loss 0.5543
+  step 200/226 | loss 0.5126
+CNN seed 43 epoch 03 | loss 0.6347/0.4332 | accuracy train 0.8021 val 0.8747 | val F1 0.8282 | 70s
+  step 50/226 | loss 0.5664
+  step 100/226 | loss 0.5949
+  step 150/226 | loss 0.5699
+  step 200/226 | loss 0.6572
+CNN seed 43 epoch 04 | loss 0.5635/0.3299 | accuracy train 0.8254 val 0.9081 | val F1 0.8779 | 70s
+  step 50/226 | loss 0.3440
+  step 100/226 | loss 0.5053
+  step 150/226 | loss 0.5664
+  step 200/226 | loss 0.4302
+CNN seed 43 epoch 05 | loss 0.5317/0.3250 | accuracy train 0.8343 val 0.9081 | val F1 0.8729 | 70s
+  step 50/226 | loss 0.3983
+  step 100/226 | loss 0.5070
+  step 150/226 | loss 0.3599
+  step 200/226 | loss 0.4794
+CNN seed 43 epoch 06 | loss 0.4903/0.3345 | accuracy train 0.8464 val 0.8964 | val F1 0.8662 | 70s
+  step 50/226 | loss 0.4865
+  step 100/226 | loss 0.7631
+  step 150/226 | loss 0.5444
+  step 200/226 | loss 0.5470
+CNN seed 43 epoch 07 | loss 0.4565/0.2718 | accuracy train 0.8575 val 0.9243 | val F1 0.8964 | 70s
+  step 50/226 | loss 0.4291
+  step 100/226 | loss 0.2585
+  step 150/226 | loss 0.4163
+  step 200/226 | loss 0.2208
+CNN seed 43 epoch 08 | loss 0.4305/0.2667 | accuracy train 0.8664 val 0.9115 | val F1 0.8766 | 71s
+  step 50/226 | loss 0.3539
+  step 100/226 | loss 0.3959
+  step 150/226 | loss 0.4157
+  step 200/226 | loss 0.3769
+CNN seed 43 epoch 09 | loss 0.4186/0.2562 | accuracy train 0.8657 val 0.9226 | val F1 0.8943 | 70s
+  step 50/226 | loss 0.1379
+  step 100/226 | loss 0.6315
+  step 150/226 | loss 0.2316
+  step 200/226 | loss 0.4138
+CNN seed 43 epoch 10 | loss 0.3962/0.2602 | accuracy train 0.8750 val 0.9137 | val F1 0.8868 | 70s
+  step 50/226 | loss 0.2391
+  step 100/226 | loss 0.4150
+  step 150/226 | loss 0.4678
+  step 200/226 | loss 0.3732
+CNN seed 43 epoch 11 | loss 0.3764/0.2339 | accuracy train 0.8786 val 0.9265 | val F1 0.8995 | 70s
+  step 50/226 | loss 0.2128
+  step 100/226 | loss 0.2573
+  step 150/226 | loss 0.3401
+  step 200/226 | loss 0.3323
+CNN seed 43 epoch 12 | loss 0.3601/0.2522 | accuracy train 0.8850 val 0.9254 | val F1 0.9038 | 70s
+  step 50/226 | loss 0.5527
+  step 100/226 | loss 0.2146
+  step 150/226 | loss 0.2055
+  step 200/226 | loss 0.2434
+CNN seed 43 epoch 13 | loss 0.3499/0.2334 | accuracy train 0.8853 val 0.9365 | val F1 0.9169 | 70s
+  step 50/226 | loss 0.4028
+  step 100/226 | loss 0.4596
+  step 150/226 | loss 0.3438
+  step 200/226 | loss 0.2512
+CNN seed 43 epoch 14 | loss 0.3457/0.2362 | accuracy train 0.8906 val 0.9265 | val F1 0.8979 | 70s
+  step 50/226 | loss 0.2918
+  step 100/226 | loss 0.3142
+  step 150/226 | loss 0.2923
+  step 200/226 | loss 0.1974
+CNN seed 43 epoch 15 | loss 0.3330/0.1965 | accuracy train 0.8939 val 0.9399 | val F1 0.9179 | 70s
+  step 50/226 | loss 0.2629
+  step 100/226 | loss 0.1608
+  step 150/226 | loss 0.4176
+  step 200/226 | loss 0.3111
+CNN seed 43 epoch 16 | loss 0.3227/0.2023 | accuracy train 0.8972 val 0.9343 | val F1 0.9067 | 70s
+  step 50/226 | loss 0.2552
+  step 100/226 | loss 0.4294
+  step 150/226 | loss 0.2071
+  step 200/226 | loss 0.1738
+CNN seed 43 epoch 17 | loss 0.3122/0.2358 | accuracy train 0.9012 val 0.9315 | val F1 0.8997 | 70s
+  step 50/226 | loss 0.3776
+  step 100/226 | loss 0.2874
+  step 150/226 | loss 0.3459
+  step 200/226 | loss 0.2525
+CNN seed 43 epoch 18 | loss 0.2992/0.1778 | accuracy train 0.9028 val 0.9471 | val F1 0.9266 | 71s
+  step 50/226 | loss 0.2498
+  step 100/226 | loss 0.5304
+  step 150/226 | loss 0.2403
+  step 200/226 | loss 0.3780
+CNN seed 43 epoch 19 | loss 0.2983/0.2356 | accuracy train 0.9034 val 0.9349 | val F1 0.9079 | 70s
+  step 50/226 | loss 0.2833
+  step 100/226 | loss 0.2712
+  step 150/226 | loss 0.2127
+  step 200/226 | loss 0.2660
+CNN seed 43 epoch 20 | loss 0.2861/0.1786 | accuracy train 0.9050 val 0.9438 | val F1 0.9231 | 71s
+  step 50/226 | loss 0.2398
+  step 100/226 | loss 0.4456
+  step 150/226 | loss 0.3425
+  step 200/226 | loss 0.3402
+CNN seed 43 epoch 21 | loss 0.2868/0.1833 | accuracy train 0.9091 val 0.9510 | val F1 0.9336 | 71s
+  step 50/226 | loss 0.3233
+  step 100/226 | loss 0.4080
+  step 150/226 | loss 0.2176
+  step 200/226 | loss 0.3965
+CNN seed 43 epoch 22 | loss 0.2797/0.1964 | accuracy train 0.9095 val 0.9382 | val F1 0.9190 | 71s
+  step 50/226 | loss 0.3249
+  step 100/226 | loss 0.1786
+  step 150/226 | loss 0.2638
+  step 200/226 | loss 0.2909
+CNN seed 43 epoch 23 | loss 0.2697/0.2105 | accuracy train 0.9127 val 0.9298 | val F1 0.9040 | 71s
+  step 50/226 | loss 0.1658
+  step 100/226 | loss 0.3214
+  step 150/226 | loss 0.4094
+  step 200/226 | loss 0.3105
+CNN seed 43 epoch 24 | loss 0.2707/0.1753 | accuracy train 0.9134 val 0.9449 | val F1 0.9232 | 70s
+  step 50/226 | loss 0.1906
+  step 100/226 | loss 0.2216
+  step 150/226 | loss 0.1764
+  step 200/226 | loss 0.1979
+CNN seed 43 epoch 25 | loss 0.2662/0.1811 | accuracy train 0.9142 val 0.9482 | val F1 0.9265 | 70s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/CNN_seed43_20261103_102011_300928
+  step 50/226 | loss 1.0731
+  step 100/226 | loss 0.6484
+  step 150/226 | loss 0.5560
+  step 200/226 | loss 0.5881
+ResNet18Frozen seed 43 epoch 01 | loss 0.8399/0.4899 | accuracy train 0.7472 val 0.8524 | val F1 0.7835 | 369s
+  step 50/226 | loss 0.5054
+  step 100/226 | loss 0.5845
+  step 150/226 | loss 0.4358
+  step 200/226 | loss 0.3179
+ResNet18Frozen seed 43 epoch 02 | loss 0.4620/0.3739 | accuracy train 0.8634 val 0.8959 | val F1 0.8583 | 366s
+  step 50/226 | loss 0.4794
+  step 100/226 | loss 0.4426
+  step 150/226 | loss 0.2237
+  step 200/226 | loss 0.4103
+ResNet18Frozen seed 43 epoch 03 | loss 0.3879/0.3399 | accuracy train 0.8823 val 0.8987 | val F1 0.8529 | 365s
+  step 50/226 | loss 0.3625
+  step 100/226 | loss 0.3447
+  step 150/226 | loss 0.3141
+  step 200/226 | loss 0.3286
+ResNet18Frozen seed 43 epoch 04 | loss 0.3500/0.3152 | accuracy train 0.8917 val 0.8953 | val F1 0.8585 | 369s
+  step 50/226 | loss 0.2359
+  step 100/226 | loss 0.2576
+  step 150/226 | loss 0.5666
+  step 200/226 | loss 0.2548
+ResNet18Frozen seed 43 epoch 05 | loss 0.3272/0.2943 | accuracy train 0.8987 val 0.9104 | val F1 0.8742 | 369s
+  step 50/226 | loss 0.2023
+  step 100/226 | loss 0.3912
+  step 150/226 | loss 0.2762
+  step 200/226 | loss 0.4073
+ResNet18Frozen seed 43 epoch 06 | loss 0.3119/0.2781 | accuracy train 0.9034 val 0.9148 | val F1 0.8835 | 368s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18Frozen_seed43_20261103_105020_031896
+  step 50/226 | loss 0.1373
+  step 100/226 | loss 0.1052
+  step 150/226 | loss 0.0934
+  step 200/226 | loss 0.1319
+ResNet18FineTune seed 43 epoch 01 | loss 0.2888/0.1275 | accuracy train 0.9063 val 0.9566 | val F1 0.9385 | 582s
+  step 50/226 | loss 0.0587
+  step 100/226 | loss 0.1500
+  step 150/226 | loss 0.0482
+  step 200/226 | loss 0.0149
+ResNet18FineTune seed 43 epoch 02 | loss 0.0968/0.1034 | accuracy train 0.9676 val 0.9694 | val F1 0.9547 | 577s
+  step 50/226 | loss 0.0620
+  step 100/226 | loss 0.0780
+  step 150/226 | loss 0.0774
+  step 200/226 | loss 0.1006
+ResNet18FineTune seed 43 epoch 03 | loss 0.0729/0.0882 | accuracy train 0.9758 val 0.9716 | val F1 0.9585 | 581s
+  step 50/226 | loss 0.0622
+  step 100/226 | loss 0.1292
+  step 150/226 | loss 0.0196
+  step 200/226 | loss 0.0285
+ResNet18FineTune seed 43 epoch 04 | loss 0.0515/0.0849 | accuracy train 0.9825 val 0.9738 | val F1 0.9616 | 579s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTune_seed43_20261103_113320_993398
+  step 50/226 | loss 0.2246
+  step 100/226 | loss 0.1109
+  step 150/226 | loss 0.1447
+  step 200/226 | loss 0.1703
+ResNet18FineTuneStrongAug seed 43 epoch 01 | loss 0.3356/0.1795 | accuracy train 0.8884 val 0.9415 | val F1 0.9240 | 676s
+  step 50/226 | loss 0.0873
+  step 100/226 | loss 0.1628
+  step 150/226 | loss 0.0842
+  step 200/226 | loss 0.0102
+ResNet18FineTuneStrongAug seed 43 epoch 02 | loss 0.1371/0.1322 | accuracy train 0.9527 val 0.9610 | val F1 0.9484 | 671s
+  step 50/226 | loss 0.0661
+  step 100/226 | loss 0.1392
+  step 150/226 | loss 0.1051
+  step 200/226 | loss 0.0921
+ResNet18FineTuneStrongAug seed 43 epoch 03 | loss 0.1092/0.1994 | accuracy train 0.9625 val 0.9343 | val F1 0.9069 | 668s
+  step 50/226 | loss 0.0782
+  step 100/226 | loss 0.0798
+  step 150/226 | loss 0.0431
+  step 200/226 | loss 0.0961
+ResNet18FineTuneStrongAug seed 43 epoch 04 | loss 0.0854/0.1232 | accuracy train 0.9703 val 0.9638 | val F1 0.9498 | 660s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTuneStrongAug_seed43_20261103_121806_070565
+  step 50/226 | loss 1.3725
+  step 100/226 | loss 1.0903
+  step 150/226 | loss 1.0122
+  step 200/226 | loss 1.0251
+CNN seed 44 epoch 01 | loss 1.0245/0.6682 | accuracy train 0.6738 val 0.7784 | val F1 0.6739 | 71s
+  step 50/226 | loss 0.7655
+  step 100/226 | loss 0.6002
+  step 150/226 | loss 0.7935
+  step 200/226 | loss 0.5977
+CNN seed 44 epoch 02 | loss 0.7026/0.4689 | accuracy train 0.7824 val 0.8541 | val F1 0.8038 | 71s
+  step 50/226 | loss 0.5608
+  step 100/226 | loss 0.7291
+  step 150/226 | loss 0.5937
+  step 200/226 | loss 0.5423
+CNN seed 44 epoch 03 | loss 0.5996/0.4003 | accuracy train 0.8158 val 0.8731 | val F1 0.8259 | 71s
+  step 50/226 | loss 0.5402
+  step 100/226 | loss 0.5770
+  step 150/226 | loss 0.6452
+  step 200/226 | loss 0.6335
+CNN seed 44 epoch 04 | loss 0.5541/0.3686 | accuracy train 0.8264 val 0.8892 | val F1 0.8561 | 70s
+  step 50/226 | loss 0.5552
+  step 100/226 | loss 0.4685
+  step 150/226 | loss 0.4893
+  step 200/226 | loss 0.4599
+CNN seed 44 epoch 05 | loss 0.5036/0.3048 | accuracy train 0.8448 val 0.9154 | val F1 0.8842 | 71s
+  step 50/226 | loss 0.5558
+  step 100/226 | loss 0.6743
+  step 150/226 | loss 0.5152
+  step 200/226 | loss 0.7575
+CNN seed 44 epoch 06 | loss 0.4813/0.3092 | accuracy train 0.8514 val 0.8998 | val F1 0.8635 | 71s
+  step 50/226 | loss 0.6068
+  step 100/226 | loss 0.4320
+  step 150/226 | loss 0.4772
+  step 200/226 | loss 0.4756
+CNN seed 44 epoch 07 | loss 0.4563/0.2822 | accuracy train 0.8563 val 0.9159 | val F1 0.8848 | 71s
+  step 50/226 | loss 0.8607
+  step 100/226 | loss 0.2861
+  step 150/226 | loss 0.3279
+  step 200/226 | loss 0.5136
+CNN seed 44 epoch 08 | loss 0.4282/0.2479 | accuracy train 0.8655 val 0.9287 | val F1 0.9052 | 71s
+  step 50/226 | loss 0.3993
+  step 100/226 | loss 0.5388
+  step 150/226 | loss 0.5410
+  step 200/226 | loss 0.4877
+CNN seed 44 epoch 09 | loss 0.4149/0.2546 | accuracy train 0.8706 val 0.9298 | val F1 0.9048 | 71s
+  step 50/226 | loss 0.3031
+  step 100/226 | loss 0.2399
+  step 150/226 | loss 0.5578
+  step 200/226 | loss 0.6907
+CNN seed 44 epoch 10 | loss 0.4035/0.2346 | accuracy train 0.8705 val 0.9315 | val F1 0.9063 | 71s
+  step 50/226 | loss 0.3872
+  step 100/226 | loss 0.3460
+  step 150/226 | loss 0.2975
+  step 200/226 | loss 0.3854
+CNN seed 44 epoch 11 | loss 0.3833/0.3347 | accuracy train 0.8794 val 0.8864 | val F1 0.8420 | 70s
+  step 50/226 | loss 0.4829
+  step 100/226 | loss 0.3257
+  step 150/226 | loss 0.3820
+  step 200/226 | loss 0.5050
+CNN seed 44 epoch 12 | loss 0.3744/0.2148 | accuracy train 0.8807 val 0.9376 | val F1 0.9133 | 70s
+  step 50/226 | loss 0.4433
+  step 100/226 | loss 0.2239
+  step 150/226 | loss 0.2879
+  step 200/226 | loss 0.5226
+CNN seed 44 epoch 13 | loss 0.3677/0.2553 | accuracy train 0.8843 val 0.9076 | val F1 0.8731 | 71s
+  step 50/226 | loss 0.2784
+  step 100/226 | loss 0.3235
+  step 150/226 | loss 0.3395
+  step 200/226 | loss 0.2928
+CNN seed 44 epoch 14 | loss 0.3426/0.2373 | accuracy train 0.8913 val 0.9282 | val F1 0.9064 | 70s
+  step 50/226 | loss 0.4624
+  step 100/226 | loss 0.2519
+  step 150/226 | loss 0.2421
+  step 200/226 | loss 0.4405
+CNN seed 44 epoch 15 | loss 0.3429/0.2296 | accuracy train 0.8877 val 0.9265 | val F1 0.8947 | 69s
+  step 50/226 | loss 0.2501
+  step 100/226 | loss 0.2577
+  step 150/226 | loss 0.5070
+  step 200/226 | loss 0.5259
+CNN seed 44 epoch 16 | loss 0.3252/0.1727 | accuracy train 0.8948 val 0.9504 | val F1 0.9315 | 69s
+  step 50/226 | loss 0.4683
+  step 100/226 | loss 0.4447
+  step 150/226 | loss 0.3460
+  step 200/226 | loss 0.5022
+CNN seed 44 epoch 17 | loss 0.3185/0.2160 | accuracy train 0.9000 val 0.9321 | val F1 0.9041 | 69s
+  step 50/226 | loss 0.2534
+  step 100/226 | loss 0.1940
+  step 150/226 | loss 0.3550
+  step 200/226 | loss 0.3708
+CNN seed 44 epoch 18 | loss 0.3183/0.1978 | accuracy train 0.8966 val 0.9393 | val F1 0.9178 | 69s
+  step 50/226 | loss 0.2888
+  step 100/226 | loss 0.3033
+  step 150/226 | loss 0.2839
+  step 200/226 | loss 0.1203
+CNN seed 44 epoch 19 | loss 0.3021/0.2077 | accuracy train 0.9012 val 0.9393 | val F1 0.9162 | 69s
+  step 50/226 | loss 0.2999
+  step 100/226 | loss 0.4118
+  step 150/226 | loss 0.5344
+  step 200/226 | loss 0.3292
+CNN seed 44 epoch 20 | loss 0.2998/0.3020 | accuracy train 0.9066 val 0.8892 | val F1 0.8533 | 71s
+  step 50/226 | loss 0.1570
+  step 100/226 | loss 0.1509
+  step 150/226 | loss 0.3151
+  step 200/226 | loss 0.2885
+CNN seed 44 epoch 21 | loss 0.2890/0.2281 | accuracy train 0.9057 val 0.9243 | val F1 0.9005 | 71s
+  step 50/226 | loss 0.3356
+  step 100/226 | loss 0.2739
+  step 150/226 | loss 0.1970
+  step 200/226 | loss 0.2551
+CNN seed 44 epoch 22 | loss 0.2885/0.1611 | accuracy train 0.9047 val 0.9560 | val F1 0.9400 | 71s
+  step 50/226 | loss 0.3323
+  step 100/226 | loss 0.2013
+  step 150/226 | loss 0.2931
+  step 200/226 | loss 0.3369
+CNN seed 44 epoch 23 | loss 0.2760/0.1968 | accuracy train 0.9098 val 0.9432 | val F1 0.9256 | 71s
+  step 50/226 | loss 0.2367
+  step 100/226 | loss 0.3010
+  step 150/226 | loss 0.2553
+  step 200/226 | loss 0.2887
+CNN seed 44 epoch 24 | loss 0.2711/0.1716 | accuracy train 0.9114 val 0.9471 | val F1 0.9228 | 71s
+  step 50/226 | loss 0.1239
+  step 100/226 | loss 0.1830
+  step 150/226 | loss 0.3546
+  step 200/226 | loss 0.2366
+CNN seed 44 epoch 25 | loss 0.2608/0.1559 | accuracy train 0.9149 val 0.9516 | val F1 0.9335 | 71s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/CNN_seed44_20261103_130845_240774
+  step 50/226 | loss 1.1417
+  step 100/226 | loss 0.7880
+  step 150/226 | loss 0.6607
+  step 200/226 | loss 0.7342
+ResNet18Frozen seed 44 epoch 01 | loss 0.8384/0.4766 | accuracy train 0.7492 val 0.8675 | val F1 0.8048 | 365s
+  step 50/226 | loss 0.4670
+  step 100/226 | loss 0.4308
+  step 150/226 | loss 0.3878
+  step 200/226 | loss 0.4671
+ResNet18Frozen seed 44 epoch 02 | loss 0.4599/0.3764 | accuracy train 0.8631 val 0.8925 | val F1 0.8500 | 366s
+  step 50/226 | loss 0.4240
+  step 100/226 | loss 0.4869
+  step 150/226 | loss 0.3696
+  step 200/226 | loss 0.3653
+ResNet18Frozen seed 44 epoch 03 | loss 0.3917/0.3354 | accuracy train 0.8788 val 0.9003 | val F1 0.8613 | 365s
+  step 50/226 | loss 0.2368
+  step 100/226 | loss 0.3916
+  step 150/226 | loss 0.2491
+  step 200/226 | loss 0.4487
+ResNet18Frozen seed 44 epoch 04 | loss 0.3490/0.3034 | accuracy train 0.8959 val 0.9081 | val F1 0.8703 | 367s
+  step 50/226 | loss 0.2842
+  step 100/226 | loss 0.2429
+  step 150/226 | loss 0.2363
+  step 200/226 | loss 0.4028
+ResNet18Frozen seed 44 epoch 05 | loss 0.3237/0.3017 | accuracy train 0.8997 val 0.9037 | val F1 0.8644 | 369s
+  step 50/226 | loss 0.3261
+  step 100/226 | loss 0.2784
+  step 150/226 | loss 0.3083
+  step 200/226 | loss 0.3638
+ResNet18Frozen seed 44 epoch 06 | loss 0.3060/0.2842 | accuracy train 0.9041 val 0.9115 | val F1 0.8766 | 368s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18Frozen_seed44_20261103_133853_641155
+  step 50/226 | loss 0.3937
+  step 100/226 | loss 0.3112
+  step 150/226 | loss 0.1456
+  step 200/226 | loss 0.1936
+ResNet18FineTune seed 44 epoch 01 | loss 0.2861/0.1211 | accuracy train 0.9085 val 0.9599 | val F1 0.9438 | 578s
+  step 50/226 | loss 0.0794
+  step 100/226 | loss 0.1330
+  step 150/226 | loss 0.1128
+  step 200/226 | loss 0.1159
+ResNet18FineTune seed 44 epoch 02 | loss 0.1000/0.0898 | accuracy train 0.9676 val 0.9727 | val F1 0.9590 | 582s
+  step 50/226 | loss 0.0598
+  step 100/226 | loss 0.0423
+  step 150/226 | loss 0.0317
+  step 200/226 | loss 0.0615
+ResNet18FineTune seed 44 epoch 03 | loss 0.0683/0.0938 | accuracy train 0.9790 val 0.9722 | val F1 0.9598 | 582s
+  step 50/226 | loss 0.0490
+  step 100/226 | loss 0.0708
+  step 150/226 | loss 0.0431
+  step 200/226 | loss 0.0379
+ResNet18FineTune seed 44 epoch 04 | loss 0.0564/0.1478 | accuracy train 0.9826 val 0.9571 | val F1 0.9341 | 585s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTune_seed44_20261103_142139_841316
+  step 50/226 | loss 0.4003
+  step 100/226 | loss 0.4205
+  step 150/226 | loss 0.2092
+  step 200/226 | loss 0.3362
+ResNet18FineTuneStrongAug seed 44 epoch 01 | loss 0.3307/0.1682 | accuracy train 0.8926 val 0.9477 | val F1 0.9256 | 685s
+  step 50/226 | loss 0.1294
+  step 100/226 | loss 0.2083
+  step 150/226 | loss 0.1068
+  step 200/226 | loss 0.1427
+ResNet18FineTuneStrongAug seed 44 epoch 02 | loss 0.1366/0.1493 | accuracy train 0.9546 val 0.9549 | val F1 0.9436 | 700s
+  step 50/226 | loss 0.1316
+  step 100/226 | loss 0.1154
+  step 150/226 | loss 0.0660
+  step 200/226 | loss 0.0746
+ResNet18FineTuneStrongAug seed 44 epoch 03 | loss 0.1046/0.1327 | accuracy train 0.9648 val 0.9610 | val F1 0.9444 | 698s
+  step 50/226 | loss 0.0278
+  step 100/226 | loss 0.1166
+  step 150/226 | loss 0.0367
+  step 200/226 | loss 0.1290
+ResNet18FineTuneStrongAug seed 44 epoch 04 | loss 0.0911/0.1222 | accuracy train 0.9704 val 0.9616 | val F1 0.9450 | 695s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTuneStrongAug_seed44_20261103_150632_439093
+  step 50/226 | loss 1.1205
+  step 100/226 | loss 1.0281
+  step 150/226 | loss 0.7850
+  step 200/226 | loss 0.9562
+CNN seed 45 epoch 01 | loss 1.0148/0.6072 | accuracy train 0.6794 val 0.7945 | val F1 0.7008 | 74s
+  step 50/226 | loss 0.7213
+  step 100/226 | loss 0.6485
+  step 150/226 | loss 0.6515
+  step 200/226 | loss 0.8857
+CNN seed 45 epoch 02 | loss 0.7139/0.5566 | accuracy train 0.7756 val 0.8129 | val F1 0.7466 | 74s
+  step 50/226 | loss 0.5608
+  step 100/226 | loss 0.6375
+  step 150/226 | loss 0.6061
+  step 200/226 | loss 0.5191
+CNN seed 45 epoch 03 | loss 0.6186/0.4580 | accuracy train 0.8074 val 0.8385 | val F1 0.8012 | 74s
+  step 50/226 | loss 0.5268
+  step 100/226 | loss 0.3834
+  step 150/226 | loss 0.4720
+  step 200/226 | loss 0.7190
+CNN seed 45 epoch 04 | loss 0.5629/0.3871 | accuracy train 0.8246 val 0.8803 | val F1 0.8355 | 74s
+  step 50/226 | loss 0.3820
+  step 100/226 | loss 0.6986
+  step 150/226 | loss 0.5859
+  step 200/226 | loss 0.4384
+CNN seed 45 epoch 05 | loss 0.5251/0.3109 | accuracy train 0.8373 val 0.9009 | val F1 0.8633 | 74s
+  step 50/226 | loss 0.4543
+  step 100/226 | loss 0.3425
+  step 150/226 | loss 0.8071
+  step 200/226 | loss 0.3957
+CNN seed 45 epoch 06 | loss 0.4852/0.3143 | accuracy train 0.8506 val 0.9126 | val F1 0.8877 | 74s
+  step 50/226 | loss 0.4711
+  step 100/226 | loss 0.5871
+  step 150/226 | loss 0.7021
+  step 200/226 | loss 0.6872
+CNN seed 45 epoch 07 | loss 0.4662/0.2684 | accuracy train 0.8543 val 0.9226 | val F1 0.8885 | 74s
+  step 50/226 | loss 0.2584
+  step 100/226 | loss 0.4207
+  step 150/226 | loss 0.3633
+  step 200/226 | loss 0.4905
+CNN seed 45 epoch 08 | loss 0.4373/0.2824 | accuracy train 0.8658 val 0.9131 | val F1 0.8798 | 72s
+  step 50/226 | loss 0.2578
+  step 100/226 | loss 0.3583
+  step 150/226 | loss 0.3185
+  step 200/226 | loss 0.3935
+CNN seed 45 epoch 09 | loss 0.4236/0.2368 | accuracy train 0.8674 val 0.9293 | val F1 0.9033 | 72s
+  step 50/226 | loss 0.2427
+  step 100/226 | loss 0.3243
+  step 150/226 | loss 0.5660
+  step 200/226 | loss 0.3901
+CNN seed 45 epoch 10 | loss 0.4037/0.2315 | accuracy train 0.8716 val 0.9326 | val F1 0.9067 | 73s
+  step 50/226 | loss 0.3081
+  step 100/226 | loss 0.3897
+  step 150/226 | loss 0.4157
+  step 200/226 | loss 0.2205
+CNN seed 45 epoch 11 | loss 0.3822/0.2450 | accuracy train 0.8812 val 0.9226 | val F1 0.8947 | 73s
+  step 50/226 | loss 0.3501
+  step 100/226 | loss 0.3500
+  step 150/226 | loss 0.1875
+  step 200/226 | loss 0.2801
+CNN seed 45 epoch 12 | loss 0.3783/0.2375 | accuracy train 0.8808 val 0.9298 | val F1 0.9035 | 71s
+  step 50/226 | loss 0.5537
+  step 100/226 | loss 0.3206
+  step 150/226 | loss 0.1917
+  step 200/226 | loss 0.6571
+CNN seed 45 epoch 13 | loss 0.3625/0.2305 | accuracy train 0.8841 val 0.9310 | val F1 0.9047 | 72s
+  step 50/226 | loss 0.4855
+  step 100/226 | loss 0.2728
+  step 150/226 | loss 0.3407
+  step 200/226 | loss 0.6570
+CNN seed 45 epoch 14 | loss 0.3525/0.3089 | accuracy train 0.8875 val 0.8953 | val F1 0.8670 | 72s
+  step 50/226 | loss 0.2270
+  step 100/226 | loss 0.7370
+  step 150/226 | loss 0.3376
+  step 200/226 | loss 0.6338
+CNN seed 45 epoch 15 | loss 0.3365/0.2245 | accuracy train 0.8920 val 0.9232 | val F1 0.8935 | 72s
+  step 50/226 | loss 0.2994
+  step 100/226 | loss 0.3665
+  step 150/226 | loss 0.4357
+  step 200/226 | loss 0.2446
+CNN seed 45 epoch 16 | loss 0.3301/0.2276 | accuracy train 0.8928 val 0.9304 | val F1 0.9049 | 71s
+  step 50/226 | loss 0.2322
+  step 100/226 | loss 0.1328
+  step 150/226 | loss 0.1621
+  step 200/226 | loss 0.4406
+CNN seed 45 epoch 17 | loss 0.3173/0.2036 | accuracy train 0.8978 val 0.9415 | val F1 0.9246 | 72s
+  step 50/226 | loss 0.2302
+  step 100/226 | loss 0.3038
+  step 150/226 | loss 0.5036
+  step 200/226 | loss 0.3009
+CNN seed 45 epoch 18 | loss 0.3134/0.2219 | accuracy train 0.8997 val 0.9276 | val F1 0.9003 | 72s
+  step 50/226 | loss 0.3173
+  step 100/226 | loss 0.3821
+  step 150/226 | loss 0.2447
+  step 200/226 | loss 0.1417
+CNN seed 45 epoch 19 | loss 0.3040/0.1937 | accuracy train 0.9041 val 0.9432 | val F1 0.9194 | 72s
+  step 50/226 | loss 0.5390
+  step 100/226 | loss 0.4108
+  step 150/226 | loss 0.1849
+  step 200/226 | loss 0.2863
+CNN seed 45 epoch 20 | loss 0.2982/0.1771 | accuracy train 0.9063 val 0.9499 | val F1 0.9291 | 73s
+  step 50/226 | loss 0.2137
+  step 100/226 | loss 0.2106
+  step 150/226 | loss 0.1926
+  step 200/226 | loss 0.3116
+CNN seed 45 epoch 21 | loss 0.2860/0.1789 | accuracy train 0.9072 val 0.9482 | val F1 0.9270 | 71s
+  step 50/226 | loss 0.2890
+  step 100/226 | loss 0.2235
+  step 150/226 | loss 0.1924
+  step 200/226 | loss 0.5264
+CNN seed 45 epoch 22 | loss 0.2813/0.2202 | accuracy train 0.9089 val 0.9220 | val F1 0.8966 | 71s
+  step 50/226 | loss 0.3370
+  step 100/226 | loss 0.1220
+  step 150/226 | loss 0.2255
+  step 200/226 | loss 0.1894
+CNN seed 45 epoch 23 | loss 0.2749/0.2031 | accuracy train 0.9136 val 0.9393 | val F1 0.9186 | 72s
+  step 50/226 | loss 0.4330
+  step 100/226 | loss 0.1792
+  step 150/226 | loss 0.3521
+  step 200/226 | loss 0.1663
+CNN seed 45 epoch 24 | loss 0.2652/0.1936 | accuracy train 0.9126 val 0.9410 | val F1 0.9196 | 72s
+  step 50/226 | loss 0.1525
+  step 100/226 | loss 0.2468
+  step 150/226 | loss 0.2825
+  step 200/226 | loss 0.3169
+CNN seed 45 epoch 25 | loss 0.2642/0.1761 | accuracy train 0.9145 val 0.9477 | val F1 0.9286 | 71s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/CNN_seed45_20261103_155910_316965
+  step 50/226 | loss 1.0099
+  step 100/226 | loss 0.7732
+  step 150/226 | loss 0.4492
+  step 200/226 | loss 0.6101
+ResNet18Frozen seed 45 epoch 01 | loss 0.8425/0.4946 | accuracy train 0.7477 val 0.8463 | val F1 0.7675 | 365s
+  step 50/226 | loss 0.7032
+  step 100/226 | loss 0.4567
+  step 150/226 | loss 0.4336
+  step 200/226 | loss 0.5212
+ResNet18Frozen seed 45 epoch 02 | loss 0.4681/0.3825 | accuracy train 0.8584 val 0.8898 | val F1 0.8430 | 365s
+  step 50/226 | loss 0.3587
+  step 100/226 | loss 0.2753
+  step 150/226 | loss 0.3524
+  step 200/226 | loss 0.2995
+ResNet18Frozen seed 45 epoch 03 | loss 0.3888/0.3354 | accuracy train 0.8820 val 0.9031 | val F1 0.8591 | 366s
+  step 50/226 | loss 0.4032
+  step 100/226 | loss 0.1856
+  step 150/226 | loss 0.2195
+  step 200/226 | loss 0.3434
+ResNet18Frozen seed 45 epoch 04 | loss 0.3552/0.3122 | accuracy train 0.8916 val 0.9014 | val F1 0.8629 | 368s
+  step 50/226 | loss 0.3640
+  step 100/226 | loss 0.4328
+  step 150/226 | loss 0.2971
+  step 200/226 | loss 0.3177
+ResNet18Frozen seed 45 epoch 05 | loss 0.3270/0.2947 | accuracy train 0.9002 val 0.9131 | val F1 0.8761 | 366s
+  step 50/226 | loss 0.2983
+  step 100/226 | loss 0.3643
+  step 150/226 | loss 0.4737
+  step 200/226 | loss 0.2256
+ResNet18Frozen seed 45 epoch 06 | loss 0.3060/0.2870 | accuracy train 0.9054 val 0.9081 | val F1 0.8699 | 366s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18Frozen_seed45_20261103_163010_862770
+  step 50/226 | loss 0.1883
+  step 100/226 | loss 0.2525
+  step 150/226 | loss 0.1923
+  step 200/226 | loss 0.2868
+ResNet18FineTune seed 45 epoch 01 | loss 0.2755/0.1161 | accuracy train 0.9126 val 0.9577 | val F1 0.9409 | 577s
+  step 50/226 | loss 0.0611
+  step 100/226 | loss 0.0643
+  step 150/226 | loss 0.1316
+  step 200/226 | loss 0.0825
+ResNet18FineTune seed 45 epoch 02 | loss 0.1029/0.1163 | accuracy train 0.9654 val 0.9633 | val F1 0.9470 | 578s
+  step 50/226 | loss 0.0462
+  step 100/226 | loss 0.0518
+  step 150/226 | loss 0.1351
+  step 200/226 | loss 0.0104
+ResNet18FineTune seed 45 epoch 03 | loss 0.0702/0.0886 | accuracy train 0.9766 val 0.9755 | val F1 0.9649 | 576s
+  step 50/226 | loss 0.0444
+  step 100/226 | loss 0.0176
+  step 150/226 | loss 0.0027
+  step 200/226 | loss 0.0814
+ResNet18FineTune seed 45 epoch 04 | loss 0.0509/0.0899 | accuracy train 0.9834 val 0.9722 | val F1 0.9603 | 576s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTune_seed45_20261103_171611_390496
+  step 50/226 | loss 0.2612
+  step 100/226 | loss 0.2351
+  step 150/226 | loss 0.1480
+  step 200/226 | loss 0.2517
+ResNet18FineTuneStrongAug seed 45 epoch 01 | loss 0.3215/0.1346 | accuracy train 0.8991 val 0.9560 | val F1 0.9366 | 667s
+  step 50/226 | loss 0.1887
+  step 100/226 | loss 0.1185
+  step 150/226 | loss 0.1714
+  step 200/226 | loss 0.1357
+ResNet18FineTuneStrongAug seed 45 epoch 02 | loss 0.1341/0.2300 | accuracy train 0.9539 val 0.9248 | val F1 0.8871 | 667s
+  step 50/226 | loss 0.1387
+  step 100/226 | loss 0.1344
+  step 150/226 | loss 0.1640
+  step 200/226 | loss 0.0743
+ResNet18FineTuneStrongAug seed 45 epoch 03 | loss 0.1052/0.0978 | accuracy train 0.9636 val 0.9733 | val F1 0.9625 | 665s
+  step 50/226 | loss 0.0937
+  step 100/226 | loss 0.0290
+  step 150/226 | loss 0.0233
+  step 200/226 | loss 0.1549
+ResNet18FineTuneStrongAug seed 45 epoch 04 | loss 0.0858/0.1090 | accuracy train 0.9717 val 0.9649 | val F1 0.9536 | 664s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTuneStrongAug_seed45_20261103_180044_024023
+  step 50/226 | loss 1.0896
+  step 100/226 | loss 0.8359
+  step 150/226 | loss 0.9271
+  step 200/226 | loss 0.7390
+CNN seed 46 epoch 01 | loss 1.0289/0.6682 | accuracy train 0.6736 val 0.8369 | val F1 0.7868 | 71s
+  step 50/226 | loss 0.6943
+  step 100/226 | loss 0.5693
+  step 150/226 | loss 0.7495
+  step 200/226 | loss 0.7962
+CNN seed 46 epoch 02 | loss 0.7153/0.5417 | accuracy train 0.7760 val 0.8112 | val F1 0.7408 | 69s
+  step 50/226 | loss 0.4785
+  step 100/226 | loss 0.5712
+  step 150/226 | loss 0.5101
+  step 200/226 | loss 0.3577
+CNN seed 46 epoch 03 | loss 0.6181/0.4629 | accuracy train 0.8096 val 0.8552 | val F1 0.8092 | 69s
+  step 50/226 | loss 0.4039
+  step 100/226 | loss 0.7569
+  step 150/226 | loss 0.5727
+  step 200/226 | loss 0.5035
+CNN seed 46 epoch 04 | loss 0.5693/0.3335 | accuracy train 0.8221 val 0.9065 | val F1 0.8694 | 69s
+  step 50/226 | loss 0.2610
+  step 100/226 | loss 0.4598
+  step 150/226 | loss 0.6106
+  step 200/226 | loss 0.3979
+CNN seed 46 epoch 05 | loss 0.5084/0.3774 | accuracy train 0.8389 val 0.8764 | val F1 0.8284 | 69s
+  step 50/226 | loss 0.4227
+  step 100/226 | loss 0.4441
+  step 150/226 | loss 0.4943
+  step 200/226 | loss 0.4455
+CNN seed 46 epoch 06 | loss 0.4875/0.3186 | accuracy train 0.8478 val 0.9065 | val F1 0.8761 | 69s
+  step 50/226 | loss 0.3610
+  step 100/226 | loss 0.3861
+  step 150/226 | loss 0.4270
+  step 200/226 | loss 0.3941
+CNN seed 46 epoch 07 | loss 0.4577/0.2986 | accuracy train 0.8557 val 0.9053 | val F1 0.8702 | 69s
+  step 50/226 | loss 0.5226
+  step 100/226 | loss 0.5032
+  step 150/226 | loss 0.4391
+  step 200/226 | loss 0.5346
+CNN seed 46 epoch 08 | loss 0.4209/0.3308 | accuracy train 0.8649 val 0.8925 | val F1 0.8593 | 69s
+  step 50/226 | loss 0.2759
+  step 100/226 | loss 0.5542
+  step 150/226 | loss 0.5102
+  step 200/226 | loss 0.3210
+CNN seed 46 epoch 09 | loss 0.4157/0.2782 | accuracy train 0.8686 val 0.9081 | val F1 0.8678 | 69s
+  step 50/226 | loss 0.4234
+  step 100/226 | loss 0.2588
+  step 150/226 | loss 0.4326
+  step 200/226 | loss 0.3420
+CNN seed 46 epoch 10 | loss 0.3997/0.3022 | accuracy train 0.8734 val 0.9065 | val F1 0.8776 | 69s
+  step 50/226 | loss 0.4600
+  step 100/226 | loss 0.4113
+  step 150/226 | loss 0.3046
+  step 200/226 | loss 0.3759
+CNN seed 46 epoch 11 | loss 0.3795/0.2130 | accuracy train 0.8784 val 0.9332 | val F1 0.9097 | 69s
+  step 50/226 | loss 0.3242
+  step 100/226 | loss 0.5665
+  step 150/226 | loss 0.2921
+  step 200/226 | loss 0.4056
+CNN seed 46 epoch 12 | loss 0.3598/0.1835 | accuracy train 0.8813 val 0.9499 | val F1 0.9306 | 69s
+  step 50/226 | loss 0.2579
+  step 100/226 | loss 0.3755
+  step 150/226 | loss 0.2571
+  step 200/226 | loss 0.5258
+CNN seed 46 epoch 13 | loss 0.3612/0.2099 | accuracy train 0.8841 val 0.9343 | val F1 0.9092 | 69s
+  step 50/226 | loss 0.4334
+  step 100/226 | loss 0.4103
+  step 150/226 | loss 0.3783
+  step 200/226 | loss 0.4582
+CNN seed 46 epoch 14 | loss 0.3424/0.2222 | accuracy train 0.8887 val 0.9326 | val F1 0.9120 | 69s
+  step 50/226 | loss 0.4310
+  step 100/226 | loss 0.3680
+  step 150/226 | loss 0.3263
+  step 200/226 | loss 0.2254
+CNN seed 46 epoch 15 | loss 0.3302/0.2830 | accuracy train 0.8921 val 0.9076 | val F1 0.8723 | 70s
+  step 50/226 | loss 0.3450
+  step 100/226 | loss 0.2427
+  step 150/226 | loss 0.3212
+  step 200/226 | loss 0.3134
+CNN seed 46 epoch 16 | loss 0.3300/0.2206 | accuracy train 0.8923 val 0.9343 | val F1 0.9082 | 71s
+  step 50/226 | loss 0.3394
+  step 100/226 | loss 0.3744
+  step 150/226 | loss 0.2713
+  step 200/226 | loss 0.3472
+CNN seed 46 epoch 17 | loss 0.3139/0.1852 | accuracy train 0.8995 val 0.9477 | val F1 0.9287 | 71s
+  step 50/226 | loss 0.3202
+  step 100/226 | loss 0.2715
+  step 150/226 | loss 0.3457
+  step 200/226 | loss 0.3439
+CNN seed 46 epoch 18 | loss 0.3050/0.1777 | accuracy train 0.9001 val 0.9454 | val F1 0.9237 | 71s
+  step 50/226 | loss 0.1816
+  step 100/226 | loss 0.2052
+  step 150/226 | loss 0.3462
+  step 200/226 | loss 0.3850
+CNN seed 46 epoch 19 | loss 0.2937/0.1877 | accuracy train 0.9022 val 0.9432 | val F1 0.9188 | 71s
+  step 50/226 | loss 0.2456
+  step 100/226 | loss 0.4768
+  step 150/226 | loss 0.1329
+  step 200/226 | loss 0.2621
+CNN seed 46 epoch 20 | loss 0.2895/0.2123 | accuracy train 0.9067 val 0.9371 | val F1 0.9079 | 71s
+  step 50/226 | loss 0.2995
+  step 100/226 | loss 0.2368
+  step 150/226 | loss 0.3270
+  step 200/226 | loss 0.1650
+CNN seed 46 epoch 21 | loss 0.2775/0.1795 | accuracy train 0.9106 val 0.9432 | val F1 0.9227 | 71s
+  step 50/226 | loss 0.1164
+  step 100/226 | loss 0.1600
+  step 150/226 | loss 0.2969
+  step 200/226 | loss 0.2385
+CNN seed 46 epoch 22 | loss 0.2730/0.1723 | accuracy train 0.9098 val 0.9521 | val F1 0.9322 | 71s
+  step 50/226 | loss 0.2422
+  step 100/226 | loss 0.2821
+  step 150/226 | loss 0.4435
+  step 200/226 | loss 0.2664
+CNN seed 46 epoch 23 | loss 0.2765/0.1722 | accuracy train 0.9060 val 0.9471 | val F1 0.9293 | 71s
+  step 50/226 | loss 0.1698
+  step 100/226 | loss 0.3616
+  step 150/226 | loss 0.1169
+  step 200/226 | loss 0.2476
+CNN seed 46 epoch 24 | loss 0.2722/0.1489 | accuracy train 0.9141 val 0.9493 | val F1 0.9258 | 70s
+  step 50/226 | loss 0.3923
+  step 100/226 | loss 0.3152
+  step 150/226 | loss 0.5003
+  step 200/226 | loss 0.2185
+CNN seed 46 epoch 25 | loss 0.2611/0.1610 | accuracy train 0.9183 val 0.9510 | val F1 0.9308 | 69s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/CNN_seed46_20261103_185109_510833
+  step 50/226 | loss 0.9682
+  step 100/226 | loss 0.6904
+  step 150/226 | loss 0.6391
+  step 200/226 | loss 0.4535
+ResNet18Frozen seed 46 epoch 01 | loss 0.8111/0.4833 | accuracy train 0.7571 val 0.8731 | val F1 0.8095 | 364s
+  step 50/226 | loss 0.4103
+  step 100/226 | loss 0.4551
+  step 150/226 | loss 0.3923
+  step 200/226 | loss 0.5078
+ResNet18Frozen seed 46 epoch 02 | loss 0.4542/0.3793 | accuracy train 0.8661 val 0.8903 | val F1 0.8441 | 367s
+  step 50/226 | loss 0.2993
+  step 100/226 | loss 0.4945
+  step 150/226 | loss 0.3038
+  step 200/226 | loss 0.1913
+ResNet18Frozen seed 46 epoch 03 | loss 0.3835/0.3419 | accuracy train 0.8808 val 0.8948 | val F1 0.8534 | 366s
+  step 50/226 | loss 0.2678
+  step 100/226 | loss 0.5184
+  step 150/226 | loss 0.3470
+  step 200/226 | loss 0.2245
+ResNet18Frozen seed 46 epoch 04 | loss 0.3461/0.3131 | accuracy train 0.8917 val 0.9009 | val F1 0.8629 | 366s
+  step 50/226 | loss 0.1431
+  step 100/226 | loss 0.2340
+  step 150/226 | loss 0.3734
+  step 200/226 | loss 0.2015
+ResNet18Frozen seed 46 epoch 05 | loss 0.3226/0.2886 | accuracy train 0.8985 val 0.9159 | val F1 0.8824 | 365s
+  step 50/226 | loss 0.3367
+  step 100/226 | loss 0.2384
+  step 150/226 | loss 0.3382
+  step 200/226 | loss 0.2515
+ResNet18Frozen seed 46 epoch 06 | loss 0.3069/0.2763 | accuracy train 0.9049 val 0.9143 | val F1 0.8812 | 373s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18Frozen_seed46_20261103_192103_088789
+  step 50/226 | loss 0.1748
+  step 100/226 | loss 0.1232
+  step 150/226 | loss 0.1677
+  step 200/226 | loss 0.1417
+ResNet18FineTune seed 46 epoch 01 | loss 0.2743/0.1078 | accuracy train 0.9140 val 0.9666 | val F1 0.9513 | 584s
+  step 50/226 | loss 0.1589
+  step 100/226 | loss 0.0288
+  step 150/226 | loss 0.1230
+  step 200/226 | loss 0.1472
+ResNet18FineTune seed 46 epoch 02 | loss 0.0972/0.0845 | accuracy train 0.9681 val 0.9738 | val F1 0.9613 | 582s
+  step 50/226 | loss 0.1517
+  step 100/226 | loss 0.0804
+  step 150/226 | loss 0.1437
+  step 200/226 | loss 0.0344
+ResNet18FineTune seed 46 epoch 03 | loss 0.0699/0.1077 | accuracy train 0.9769 val 0.9722 | val F1 0.9585 | 588s
+  step 50/226 | loss 0.0255
+  step 100/226 | loss 0.0707
+  step 150/226 | loss 0.0536
+  step 200/226 | loss 0.0274
+ResNet18FineTune seed 46 epoch 04 | loss 0.0571/0.0816 | accuracy train 0.9826 val 0.9749 | val F1 0.9628 | 585s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTune_seed46_20261103_200352_420632
+  step 50/226 | loss 0.2218
+  step 100/226 | loss 0.1180
+  step 150/226 | loss 0.2095
+  step 200/226 | loss 0.1470
+ResNet18FineTuneStrongAug seed 46 epoch 01 | loss 0.3250/0.1574 | accuracy train 0.8945 val 0.9510 | val F1 0.9296 | 669s
+  step 50/226 | loss 0.3062
+  step 100/226 | loss 0.1361
+  step 150/226 | loss 0.1177
+  step 200/226 | loss 0.1933
+ResNet18FineTuneStrongAug seed 46 epoch 02 | loss 0.1360/0.1101 | accuracy train 0.9526 val 0.9671 | val F1 0.9541 | 671s
+  step 50/226 | loss 0.1390
+  step 100/226 | loss 0.0486
+  step 150/226 | loss 0.0733
+  step 200/226 | loss 0.0573
+ResNet18FineTuneStrongAug seed 46 epoch 03 | loss 0.1010/0.1334 | accuracy train 0.9672 val 0.9566 | val F1 0.9418 | 671s
+  step 50/226 | loss 0.0196
+  step 100/226 | loss 0.1332
+  step 150/226 | loss 0.1133
+  step 200/226 | loss 0.0448
+ResNet18FineTuneStrongAug seed 46 epoch 04 | loss 0.0895/0.1094 | accuracy train 0.9699 val 0.9666 | val F1 0.9515 | 673s
+Saved /Users/katrinahua/Documents/dl-co3133/Assignment2/outputs/ResNet18FineTuneStrongAug_seed46_20261103_204857_983290
+  step 50/226 | loss 0.1748
+# NOTE: the ResNet18FineTune seed 46 rerun started at 21:49 on 03/11 was interrupted and discarded; the original seed-46 runs are kept.
