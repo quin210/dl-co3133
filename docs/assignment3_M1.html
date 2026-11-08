@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assignment 3 · M1 Proposal · G-02 · CO3133</title>
-<meta name="description" content="Assignment 3 · M1 Proposal">
+<meta name="description" content="Assignment 3 Milestone 1 dataset proposal: knowledge-based visual question answering on A-OKVQA with CLIP encoders and fusion. Class CC01, group G-02, CO3133.">
 <link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
@@ -14,25 +14,262 @@
 <nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html" aria-current="location">Assignment 3</a></nav>
 </div></div>
 <div class="milestone-bar">
-<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" href="assignment3_M1.html" aria-current="page">M1 Proposal</a><a class="report-button" href="assignment3_M2.html">M2 Draft</a><a class="report-button" href="assignment3_M3.html">M3 Final</a></nav>
+<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" aria-current="page" href="assignment3_M1.html">M1 Proposal</a><a class="report-button" href="assignment3_M2.html">M2 Draft</a><a class="report-button" href="assignment3_M3.html">M3 Final</a></nav>
 </div>
 <div class="wrap">
 <header>
 <p class="kicker">Assignment 3 · Milestone 1</p>
-<h1>Multimodal learning</h1>
-
-
+<h1>Knowledge-based visual question answering</h1>
+<dl class="facts">
+<div><dt>Group</dt><dd>G-02</dd></div>
+<div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br>Mai Trung Kiên (2352641)<br>Hứa Tuệ Minh (2450018)</dd></div>
+<div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div>
+</dl>
 </header>
 <main id="main">
-<section class="report-preview" aria-labelledby="pdf-report">
+<section class="report-preview" aria-labelledby="detailed-report">
 <div class="report-card-row">
-<div class="report-cover report-cover-pending" aria-hidden="true">PDF</div>
+<div class="report-cover" aria-hidden="true"><object class="report-cover-pdf" data="reports/A3_M1.pdf#page=1&amp;view=Fit&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0" type="application/pdf" tabindex="-1">PDF</object></div>
 <div class="report-preview-copy">
-<h2 class="report-preview-title" id="pdf-report">M1 Proposal PDF report</h2>
-<p>Pending</p>
+<h2 class="report-preview-title" id="detailed-report">M1 Proposal PDF report</h2>
+<p>Professional report - 11 pages</p>
+</div>
+<div class="report-card-actions">
+<a class="report-button report-open" href="reports/A3_M1.pdf" target="_blank" rel="noopener" aria-label="Open PDF in a new tab">Open PDF</a>
 </div>
 </div>
+<details class="report-pdf-preview">
+<summary>Preview PDF</summary>
+<object class="pdf-reader" data="reports/A3_M1.pdf#view=Fit&amp;navpanes=0" type="application/pdf" aria-label="Assignment 3 M1 Proposal PDF report">
+<p><a href="reports/A3_M1.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+</object>
+</details>
 </section>
+<p>Source: <a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (download.py, data_loader.py, 01_eda.ipynb, splits.csv).</p>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#s1">Dataset and task</a><a href="#s2">Data description and preliminary analysis</a><a href="#s3">Data protocol</a><a href="#s4">Experiment plan</a><a href="#s5">AI Usage Disclosure</a><a href="#references">References</a></nav>
+
+<section id="s1">
+<h2>Dataset and task</h2>
+<h3>Source, version and licence</h3>
+<p>Dataset: A-OKVQA [1], a visual question answering benchmark whose questions need commonsense or world knowledge in addition to what is visible in the image.</p>
+<p><a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA</a></p>
+<p>Version: Hugging Face revision <code>d1b0efa</code> (<code>d1b0efa3a436e9101dfbde3752db7607da696c35</code>), downloaded on 9 November 2026 with <code>Assignment3/download.py</code>. Parquet files with the JPEG bytes inside, about 1.2 GB in total.</p>
+<p>Licence: the A-OKVQA annotations are released by AllenAI under Apache 2.0. The images are COCO 2017 photos [2], which keep their Flickr licences; we use them only for course work.</p>
+<p>How the data was made: crowd workers looked at a COCO image and wrote a question that cannot be answered from the image alone or from knowledge alone. Each question has 4 answer choices, 10 free-form answers from 10 different workers, and 3 short rationales that explain the answer.</p>
+<h3>Task, modalities, input and output</h3>
+<p>Task: multiple-choice VQA. One sample is one image with one question and exactly 4 choices.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Task definition.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Definition</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Modality A</th><td>Text: the question (mean 8.8 words) and the 4 choice texts (mean 1.3 words)</td></tr>
+<tr><th scope="row">Modality B</th><td>Image: one RGB COCO photo (median 640×480), resized to 224×224</td></tr>
+<tr><th scope="row">Extra annotation</th><td>10 direct answers and 3 rationales per question. Used for evaluation and analysis only, never as model input</td></tr>
+<tr><th scope="row">Output</th><td>Index of the correct choice, ŷ∈{0,1,2,3}</td></tr>
+<tr><th scope="row">Prediction unit</th><td>One (image, question) pair</td></tr>
+</tbody></table></div>
+<p>Formulation. For choice j the model gives a score s<sub>j</sub> = f<sub>θ</sub>(image, question, choice<sub>j</sub>), p<sub>j</sub> = softmax<sub>j</sub>(s<sub>j</sub>) and ŷ = argmax<sub>j</sub> p<sub>j</sub>. Training minimises the cross-entropy -log p<sub>y</sub>.</p>
+<p>Why this task is multimodal. A worker wrote each question while looking at that image, so the pair is linked by the same scene. The answer needs both: the image says <em>what</em> is there (a red shirt, a clock at seven), and the question with the choices says what to do with it (which gang wears red, what hour it is). Section  shows that text alone gets only a few points above chance.</p>
+<h3>Size</h3>
+<p>The handbook asks for about 10,000 question–image pairs for VQA. The official test split (6,702 questions) has no public labels, so we count only labelled pairs: 17,056 (train) + 1,145 (validation) = <strong>18,201 labelled pairs on 17,661 images</strong>, which meets the threshold.</p>
+</section>
+<section id="s2">
+<h2>Data description and preliminary analysis</h2>
+<p>Source: <code>Assignment3/01_eda.ipynb</code>. Main numbers below; the notebook has the rest.</p>
+<h3>Pair counts and missing modalities</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Official splits. Images are identified by the MD5 hash of their bytes, because the files have no image id.</caption>
+<thead><tr>
+<th scope="col"><strong>Official split</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>Labelled</strong></th>
+<th scope="col"><strong>Distinct images</strong></th>
+<th scope="col"><strong>Images with 2 questions</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">train</th><td>17,056</td><td>17,056</td><td>16,539</td><td>517</td></tr>
+<tr><th scope="row">validation</th><td>1,145</td><td>1,145</td><td>1,122</td><td>23</td></tr>
+<tr><th scope="row">test</th><td>6,702</td><td>0</td><td>6,030</td><td></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<caption>Missing-modality and validity checks.</caption>
+<thead><tr>
+<th scope="col"><strong>Check on the 18,201 labelled questions</strong></th>
+<th scope="col"><strong>Result</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Missing or undecodable image, empty question</th><td>0</td></tr>
+<tr><th scope="row">Not exactly 4 choices, label outside 0–3</th><td>0</td></tr>
+<tr><th scope="row">Not 10 direct answers or not 3 rationales</th><td>0</td></tr>
+<tr><th scope="row">Questions with an empty choice</th><td>7 (0.04%)</td></tr>
+<tr><th scope="row">Questions with two identical choices</th><td>37 (0.20%)</td></tr>
+<tr><th scope="row">Images shared by the official train and validation splits</th><td>0</td></tr>
+<tr><th scope="row">Grayscale images (converted to RGB)</th><td>20 of 17,661</td></tr>
+</tbody></table></div>
+<p>No image or question is missing, so no missing-modality strategy is needed for training. The 44 questions with an empty or repeated choice are kept; they are counted in the error analysis. We will still test what happens when the image is removed or replaced (Section ).</p>
+<h3>Images</h3>
+<figure>
+<img alt="Original image width, height and file size." src="assets/assignment3_M1/image_sizes.png"/>
+<figcaption>Original image width, height and file size.</figcaption></figure>
+<p>The photos are COCO images, mostly 640×480 (4,005) or 640×427 (2,295); the median aspect ratio is 1.33 and the extremes are 0.33 and 4.81. Resizing to 224×224 squeezes a 4:3 photo horizontally by 25%. CLIP's own preprocessing resizes the short side and takes a centre crop instead, so this option will be compared in M2.</p>
+<h3>Text</h3>
+<figure>
+<img alt="Question length in words." src="assets/assignment3_M1/question_length.png"/>
+<figcaption>Question length in words.</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Text lengths (left) and the most common two-word question openings (right).</caption>
+<thead><tr>
+<th scope="col"><strong>Words</strong></th>
+<th scope="col"><strong>mean</strong></th>
+<th scope="col"><strong>median</strong></th>
+<th scope="col"><strong>max</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">question</th><td>8.8</td><td>8</td><td>44</td></tr>
+<tr><th scope="row">choice</th><td>1.3</td><td>1</td><td>4</td></tr>
+<tr><th scope="row">direct answer</th><td>1.2</td><td>1</td><td>4</td></tr>
+<tr><th scope="row">rationale</th><td>11.1</td><td>9</td><td>65</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>Opening</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>Share</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">what is</th><td>4,109</td><td>22.6%</td></tr>
+<tr><th scope="row">what type</th><td>1,102</td><td>6.1%</td></tr>
+<tr><th scope="row">what are</th><td>850</td><td>4.7%</td></tr>
+<tr><th scope="row">why is</th><td>730</td><td>4.0%</td></tr>
+<tr><th scope="row">how many</th><td>595</td><td>3.3%</td></tr>
+<tr><th scope="row">what color</th><td>542</td><td>3.0%</td></tr>
+<tr><th scope="row">what kind</th><td>526</td><td>2.9%</td></tr>
+</tbody></table></div>
+<p>Questions are short (median 8 words) and every text fits the 77-token limit of the CLIP text encoder. The vocabulary is large (6,508 words in questions, 13,456 in choices) because the topics are open: animals, sports, food, history, brands. 64.5% of the questions start with “what” and 7.7% with “why”. A-OKVQA has no question-type field, so we will use the opening words as a rough type for the error analysis.</p>
+<h3>Labels and answer agreement</h3>
+<figure>
+<img alt="Share of each correct letter." src="assets/assignment3_M1/answer_letters.png"/>
+<figcaption>Share of each correct letter.</figcaption></figure>
+<p>The correct letter is spread evenly: A 24.2%, B 24.8%, C 25.4%, D 25.7% over all labelled questions, so a letter bias cannot help. The correct choice appears among the 10 direct answers for every question, given on average by 3.7 of the 10 workers. Agreement between workers is moderate: the most common direct answer is given by 5.0 workers on average, and by 3 or fewer for 32.4% of the questions. The dataset flags 8.9% of the questions as difficult for direct answering.</p>
+<h3>Pair quality</h3>
+<figure>
+<img alt="Eight random training pairs (seed 42); * marks the correct choice and “Why” is the first rationale." src="assets/assignment3_M1/samples.png"/>
+<figcaption>Eight random training pairs (seed 42); * marks the correct choice and “Why” is the first rationale.</figcaption></figure>
+<p>The examples show the mix the dataset was built for: counting (how many people on the scooter), reading the scene (the hour on the clock), and outside knowledge (which gang wears red, which civilisation made a vase). In 76.8% of the questions at least one rationale repeats a word of the correct choice, so the rationales usually talk about the answer, which makes them useful to explain errors later.</p>
+<figure>
+<img alt="Four training questions with low agreement among the 10 direct answers (possible noise)." src="assets/assignment3_M1/noisy.png"/>
+<figcaption>Four training questions with low agreement among the 10 direct answers (possible noise).</figcaption></figure>
+<p>Two kinds of low agreement show up. Some questions are vague (who uses this bathtub: adults or children?), so several answers are reasonable. Others need rare knowledge (which player won a 1992 playoff game by sliding home), which many workers did not know. In both cases the multiple-choice label is still one of the direct answers. We keep these questions and report accuracy on the high-agreement subset as a check.</p>
+<h3>How much can text alone answer?</h3>
+<p></p>
+<p>Simple rules that never look at the image, built on our train split and scored on our validation split (1,710 questions):</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Text-only rules.tab:prior</caption>
+<thead><tr>
+<th scope="col"><strong>Rule</strong></th>
+<th scope="col"><strong>Validation accuracy</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Chance</th><td>25.0%</td></tr>
+<tr><th scope="row">Always the most frequent letter (D)</th><td>26.0%</td></tr>
+<tr><th scope="row">Choice whose text was most often correct in training</th><td>31.1%</td></tr>
+<tr><th scope="row">Choice sharing most words with the question</th><td>24.1%</td></tr>
+<tr><th scope="row">Longest choice</th><td>28.5%</td></tr>
+</tbody></table></div>
+<p>The best rule reaches 31.1%, only 6 points above chance, although 89.6% of the validation questions offer at least one choice that was correct somewhere in training. The dataset was built so that the wrong choices are plausible answers, so answer frequency and word overlap help little. This is the opposite of datasets where the text alone gives most answers, and it means the image should matter. A trained text-only model may still learn more than these rules, which is why it is one of the baselines.</p>
+</section>
+<section id="s3">
+<h2>Data protocol</h2>
+<h3>Splits and leakage prevention</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Split plan.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Plan</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Test</th><td>The official validation split: 1,145 questions on 1,122 images, used once at the end</td></tr>
+<tr><th scope="row">Train / validation</th><td>The official train split divided about 90/10 by image: 15,346 / 1,710 questions on 14,885 / 1,654 images</td></tr>
+<tr><th scope="row">Seed</th><td><code>GroupShuffleSplit</code>, seed 42, groups = image hash; saved in <code>Assignment3/splits.csv</code></td></tr>
+<tr><th scope="row">Split unit</th><td>The image. 540 images have two questions, and both always stay in the same split; the code asserts that no image is in two splits (0 overlaps found)</td></tr>
+<tr><th scope="row">Unused</th><td>The official test split (6,702 questions, no labels)</td></tr>
+<tr><th scope="row">Leakage notes</th><td>CLIP was pretrained on web images, and some COCO photos may be among them; this cannot be checked and affects all models equally</td></tr>
+<tr><th scope="row">Subset rules</th><td>None. All 18,201 labelled questions are used</td></tr>
+</tbody></table></div>
+<p>The letter shares and the share of difficult questions are close in the three splits (difficult: 9.1%, 8.6% and 6.1%). With 1,145 test questions one standard error of accuracy is about 1.4 points, so differences smaller than about 3 points will need the seed comparison to be trusted.</p>
+<h3>Preprocessing</h3>
+<ul><li>Image: decode JPEG, convert to RGB, resize to 224×224 (bicubic), scale to [0,1], normalise with the CLIP mean and standard deviation. No augmentation in the first runs.</li><li>Text: the question and each choice go through the CLIP tokenizer (lower case, byte-pair encoding, at most 77 tokens). For the fusion models the text of choice j is “question + answer: choice<sub>j</sub>”.</li><li>Batch: images [B,3,224,224] float32, labels [B] int64, plus B questions and B lists of 4 choices. One batch of 32 has channel means (-0.06, -0.09, -0.02) and standard deviations close to 1 after normalisation.</li></ul>
+<figure>
+<img alt="One training image before and after resizing and CLIP normalisation." src="assets/assignment3_M1/preprocessing.png"/>
+<figcaption>One training image before and after resizing and CLIP normalisation.</figcaption></figure>
+</section>
+<section id="s4">
+<h2>Experiment plan</h2>
+<h3>Pipeline</h3>
+<figure><p class="pipeline">Image, question, 4 choices, label → Resize, CLIP norm., tokenize → Frozen CLIP image + text encoders → Fusion head (score per choice) → Softmax over 4, cross-entropy → Adam, validation accuracy checkpoint → Test: argmax over choices → MC accuracy, DA score, per question type</p><figcaption>Planned pipeline. Only the fusion head changes between the main models.</figcaption></figure>
+<h3>Encoders and representations</h3>
+<p>All models use the same frozen CLIP ViT-B/32 [3] (<code>openai/clip-vit-base-patch32</code>, the checkpoint used in the course slides), loaded with Hugging Face <code>transformers</code>.</p>
+<ul><li>Image encoder: ViT-B/32, 87.5M parameters. Gives one global vector v∈ℝ<sup>512</sup> and 50 token vectors V∈ℝ<sup>50×768</sup> (1 class token + 7×7 patches).</li><li>Text encoder: 63.2M parameters. Gives one vector per text: q for the question and c<sub>j</sub> for each choice (ℝ<sup>512</sup>), and token vectors T∈ℝ<sup>L×512</sup>.</li><li>Alignment: each question belongs to one image, so pairing is given by the dataset. The global image and text vectors already live in one space because CLIP was trained with a contrastive loss.</li></ul>
+<p>The encoders are frozen, so their outputs are computed once and cached; only the heads below are trained.</p>
+<h3>Models</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Planned models. Every MLP has one hidden layer of 512 units, ReLU and dropout 0.1.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Uses</strong></th>
+<th scope="col">Score for choice j</th>
+</tr></thead><tbody>
+<tr><th scope="row">0. Reference rules</th><td>text</td><td>Chance, letter prior, answer-text prior (Table ). No training</td></tr>
+<tr><th scope="row">0'. Zero-shot CLIP</th><td>image, text</td><td>cosine(v, text(question + answer: choice<sub>j</sub>)). No training</td></tr>
+<tr><th scope="row">1. Text only (A)</th><td>question, choices</td><td>s<sub>j</sub> = MLP([q; c<sub>j</sub>; q⊙ c<sub>j</sub>])</td></tr>
+<tr><th scope="row">2. Image only (B)</th><td>image, choices</td><td>s<sub>j</sub> = MLP([v; c<sub>j</sub>; v⊙ c<sub>j</sub>]); the choices are needed to name the answers, the question is removed</td></tr>
+<tr><th scope="row">3. Simple fusion</th><td>image, question, choices</td><td>Late concatenation of the global vectors: s<sub>j</sub> = MLP([v; q; c<sub>j</sub>; v⊙ c<sub>j</sub>; q⊙ c<sub>j</sub>])</td></tr>
+<tr><th scope="row">4. Improved fusion</th><td>image, question, choices</td><td>Cross-attention: the text tokens of “question + answer: choice<sub>j</sub>” are queries, the 50 image tokens are keys and values (1 layer, 8 heads, d=512); the attended tokens are mean-pooled and an MLP gives s<sub>j</sub></td></tr>
+</tbody></table></div>
+<p>Models 1 to 3 differ only in which vectors enter the same kind of MLP, so their comparison isolates the modalities. Model 4 moves the fusion from one global vector per modality to token level, so the question can look at the image regions it is about (the clock, the shirts). We expect the largest gains on questions about details of the scene (“how many”, “what color”, “what hour”) and smaller gains on pure knowledge questions.</p>
+<p><strong>Loss.</strong> One loss for every model: cross-entropy over the 4 choices. There is no separate per-modality loss in the main models; the unimodal baselines are trained on their own with the same loss. An auxiliary loss on each branch is a possible extension.</p>
+<p><strong>Training.</strong> Adam, learning rate 10<sup>-3</sup> for the heads (chosen between 10<sup>-3</sup> and 3×10<sup>-4</sup> on validation only), batch size 64, 20 epochs, checkpoint with the best validation accuracy, seeds 42–46. If time allows, one extra run unfreezes the last block of the CLIP image encoder with learning rate 10<sup>-5</sup> (frozen vs fine-tuned comparison).</p>
+<h3>Ablations</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Planned ablations. Fixed in each: split, encoders, optimizer, epochs, seeds.</caption>
+<thead><tr>
+<th scope="col"><strong>Ablation</strong></th>
+<th scope="col"><strong>Changed factor</strong></th>
+<th scope="col"><strong>Question it answers</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Remove a modality</th><td>Models 1 and 2 against 3</td><td>How much does each modality add?</td></tr>
+<tr><th scope="row">Shuffle images at test</th><td>Model 3 / 4 tested with the image of another question</td><td>Does the model use the image, or only the text?</td></tr>
+<tr><th scope="row">Fusion level</th><td>Global concatenation (3) vs token cross-attention (4)</td><td>Does looking at image regions help?</td></tr>
+<tr><th scope="row">Fusion operation</th><td>Model 3 with and without the ⊙ product terms</td><td>Is plain concatenation enough?</td></tr>
+<tr><th scope="row">Freeze vs fine-tune</th><td>Last CLIP vision block frozen or trained</td><td>Is CLIP's pretraining enough for this task?</td></tr>
+</tbody></table></div>
+<h3>Evaluation</h3>
+<ul><li>Main metric: multiple-choice (MC) accuracy on the test split, mean ± standard deviation over seeds 42–46, as in the A-OKVQA paper.</li><li>Second metric: direct-answer (DA) score of the chosen text, using the A-OKVQA rule: score =min(n/3, 1), where n is the number of workers who gave that answer. It gives partial credit when the chosen answer is acceptable to some workers.</li><li>Breakdowns: accuracy by question opening (what / why / how many / what color ), on the difficult questions, and on the high-agreement questions.</li><li>Support and conflict cases: questions where model 3 or 4 is right and model 1 is wrong (the image helps) and questions where model 1 is right and the fusion model is wrong (the image misleads), shown with their rationales.</li><li>Cost: trainable and total parameters, feature caching time, training time per run, inference time per question.</li><li>A difference between two models counts only if the gap of their means is larger than the larger seed SD.</li></ul>
+<h3>Compute estimate</h3>
+<p>Measured on our machine (CPU, 14 PyTorch threads): the CLIP image encoder takes about 18 ms per image and the text encoder about 6.5 ms per text in batches of 64. Caching the features of the 17,661 images and of about 164,000 texts (18,201 questions, 72,804 choices and 72,804 “question + answer” strings) takes about 5 + 18 minutes on the CPU, or a few minutes on one GPU. The cached image tokens take 17,661×50×768 float16 values, about 1.4 GB. The trainable heads have about 1–3M parameters, so 20 epochs take a few minutes per run. The whole plan (5 models, 5 ablations, 5 seeds) is about 50 short runs and fits in a few GPU hours.</p>
+</section>
+<section id="s5">
+<h2>AI Usage Disclosure</h2>
+<div class="table-scroll"><table class="numeric">
+<caption>AI usage for Assignment 3 M1 (details in <code>AI_USAGE.md</code>).</caption>
+<thead><tr>
+<th scope="col"><strong>Field</strong></th>
+<th scope="col"><strong>Entry</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Tool</th><td>Claude Code (Anthropic), model Claude Opus 5.5, with helper agents on Claude Sonnet, in the group's VS Code workspace</td></tr>
+<tr><th scope="row">Used by</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Time / stage</th><td>9 November 2026, dataset proposal (A3-M1)</td></tr>
+<tr><th scope="row">Purpose</th><td>Searching Hugging Face for datasets that meet the handbook thresholds and comparing them; coding assistance (<code>download.py</code>, <code>data_loader.py</code>, <code>01_eda.ipynb</code>); running the EDA and the CLIP speed test; first draft of this proposal and of the assignment page. The group chose A-OKVQA from the compared datasets</td></tr>
+<tr><th scope="row">Affected sections</th><td>All sections of this proposal; <code>Assignment3/</code></td></tr>
+<tr><th scope="row">Representative prompt</th><td>“Switch Assignment 3 to the A-OKVQA dataset, read the handbook and satisfy all requirements; keep the code simple.”</td></tr>
+<tr><th scope="row">How output was verified</th><td>Every number comes from the executed <code>01_eda.ipynb</code>; the split is checked by assertions in the code; the model plan was compared with the course slides on CLIP and cross-attention; the group reviews code and text before submission</td></tr>
+<tr><th scope="row">Responsible member</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Verification sources</th><td>A-OKVQA paper [1], CLIP paper [3], course slides (multimodal learning), Hugging Face <code>transformers</code> documentation</td></tr>
+</tbody></table></div>
+</section>
+<section id="references">
+<h2>References</h2>
+<ol><li>D. Schwenk, A. Khandelwal, C. Clark, K. Marino and R. Mottaghi, “A-OKVQA: A benchmark for visual question answering using world knowledge,” in <em>Proc. ECCV</em>, pp. 146–162, 2022. Dataset: <a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA</a>, revision <code>d1b0efa</code>.</li><li>T.-Y. Lin et al., “Microsoft COCO: Common objects in context,” in <em>Proc. ECCV</em>, pp. 740–755, 2014.</li><li>A. Radford et al., “Learning transferable visual models from natural language supervision,” in <em>Proc. ICML</em>, PMLR 139, pp. 8748–8763, 2021.</li></ol>
+</section>
+
 </main>
 </div>
 </body>

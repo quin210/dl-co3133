@@ -3,7 +3,7 @@ shared:
   clip_norm: 5.0
   seeds: [42, 43, 44, 45, 46]
   threads: 14
-  device: cpu            
+  device: cpu            # default; a run may set its own device (the G_ runs use cuda)
   optimizer: Adam
   weight_decay: 0.0
   scheduler: null
@@ -48,3 +48,90 @@ runs:
     epochs: 4
     lr: 1.0e-4
     augment: strong
+
+  # M3 follow-up experiments. They run on one GPU, so they are compared only with each other,
+  # never with the CPU runs above. Every other shared setting is unchanged.
+
+  # GPU copies of the CPU configurations: hardware check and controls for Experiments 3 to 5
+  G_CNN:
+    model: CNN
+    pretrained: null
+    epochs: 25
+    lr: 1.0e-3
+    augment: flip
+    device: cuda
+
+  G_ResNet18Frozen:
+    model: ResNet18
+    freeze_backbone: true
+    pretrained: ImageNet1K_V1
+    epochs: 6
+    lr: 1.0e-3
+    augment: flip
+    device: cuda
+
+  G_ResNet18FineTune:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: flip
+    device: cuda
+
+  # Experiment 3: frozen vs full fine-tuning under the same learning rate and epoch budget
+  G_ResNet18FrozenLR1e-4:
+    model: ResNet18
+    freeze_backbone: true
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: flip
+    device: cuda
+
+  G_ResNet18FineTuneLR1e-3:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 6
+    lr: 1.0e-3
+    augment: flip
+    device: cuda
+
+  # Experiment 4: the augmentation ablation repeated with twice the epoch budget
+  G_ResNet18FineTune8ep:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 8
+    lr: 1.0e-4
+    augment: flip
+    device: cuda
+
+  G_ResNet18FineTune8epStrongAug:
+    model: ResNet18
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 8
+    lr: 1.0e-4
+    augment: strong
+    device: cuda
+
+  # Experiment 5: backbone A vs B under the G_ResNet18FineTune recipe
+  G_EfficientNetB0FineTune:
+    model: EfficientNetB0
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: flip
+    device: cuda
+
+  G_ConvNeXtTinyFineTune:
+    model: ConvNeXtTiny
+    freeze_backbone: false
+    pretrained: ImageNet1K_V1
+    epochs: 4
+    lr: 1.0e-4
+    augment: flip
+    device: cuda

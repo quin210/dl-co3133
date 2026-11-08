@@ -15,6 +15,11 @@ editing**, not as substitutes for the group's own work. In particular:
 - Every AI-assisted contribution was reviewed, edited and verified by the group against
   source code, real runs, official documentation or published references.
 - Every member is able to explain any part of the submission on request.
+- **Exception, Assignment 2 M3 (Section 6):** an AI coding agent edited code, ran the
+  group's training and evaluation scripts for the GPU follow-up runs, and drafted the M3
+  report. The results it reports come from real runs of the committed scripts; they were
+  not written by hand or invented. Section 6 lists exactly what it did and how the group
+  checked it.
 
 ## Tools Used
 
@@ -22,6 +27,7 @@ editing**, not as substitutes for the group's own work. In particular:
 |---|---|---|
 | Claude | Anthropic | [e.g., Claude Opus 5.5, via claude.ai] |
 | ChatGPT | OpenAI | [e.g., GPT-5.5, via chatgpt.com] |
+| Claude Code | Anthropic | Claude Opus 5.5 (`claude-opus-5-5`), VS Code extension (A2 M3 only) |
 
 ---
 
@@ -93,6 +99,66 @@ editing**, not as substitutes for the group's own work. In particular:
   checked every number and figure on the slides against the report and the actual run
   outputs, and rejected suggestions that changed meaning.
 - **Verification sources:** Group report; saved run outputs (`metrics.json`, `history.csv`).
+
+## 6. Assignment 2 M3: coding agent for follow-up experiments and report draft
+
+- **Tool:** Claude Code (Anthropic), model Claude Opus 5.5, run in the group's VS Code workspace.
+- **Used by:** Võ Thị Như Quỳnh.
+- **Stage:** 8-9 November 2026, after the 20 CPU runs and `02_results.ipynb` were complete.
+- **Purpose and AI contribution:**
+  - *Coding assistance:* per-run `device` option in `train.py` and `evaluate.py` (plus
+    `torch.cuda.synchronize()` before GPU timing), `models/backbones.py` (EfficientNet-B0
+    and ConvNeXt-Tiny wrappers), nine `G_` run configurations in `configs/a2.yaml`.
+    The CPU code path and the four CPU configurations are unchanged.
+  - *Experiment execution:* ran `download.py`, `data_loader.py`, `train.py` and
+    `evaluate.py` for the 45 GPU runs (9 configurations x seeds 42-46), and built and
+    executed `03_analysis.ipynb`.
+  - *Housekeeping:* removed `02_results_final.ipynb`, a byte-identical copy of
+    `02_results.ipynb`; fixed one typo in `02_results.ipynb`; added the reproduction
+    section of `README.md`.
+  - *Report writing:* first draft of the A2 M3 LaTeX report, built from the notebooks,
+    the M2 report and the handbook requirements.
+  - *Slides:* first draft of the A2 M3 slides (`docs/reports/A2_M3_slides.pdf`), built from
+    the numbers and figures of the report.
+- **Affected files / sections:** `Assignment2/train.py`, `evaluate.py`,
+  `models/backbones.py`, `03_analysis.ipynb`, `configs/a2.yaml`, `README.md`;
+  A2 M3 report, all sections (text), in particular 2.3.3, 2.6, 3.8 and 3.11.
+- **Representative prompt:** "Read the handbook requirements for Assignment 2 and complete
+  the M3 final: run more experiments if needed, follow the style of Assignment 1, and write
+  the M3 report from the LaTeX template."
+- **How the output was edited and verified:** the CPU results of the main study (E1, E2)
+  were produced by the group earlier and were not rerun or edited. Every GPU number is read
+  by `03_analysis.ipynb` from the `metrics.json` and prediction files that the scripts wrote,
+  and the report tables were checked against the notebook outputs. Code changes were
+  reviewed with `git diff` before the group committed them. Parameter counts were checked
+  against the instantiated models.
+- **Responsible member for final verification:** Võ Thị Như Quỳnh.
+- **Verification sources:** PyTorch and torchvision documentation; the cited papers
+  (ResNet, EfficientNet, ConvNeXt); saved run outputs and logs.
+
+## 7. Assignment 3 M1: data code, EDA and proposal draft
+
+- **Tool:** Claude Code (Anthropic), model Claude Opus 5.5 (the main session plus one helper
+  agent running Claude Sonnet), in the group's VS Code workspace.
+- **Used by:** Võ Thị Như Quỳnh.
+- **Stage:** 9 November 2026, dataset proposal (A3-M1).
+- **Purpose and AI contribution:** wrote `Assignment3/download.py`, `data_loader.py` and
+  `01_eda.ipynb` and ran them; measured CLIP encoder speed for the compute estimate; drafted
+  the M1 proposal in LaTeX and the `assignment3_M1.html` page (converted from the LaTeX with
+  `latex/tex2html.py`); searched Hugging Face for datasets that meet the handbook size rules
+  and compared them. A first draft used STVQA-7K, which is below the 10,000-pair VQA threshold;
+  after this comparison the group chose A-OKVQA, and the proposal was rewritten for it.
+- **Representative prompt:** "Set up Assignment 3 M1, read the handbook carefully and satisfy
+  all requirements; keep the code simple, like students learning the course", then "search
+  Hugging Face for a dataset that fits" and "switch Assignment 3 to
+  https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA".
+- **How the output was edited and verified:** every number in the proposal is printed by the
+  executed `01_eda.ipynb`; the split is checked by assertions in `data_loader.py` (no image
+  in two splits); the model plan follows the course slides on CLIP and
+  cross-attention. The group reviews the code and the text before submission.
+- **Responsible member for final verification:** Võ Thị Như Quỳnh.
+- **Verification sources:** A-OKVQA paper and dataset card; CLIP paper; course slides
+  (Multimodal learning); Hugging Face `transformers` documentation.
 
 ---
 

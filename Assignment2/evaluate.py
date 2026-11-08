@@ -8,16 +8,16 @@ import torch
 from sklearn.metrics import accuracy_score, f1_score
 
 from data_loader import get_data_loaders
-from train import DEVICE, OUTPUTS, RUNS, THREADS
+from train import OUTPUTS, RUNS, THREADS, device_of
 
-def predict(model, loader):
+def predict(model, loader, device):
     labels, probabilities = [], []
     loss = 0.0
     model.eval()
     with torch.inference_mode():
         for images, targets in loader:
-            logits = model(images.to(DEVICE))
-            loss += torch.nn.functional.cross_entropy(logits, targets.to(DEVICE), reduction="sum").item()
+            logits = model(images.to(device))
+            loss += torch.nn.functional.cross_entropy(logits, targets.to(device), reduction="sum").item()
             labels.append(targets.numpy())
             probabilities.append(logits.softmax(1).cpu().numpy())
     labels, probabilities = np.concatenate(labels), np.concatenate(probabilities)
@@ -29,14 +29,17 @@ def predict(model, loader):
     }
     return metrics, labels, predictions, probabilities
 
-def inference_time(model, loader):
+def inference_time(model, loader, device):
     # one warmup, then the median of two complete passes including batch loading
     durations = []
     with torch.inference_mode():
         for repeat in range(3):
             start = time.perf_counter()
             for images, _ in loader:
-                model(images.to(DEVICE)).argmax(1)
+                model(images.to(device)).argmax(1)
+            if device.type == "cuda":
+                # gpu kernels run asynchronously, so wait for the last batch before stopping the clock
+                torch.cuda.synchronize(device)
             if repeat:
                 durations.append(time.perf_counter() - start)
     return float(np.median(durations) * 1_000 / len(loader.dataset))
@@ -47,17 +50,18 @@ def evaluate(name, folder):
         print("Skip (already evaluated):", folder)
         return None
     torch.set_num_threads(THREADS)
-    saved = torch.load(folder / "best.pt", map_location=DEVICE, weights_only=True)
+    device = device_of(name)
+    saved = torch.load(folder / "best.pt", map_location=device, weights_only=True)
     info = saved["info"]
-    model = RUNS[name]["build"]().to(DEVICE)
+    model = RUNS[name]["build"]().to(device)
     if type(model).__name__ != info["model_class"]:
         raise ValueError("model class differs from checkpoint")
     model.load_state_dict(saved["model_state"])
     _, val_loader, test_loader, _ = get_data_loaders(info["batch_size"], info["seed"])
     results = dict(info)
     for split, loader in [("validation", val_loader), ("test", test_loader)]:
-        metrics, labels, predictions, probabilities = predict(model, loader)
-        metrics["inference_ms"] = inference_time(model, loader)
+        metrics, labels, predictions, probabilities = predict(model, loader, device)
+        metrics["inference_ms"] = inference_time(model, loader, device)
         results[split] = metrics
         np.savez_compressed(folder / (split + "_predictions.npz"), labels=labels,
                             predictions=predictions, probabilities=probabilities)

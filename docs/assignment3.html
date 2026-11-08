@@ -32,7 +32,16 @@
 <main id="main">
 <section id="question">
 <h2 id="section-1">Problem</h2>
-<p class="placeholder">Pending</p>
+<ul>
+<li>Task: multiple-choice visual question answering that needs commonsense or world knowledge. Input: one image, one question and 4 choices. Output: the correct choice.</li>
+<li>Dataset: A-OKVQA, 18,201 labelled questions on 17,661 COCO images (the official test split has no labels and is not used).</li>
+<li>Modalities: image and text (question + choices). Planned models: text only, image only, simple late fusion and a cross-attention fusion, all on frozen CLIP ViT-B/32 encoders.</li>
+</ul>
+<p><span class="link-list">
+<a href="reports/A3_M1.pdf">M1 Proposal report</a>
+<a href="assignment3_M1.html">M1 Proposal page</a>
+<a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">A-OKVQA dataset</a>
+</span></p>
 </section>
 <section id="setup">
 <h2 id="section-2">Experimental setup</h2>
@@ -47,15 +56,15 @@
 <div class="table-scroll"><table>
 <thead><tr><th scope="col">Milestone</th><th scope="col">Due</th><th scope="col">Weight within A3</th><th scope="col">Status</th></tr></thead>
 <tbody>
-<tr><th scope="row"><a href="assignment3_M1.html">M1 Proposal</a></th><td>18 Nov 2026</td><td>15%</td><td>Pending</td></tr>
+<tr><th scope="row"><a href="assignment3_M1.html">M1 Proposal</a></th><td>18 Nov 2026</td><td>15%</td><td>Dataset proposal available; waiting for approval.</td></tr>
 <tr><th scope="row"><a href="assignment3_M2.html">M2 Draft</a></th><td>25 Nov 2026</td><td>25%</td><td>Pending</td></tr>
 <tr><th scope="row"><a href="assignment3_M3.html">M3 Final</a></th><td>2 Dec 2026</td><td>60%</td><td>Pending</td></tr>
 </tbody>
 </table></div>
 <p class="meta">All deadlines: 23:59 Vietnam time.</p>
 <ul>
-<li><strong>Reports:</strong> Pending</li>
-<li><strong>Code and checkpoints:</strong> Pending</li>
+<li><strong>Reports:</strong> <a href="reports/A3_M1.pdf">M1 Proposal</a></li>
+<li><strong>Code and checkpoints:</strong> <a href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (data loader and EDA; models after approval)</li>
 <li><strong>Slides and video:</strong> Pending</li>
 </ul>
 </section>

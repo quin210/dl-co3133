@@ -21,6 +21,7 @@ from torch.utils.data import DataLoader
 
 from data_loader import get_data_loaders
 from models.cnn import CNN
+from models.backbones import ConvNeXtTiny, EfficientNetB0
 from models.resnet import ResNet18
 
 # every hyperparameter comes from configs/a2.yaml so reported runs trace back to one committed file
@@ -40,18 +41,29 @@ def builder(settings):
         return lambda: CNN()
     if settings["model"] == "ResNet18":
         return lambda: ResNet18(freeze_backbone=settings["freeze_backbone"])
+    if settings["model"] == "EfficientNetB0":
+        return lambda: EfficientNetB0()
+    if settings["model"] == "ConvNeXtTiny":
+        return lambda: ConvNeXtTiny()
     raise ValueError("unknown model %r" % settings["model"])
 
 # epochs and learning rate differ because the models start from different weights
 RUNS = {name: dict(settings, build=builder(settings)) for name, settings in CONFIG["runs"].items()}
+
+def device_of(name):
+    # a run may set its own device; the CPU runs of the main study use the shared one
+    return torch.device(RUNS[name].get("device", SHARED["device"]))
 
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.set_num_threads(THREADS)
+    # avoid autotuned convolution kernels on the GPU, so repeated runs pick the same algorithms
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 
-def run_epoch(model, loader, optimizer=None, log_every=0, max_steps=0):
+def run_epoch(model, loader, optimizer=None, log_every=0, max_steps=0, device=DEVICE):
     training = optimizer is not None
     model.train(training)
     total_loss = 0.0
@@ -60,7 +72,7 @@ def run_epoch(model, loader, optimizer=None, log_every=0, max_steps=0):
         for step, (images, targets) in enumerate(loader, 1):
             if max_steps and step > max_steps:
                 break
-            images, targets = images.to(DEVICE), targets.to(DEVICE)
+            images, targets = images.to(device), targets.to(device)
             if training:
                 optimizer.zero_grad(set_to_none=True)
             logits = model(images)
@@ -104,8 +116,9 @@ def fit(name, seed=42, smoke=False):
     # smoke test: 1 epoch of a few batches, written to a separate folder that evaluate.py never reads
     epochs = 1 if smoke else settings["epochs"]
     max_steps = 5 if smoke else 0
+    device = device_of(name)
     set_seed(seed)
-    model = settings["build"]().to(DEVICE)
+    model = settings["build"]().to(device)
     train_loader, val_loader, _, data = get_data_loaders(BATCH_SIZE, seed, augment=settings["augment"])
     trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
     optimizer = torch.optim.Adam(trainable, lr=settings["lr"])
@@ -116,8 +129,8 @@ def fit(name, seed=42, smoke=False):
     start = time.perf_counter()
     for epoch in range(1, epochs + 1):
         epoch_start = time.perf_counter()
-        train_metrics, _, _ = run_epoch(model, train_loader, optimizer, log_every=50, max_steps=max_steps)
-        val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps)
+        train_metrics, _, _ = run_epoch(model, train_loader, optimizer, log_every=50, max_steps=max_steps, device=device)
+        val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps, device=device)
         row = {"epoch": epoch}
         row.update({"train_" + key: value for key, value in train_metrics.items()})
         row.update({"val_" + key: value for key, value in val_metrics.items()})
@@ -138,8 +151,8 @@ def fit(name, seed=42, smoke=False):
     # final train metrics use the best weights without augmentation
     train_loader.dataset.augment = False
     fixed_train = DataLoader(train_loader.dataset, batch_size=BATCH_SIZE, shuffle=False)
-    train_metrics, _, _ = run_epoch(model, fixed_train, max_steps=max_steps)
-    val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps)
+    train_metrics, _, _ = run_epoch(model, fixed_train, max_steps=max_steps, device=device)
+    val_metrics, _, _ = run_epoch(model, val_loader, max_steps=max_steps, device=device)
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent,
                             capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=Path(__file__).parent,
@@ -156,7 +169,8 @@ def fit(name, seed=42, smoke=False):
         "augment": settings["augment"], "augmentation": CONFIG["augmentations"][settings["augment"]],
         "scheduler": SHARED["scheduler"], "weight_decay": SHARED["weight_decay"],
         "pretrained": settings["pretrained"], "config_file": "configs/a2.yaml",
-        "device": str(DEVICE), "threads": THREADS, "source_commit": commit,
+        "device": str(device), "threads": THREADS,
+        "gpu": torch.cuda.get_device_name(device) if device.type == "cuda" else None, "source_commit": commit,
         "source_uncommitted": bool(dirty),
         "environment": {"python": sys.version.split()[0], "torch": str(torch.__version__),
                         "numpy": np.__version__, "sklearn": sklearn.__version__,

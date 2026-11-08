@@ -46,14 +46,17 @@
 <section id="results">
 <h2 id="section-3">Results</h2>
 <div class="table-scroll"><table class="numeric">
-<caption>M2 Draft preliminary test results, seed 42</caption>
-<thead><tr><th scope="col">Model</th><th scope="col">Accuracy</th><th scope="col">Macro-F1</th></tr></thead>
+<caption>M3 Final test results, mean ± SD over seeds 42-46</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Hardware</th><th scope="col">Accuracy</th><th scope="col">Macro-F1</th><th scope="col">Web-style accuracy</th></tr></thead>
 <tbody>
-<tr><th scope="row">CNN (baseline)</th><td>0.9220</td><td>0.8955</td></tr>
-<tr><th scope="row">ResNet-18 frozen</th><td>0.9120</td><td>0.8754</td></tr>
-<tr><th scope="row">ResNet-18 fine-tuned</th><td>0.9705</td><td>0.9547</td></tr>
+<tr><th scope="row">CNN (baseline)</th><td>CPU</td><td>0.947 ± 0.007</td><td>0.927 ± 0.008</td><td>0.283 ± 0.044</td></tr>
+<tr><th scope="row">ResNet-18 frozen</th><td>CPU</td><td>0.911 ± 0.006</td><td>0.875 ± 0.007</td><td>0.307 ± 0.032</td></tr>
+<tr><th scope="row">ResNet-18 fine-tuned</th><td>CPU</td><td>0.971 ± 0.002</td><td>0.959 ± 0.002</td><td>0.488 ± 0.029</td></tr>
+<tr><th scope="row">ResNet-18 fine-tuned, strong aug.</th><td>CPU</td><td>0.963 ± 0.003</td><td>0.946 ± 0.005</td><td>0.432 ± 0.014</td></tr>
+<tr><th scope="row">EfficientNet-B0 fine-tuned</th><td>GPU</td><td>0.977 ± 0.002</td><td>0.967 ± 0.003</td><td>0.549 ± 0.021</td></tr>
+<tr><th scope="row">ConvNeXt-T fine-tuned</th><td>GPU</td><td>0.979 ± 0.002</td><td>0.970 ± 0.002</td><td>0.615 ± 0.037</td></tr>
 </tbody></table></div>
-<p class="meta">Preliminary: one seed and short training budgets. Details on the <a href="assignment2_M2.html">M2 Draft</a> page.</p>
+<p class="meta">Web-style: the 82 test images whose original size is not 256 × 256. The GPU copies of the CPU recipes agree with the CPU runs within one seed SD. Full analysis on the <a href="assignment2_M3.html">M3 Final</a> page.</p>
 </section>
 <section id="milestones">
 <h2 id="section-4">Milestones</h2>
@@ -62,14 +65,14 @@
 <tbody>
 <tr><th scope="row"><a href="assignment2_M1.html">M1 Proposal</a></th><td>7 Oct 2026</td><td>15%</td><td>Dataset proposal available.</td></tr>
 <tr><th scope="row"><a href="assignment2_M2.html">M2 Draft</a></th><td>28 Oct 2026</td><td>25%</td><td>Draft report available.</td></tr>
-<tr><th scope="row"><a href="assignment2_M3.html">M3 Final</a></th><td>11 Nov 2026</td><td>60%</td><td>Pending</td></tr>
+<tr><th scope="row"><a href="assignment2_M3.html">M3 Final</a></th><td>11 Nov 2026</td><td>60%</td><td>Final report available.</td></tr>
 </tbody>
 </table></div>
 <p class="meta">All deadlines: 23:59 Vietnam time.</p>
 <ul>
-<li><strong>Final report:</strong> Pending</li>
-<li><strong>Code and checkpoints:</strong> Pending</li>
-<li><strong>Slides and video:</strong> Pending</li>
+<li><strong>Final report:</strong> <a href="reports/A2_M3.pdf">A2_M3.pdf</a></li>
+<li><strong>Code and checkpoints:</strong> <a href="https://github.com/quin210/dl-co3133/tree/main/Assignment2">Assignment2/</a>; reproduction commands in the <a href="https://github.com/quin210/dl-co3133#reproducing-assignment-2-tomato-leaf-disease-classification">README</a>; checkpoints are rebuilt with those commands</li>
+<li><strong>Slides and video:</strong> <a href="reports/A2_M3_slides.pdf">Slides (PDF)</a>; YouTube video: pending</li>
 </ul>
 </section>
 <section id="references">

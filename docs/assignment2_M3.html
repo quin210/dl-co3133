@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assignment 2 · M3 Final · G-02 · CO3133</title>
-<meta name="description" content="Assignment 2 · M3 Final">
+<meta name="description" content="Assignment 2 final report: tomato leaf disease classification with a small CNN, ResNet-18 (frozen and fine-tuned), EfficientNet-B0 and ConvNeXt-T. Class CC01, group G-02, CO3133.">
 <link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
@@ -14,25 +14,844 @@
 <nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html" aria-current="location">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
 </div></div>
 <div class="milestone-bar">
-<nav class="milestone-nav" aria-label="Assignment 2 milestones"><a class="report-button" href="assignment2.html">Main</a><a class="report-button" href="assignment2_M1.html">M1 Proposal</a><a class="report-button" href="assignment2_M2.html">M2 Draft</a><a class="report-button" href="assignment2_M3.html" aria-current="page">M3 Final</a></nav>
+<nav class="milestone-nav" aria-label="Assignment 2 milestones"><a class="report-button" href="assignment2.html">Main</a><a class="report-button" href="assignment2_M1.html">M1 Proposal</a><a class="report-button" href="assignment2_M2.html">M2 Draft</a><a class="report-button" aria-current="page" href="assignment2_M3.html">M3 Final</a></nav>
 </div>
 <div class="wrap">
 <header>
 <p class="kicker">Assignment 2 · Milestone 3</p>
 <h1>Tomato leaf disease classification</h1>
-
-
+<dl class="facts">
+<div><dt>Group</dt><dd>G-02</dd></div>
+<div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br>Mai Trung Kiên (2352641)<br>Hứa Tuệ Minh (2450018)</dd></div>
+<div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div>
+</dl>
 </header>
 <main id="main">
-<section class="report-preview" aria-labelledby="pdf-report">
+<section class="report-preview" aria-labelledby="detailed-report">
 <div class="report-card-row">
-<div class="report-cover report-cover-pending" aria-hidden="true">PDF</div>
+<div class="report-cover" aria-hidden="true"><object class="report-cover-pdf" data="reports/A2_M3.pdf#page=1&amp;view=Fit&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0" type="application/pdf" tabindex="-1">PDF</object></div>
 <div class="report-preview-copy">
-<h2 class="report-preview-title" id="pdf-report">M3 Final PDF report</h2>
-<p>Pending</p>
+<h2 class="report-preview-title" id="detailed-report">M3 Final PDF report</h2>
+<p>Professional report - 33 pages</p>
+</div>
+<div class="report-card-actions">
+<a class="report-button report-open" href="reports/A2_M3.pdf" target="_blank" rel="noopener" aria-label="Open PDF in a new tab">Open PDF</a>
 </div>
 </div>
+<details class="report-pdf-preview">
+<summary>Preview PDF</summary>
+<object class="pdf-reader" data="reports/A2_M3.pdf#view=Fit&amp;navpanes=0" type="application/pdf" aria-label="Assignment 2 M3 Final PDF report">
+<p><a href="reports/A2_M3.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+</object>
+</details>
 </section>
+<p>Source: <a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment2">Assignment2/</a> (01_eda.ipynb, 02_results.ipynb, 03_analysis.ipynb, train.py, evaluate.py, configs/a2.yaml). Reproduction commands: <a class="source-link" href="https://github.com/quin210/dl-co3133#reproducing-assignment-2-tomato-leaf-disease-classification">README</a>. Checkpoints: rebuilt with the commands in the README (one <code>best.pt</code> per run). Slides: <a class="source-link" href="reports/A2_M3_slides.pdf">A2_M3_slides.pdf</a>. YouTube video: pending.</p>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#s1">Problem and data description</a><a href="#s2">Methodology</a><a href="#s3">Implementation results</a><a href="#s4">AI Usage Disclosure</a><a href="#references">References</a></nav>
+
+<section id="s1">
+<h2>Problem and data description</h2>
+<h3>Problem statement</h3>
+<p>Tomato diseases are usually recognised by looking at the leaves: spots, blight lesions, mould, mosaic patterns or curling. A model that names the disease from one photograph of a leaf could support early treatment in the field. The task is <strong>single-label image classification with eight classes</strong>: seven diseases and one healthy class.</p>
+<p><strong>Input and output.</strong> Given an RGB image x ∈ ℝ<sup>3×224×224</sup> (after resizing and normalisation), a model f<sub>θ</sub> outputs eight class scores (logits) and predicts ŷ = argmax<sub>k</sub> f<sub>θ</sub>(x)<sub>k</sub>. The prediction unit is one image. Parameters are learned by minimising the cross-entropy between the logits and the label on the training set.</p>
+<p><strong>Main difficulties.</strong> (1) Several diseases produce small, similar lesions (Bacterial spot, Early blight, Late blight, Septoria leaf spot), and the cues are only a few pixels wide at 224×224. (2) The classes are imbalanced (9.7 to 1). (3) The dataset mixes two sources: uniform laboratory crops and a small share of web or field photographs with clutter, several leaves and different lighting. (4) The published split contains near-duplicate photographs across partitions, some with a different label (Section ).</p>
+<p><strong>Research question.</strong> How much does ImageNet pretraining help on this specialised task compared with a small CNN trained from scratch, and which fine-tuning choices (frozen vs full backbone, augmentation strength, backbone family) matter for accuracy, macro-F1, accuracy on web-style photos and compute cost?</p>
+<h3>Dataset source, licence and proposal status</h3>
+<p>The Tomato Leaves Dataset [1] combines the tomato classes of PlantVillage [2] and PlantDoc [3]. PlantVillage images are photographs of single detached leaves taken under controlled conditions; PlantDoc images were collected from the web and show leaves in the field. Each image carries one class label, given by the folder name. We use the Hugging Face copy <code>shreemunale/tomato-leaves-dataset</code>, pinned to revision <code>c029791</code>, licence CC BY 4.0.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Dataset summary and approval status.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Value</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Dataset proposal (A2-M1)</th><td>Status <strong>Approved</strong>; the proposal is linked from the assignment page (M1 Proposal)</td></tr>
+<tr><th scope="row">Track</th><td>Image classification (Section 19.1 of the handbook: ≥5 classes, ≥5,000 training images; MNIST and Fashion-MNIST not used)</td></tr>
+<tr><th scope="row">Classes</th><td>8 (7 diseases + healthy); 14,404 training images, smallest training class 509 images</td></tr>
+<tr><th scope="row">Download</th><td><code>Assignment2/download.py</code>: 17,996 JPEG/PNG files, 475 MB</td></tr>
+<tr><th scope="row">Cache</th><td><code>data/tomato/images_224.npz</code>: all images resized once to 224×224 uint8, 2.7 GB</td></tr>
+<tr><th scope="row">Labelling</th><td>One label per image from the source folder; no bounding boxes or masks</td></tr>
+</tbody></table></div>
+<p><strong>Bias and limitations of the data.</strong> Most images come from one laboratory setting, so a model can reach high accuracy without learning to handle field conditions. The file names are anonymised, so the source of an image cannot be read directly. Label quality was not checked by an expert; Section  shows near-duplicate pairs with different labels.</p>
+<h3>Read the dataset</h3>
+<p>Source: <code>Assignment2/01_eda.ipynb</code>. Images are listed by partition and folder; the label is the folder name.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Images per class and partition.</caption>
+<thead><tr>
+<th scope="col"><strong>Class</strong></th>
+<th scope="col"><strong>train</strong></th>
+<th scope="col"><strong>validation</strong></th>
+<th scope="col"><strong>test</strong></th>
+<th scope="col"><strong>Total</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Bacterial spot</th><td>1930</td><td>235</td><td>241</td><td>2406</td></tr>
+<tr><th scope="row">Early blight</th><td>966</td><td>131</td><td>117</td><td>1214</td></tr>
+<tr><th scope="row">Late blight</th><td>1710</td><td>210</td><td>209</td><td>2129</td></tr>
+<tr><th scope="row">Leaf mold</th><td>999</td><td>120</td><td>125</td><td>1244</td></tr>
+<tr><th scope="row">Septoria leaf spot</th><td>1771</td><td>210</td><td>223</td><td>2204</td></tr>
+<tr><th scope="row">Tomato yellow leaf curl virus</th><td>4930</td><td>624</td><td>625</td><td>6179</td></tr>
+<tr><th scope="row">Tomato mosaic virus</th><td>509</td><td>66</td><td>59</td><td>634</td></tr>
+<tr><th scope="row">Healthy</th><td>1589</td><td>200</td><td>197</td><td>1986</td></tr>
+<tr><th scope="row">Total</th><td>14404</td><td>1796</td><td>1796</td><td>17996</td></tr>
+</tbody></table></div>
+<p>The published split holds 17,996 images: 14,404 for training and 1,796 each for validation and test. These counts match the M1 proposal. Tomato yellow leaf curl virus is the largest class (6,179 images, 4,930 in training) and Tomato mosaic virus the smallest (634 images, 509 in training). The smallest test class therefore has 59 images, so one image changes its recall by about 1.7 points.</p>
+<h3>Class distribution and imbalance</h3>
+<figure>
+<img alt="Share of each class in the three partitions." src="assets/assignment2_M3/class_share.png"/>
+<figcaption>Share of each class in the three partitions.</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Class imbalance.</caption>
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>Value</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Largest class</th><td>Tomato yellow leaf curl virus (6,179)</td></tr>
+<tr><th scope="row">Smallest class</th><td>Tomato mosaic virus (634)</td></tr>
+<tr><th scope="row">Imbalance ratio</th><td>9.7</td></tr>
+</tbody></table></div>
+<p>The largest class is 9.7 times the size of the smallest. The three partitions have almost the same class shares, so validation and test scores describe the same label mix as training. Accuracy alone would be dominated by the large virus class, so all experiments report macro-F1 and use validation macro-F1 to select checkpoints.</p>
+<h3>Original image size and file format</h3>
+<p>Only the image headers are read to learn the original resolution before the resize to 224×224.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Image size summary, most common sizes and file formats.</caption>
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>width</strong></th>
+<th scope="col"><strong>height</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">mean</th><td>285.9</td><td>279.8</td></tr>
+<tr><th scope="row">std</th><td>223.6</td><td>186.9</td></tr>
+<tr><th scope="row">min</th><td>115</td><td>85</td></tr>
+<tr><th scope="row">median</th><td>256</td><td>256</td></tr>
+<tr><th scope="row">max</th><td>6000</td><td>6000</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>width</strong></th>
+<th scope="col"><strong>height</strong></th>
+<th scope="col"><strong>images</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">256</th><td>256</td><td>16889</td></tr>
+<tr><th scope="row">224</th><td>224</td><td>317</td></tr>
+<tr><th scope="row">800</th><td>600</td><td>23</td></tr>
+<tr><th scope="row">1600</th><td>1200</td><td>19</td></tr>
+<tr><th scope="row">1024</th><td>768</td><td>15</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>format</strong></th>
+<th scope="col"><strong>mode</strong></th>
+<th scope="col"><strong>images</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">JPEG</th><td>RGB</td><td>17995</td></tr>
+<tr><th scope="row">PNG</th><td>RGBA</td><td>1</td></tr>
+</tbody></table></div>
+<p>17,995 files are RGB JPEG and one is an RGBA PNG, which the loader converts to RGB. 16,889 images (93.9%) are 256×256; 317 are 224×224, and the rest range from 115×85 to 6000×6000. Resizing every image to 224×224 therefore leaves most of the data almost unchanged, but it stretches the minority of non-square images.</p>
+<h3>Image sources</h3>
+<p>PlantVillage photographs are 256×256 crops, while PlantDoc images are web photographs of mixed size. Because file names are anonymised, we use the original size as a rough source label: an image whose size is not 256×256 is called <em>web-style</em>.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Images by size group, per class and per partition.</caption>
+<thead><tr>
+<th scope="col"><strong>Class</strong></th>
+<th scope="col"><strong>256 x 256</strong></th>
+<th scope="col"><strong>Web-style</strong></th>
+<th scope="col"><strong>Web-style share (%)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Bacterial spot</th><td>2274</td><td>132</td><td>5.5</td></tr>
+<tr><th scope="row">Early blight</th><td>1108</td><td>106</td><td>8.7</td></tr>
+<tr><th scope="row">Late blight</th><td>2004</td><td>125</td><td>5.9</td></tr>
+<tr><th scope="row">Leaf mold</th><td>1110</td><td>134</td><td>10.8</td></tr>
+<tr><th scope="row">Septoria leaf spot</th><td>1995</td><td>209</td><td>9.5</td></tr>
+<tr><th scope="row">Tomato yellow leaf curl virus</th><td>5990</td><td>189</td><td>3.1</td></tr>
+<tr><th scope="row">Tomato mosaic virus</th><td>539</td><td>95</td><td>15.0</td></tr>
+<tr><th scope="row">Healthy</th><td>1869</td><td>117</td><td>5.9</td></tr>
+<tr><th scope="row">train</th><td>13457</td><td>947</td><td>6.6</td></tr>
+<tr><th scope="row">validation</th><td>1718</td><td>78</td><td>4.3</td></tr>
+<tr><th scope="row">test</th><td>1714</td><td>82</td><td>4.6</td></tr>
+</tbody></table></div>
+<p>6.6% of training images (947) are web-style, against 4.3% of validation and 4.6% of test images. The share varies by class, from 3.1% for Tomato yellow leaf curl virus to 15.0% for Tomato mosaic virus. A class may therefore partly be recognised by image style rather than by disease. The test set has only 82 web-style images, so one image is about 1.2 points of web-style accuracy. The size rule is a proxy, not a verified source label.</p>
+<h3>Representative images</h3>
+<figure>
+<img alt="Random training images per class at the 224×224 model input size (seed 42)." src="assets/assignment2_M3/samples.png"/>
+<figcaption>Random training images per class at the 224×224 model input size (seed 42).</figcaption></figure>
+<p>Most sampled images show a single leaf on a plain grey background. The disease cues are small: spots, yellow areas, curled edges or dark patches. Early blight, Septoria leaf spot and Bacterial spot look alike at this size, so fine texture will matter for the models.</p>
+<h3>Colour and brightness</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Mean RGB value per class (0–255) and the training mean (0–1).</caption>
+<thead><tr>
+<th scope="col"><strong>Class</strong></th>
+<th scope="col"><strong>R</strong></th>
+<th scope="col"><strong>G</strong></th>
+<th scope="col"><strong>B</strong></th>
+<th scope="col"><strong>Brightness</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Bacterial spot</th><td>102.4</td><td>109.7</td><td>93.3</td><td>101.8</td></tr>
+<tr><th scope="row">Early blight</th><td>109.3</td><td>114.0</td><td>100.4</td><td>107.9</td></tr>
+<tr><th scope="row">Late blight</th><td>113.2</td><td>115.4</td><td>101.8</td><td>110.1</td></tr>
+<tr><th scope="row">Leaf mold</th><td>111.4</td><td>117.8</td><td>111.7</td><td>113.7</td></tr>
+<tr><th scope="row">Septoria leaf spot</th><td>129.5</td><td>132.4</td><td>117.0</td><td>126.3</td></tr>
+<tr><th scope="row">Tomato yellow leaf curl virus</th><td>111.8</td><td>119.7</td><td>89.9</td><td>107.2</td></tr>
+<tr><th scope="row">Tomato mosaic virus</th><td>116.9</td><td>118.1</td><td>114.0</td><td>116.3</td></tr>
+<tr><th scope="row">Healthy</th><td>114.3</td><td>119.6</td><td>109.8</td><td>114.6</td></tr>
+<tr><th scope="row">Training mean (0–1)</th><td>0.4438</td><td>0.4660</td><td>0.3936</td><td></td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Mean pixel intensity per training image (0–255), by class." src="assets/assignment2_M3/brightness.png"/>
+<figcaption>Mean pixel intensity per training image (0–255), by class.</figcaption></figure>
+<p>Septoria leaf spot images are the brightest (126.3) and Bacterial spot the darkest (101.8). Tomato yellow leaf curl virus has the lowest blue value (89.9). Colour carries some class information, but it may also reflect lighting or background differences between sources. The training mean (0.444, 0.466, 0.394) is close to the ImageNet mean used for normalisation.</p>
+<h3>Duplicates and leakage between partitions</h3>
+<p></p>
+<p>The M1 proposal requires that an original photograph and its copies stay in one partition. We test this on the published split in two ways: byte-identical files (MD5) and visually near-identical images, found with a 64-bit difference hash and a Hamming distance of at most 4.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Images with a near-identical training image. 29 byte-identical pairs exist in total, 3 of them across partitions.</caption>
+<thead><tr>
+<th scope="col"><strong>Partition</strong></th>
+<th scope="col"><strong>Images</strong></th>
+<th scope="col"><strong>Identical hash</strong></th>
+<th scope="col">Near duplicate (d≤4)</th>
+<th scope="col"><strong>Same label as match</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">validation</th><td>1796</td><td>5</td><td>88 (4.9%)</td><td>55</td></tr>
+<tr><th scope="row">test</th><td>1796</td><td>3</td><td>88 (4.9%)</td><td>63</td></tr>
+<tr><th scope="row">train (within itself)</th><td>14404</td><td>719</td><td>2873 (19.9%)</td><td></td></tr>
+</tbody></table></div>
+<figure>
+<img alt="The four closest test images (top) and their closest training images (bottom)." src="assets/assignment2_M3/near_duplicates.png"/>
+<figcaption>The four closest test images (top) and their closest training images (bottom).</figcaption></figure>
+<p>Exact copies are rare (29 pairs), but 88 validation and 88 test images (4.9%) have a training image within Hamming distance 4, and only 63 of the 88 test matches carry the same label. The four closest pairs are clearly the same photograph, and two of them have different labels. The published split therefore does not fully meet the leakage rule of the proposal, and the data contain some conflicting labels. With a threshold of 4 some matches may only be similar images, so the counts are an upper bound on true duplicates.</p>
+<h3>Data splitting</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Data-splitting protocol.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Decision</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Split</th><td>Official split published with the dataset (train / validation / test folders), 14,404 / 1,796 / 1,796</td></tr>
+<tr><th scope="row">Seed</th><td>The split is fixed and does not depend on a seed. Training seeds 42–46 change only weight initialisation, shuffling and augmentation</td></tr>
+<tr><th scope="row">Stratification</th><td>Not applied by us; the published partitions already have almost equal class shares (Figure 1)</td></tr>
+<tr><th scope="row">Split unit</th><td>One image. No leaf or plant identifier exists, so a group split is impossible without an image-similarity rule</td></tr>
+<tr><th scope="row">Leakage control</th><td>Option B of the M2 plan: keep the published split for comparability with M1/M2, and report every main model on a <em>clean test subset</em> of 1,708 images without the 88 near-duplicates (Section )</td></tr>
+<tr><th scope="row">Test use</th><td>The test set is evaluated once per run after the checkpoint is chosen on validation macro-F1</td></tr>
+<tr><th scope="row">Subset rules</th><td>None: all eight classes and all 17,996 images are used</td></tr>
+</tbody></table></div>
+<h3>Preprocessing</h3>
+<ul><li><strong>Decoding and resizing.</strong> Every file is converted to RGB and resized once to 224×224 with bilinear interpolation (no crop). The result is cached as a uint8 array so later runs do not decode JPEG files again.</li><li><strong>Normalisation.</strong> Pixels are scaled to [0,1] and standardised with the ImageNet mean (0.485, 0.456, 0.406) and standard deviation (0.229, 0.224, 0.225), which the pretrained backbones expect. The same statistics are used for the CNN so that all models see identical inputs.</li><li><strong>Augmentation (training only).</strong> <code>flip</code>: random horizontal and vertical flips (p=0.5 each), the default for all main runs. <code>strong</code> (ablation): <code>flip</code> plus <code>RandomResizedCrop</code> (scale 0.6–1.0, ratio 0.75–1.33) and <code>ColorJitter</code> (brightness, contrast and saturation 0.3, hue 0.05).</li><li><strong>Cleaning.</strong> No image is removed or relabelled. The RGBA file is converted to RGB. Conflicting near-duplicates are kept, because removing them would change the published test set.</li></ul>
+<figure>
+<img alt="One training image: original, resized, horizontally flipped and vertically flipped." src="assets/assignment2_M3/preprocessing.png"/>
+<figcaption>One training image: original, resized, horizontally flipped and vertically flipped.</figcaption></figure>
+<pre><code>python data_loader.py        # one training batch after preprocessing
+Train: 14404 | validation: 1796 | test: 1796
+Images: (64, 3, 224, 224) torch.float32 | labels: (64,) torch.int64</code></pre>
+<p>One training batch holds 64 float32 images of shape 3×224×224 and 64 int64 labels in {0,…,7}; every model returns logits of shape [64, 8]. For the first batch of seed 42 the normalised values range from -2.12 to 2.59, the per-channel means are (-0.17, 0.08, -0.09) and the standard deviations (0.79, 0.73, 0.90): close to, but not exactly, zero and one, because the statistics come from ImageNet rather than from this dataset. The batch contains all eight classes (from 3 to 22 images each).</p>
+<h3>EDA conclusions</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>What the EDA implies for the experiments.</caption>
+<thead><tr>
+<th scope="col"><strong>Evidence from the exploration</strong></th>
+<th scope="col"><strong>Implication</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">8 classes, 17,996 images, 9.7 to 1 imbalance</th><td>Report macro-F1 and per-class F1; select checkpoints on validation macro-F1</td></tr>
+<tr><th scope="row">94% of images are 256×256 lab crops</th><td>A 224×224 resize keeps nearly all detail; pretrained ImageNet inputs fit directly</td></tr>
+<tr><th scope="row">About 6% web-style photos, unevenly spread over classes</th><td>Report accuracy on the web-style subset separately; test whether augmentation helps this subset</td></tr>
+<tr><th scope="row">4.9% of test images have a near-duplicate in training, some with another label</th><td>Keep the split, but score every model on the clean subset as well</td></tr>
+<tr><th scope="row">Similar small lesions in four classes</th><td>Expect spot / blight confusion; inspect it in the error analysis</td></tr>
+</tbody></table></div>
+</section>
+<section id="s2">
+<h2>Methodology</h2>
+<h3>Pipeline</h3>
+<p>All models share one data pipeline, one training loop and one evaluation protocol. Only the model block and the settings named in each experiment change between runs.</p>
+<figure><p class="pipeline">Raw JPEG files HF rev. <code>c029791</code> → RGB, resize 224×224, uint8 cache → Dataset / DataLoader B=64, flip or strong augmentation → CNN, ResNet-18 (frozen / full), EfficientNet-B0, ConvNeXt-T → Logits [B,8] cross-entropy → Adam update, clip 5.0, fixed budget → Validation macro-F1 selects <code>best.pt</code> → Test: argmax (no post-processing) → Evaluation: accuracy, macro-F1, per-class F1, confusion matrix, clean-test and web-style subsets, error groups, training and inference time</p><figcaption>Training and evaluation pipeline. Only the shaded model block and the settings of each experiment change.</figcaption></figure>
+<p><strong>Self-implemented vs library code.</strong> We wrote the download script, the image cache, the <code>TomatoDataset</code> class with its augmentation presets, the small CNN, the wrappers that load pretrained backbones and replace their heads, the freezing logic, the config-driven training loop with checkpoint selection, evaluation and timing, and all analysis notebooks. Libraries: PyTorch [10] (layers, autograd, Adam, DataLoader), torchvision (ResNet-18, EfficientNet-B0 and ConvNeXt-Tiny definitions and ImageNet weights, <code>v2</code> transforms), NumPy and Pillow (arrays and image decoding), scikit-learn (accuracy, F1, confusion matrix), pandas and Matplotlib (tables and figures), <code>huggingface_hub</code> (file listing) and PyYAML (config).</p>
+<h3>Data and inputs</h3>
+<pre><code>x = (pixel / 255 - mean) / std     mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)
+
+images: float32 [B, 3, 224, 224]   B = 64, partial last batch kept
+labels: int64   [B]                values 0 ... 7
+logits: float32 [B, 8]             output of every model</code></pre>
+<p><code>TomatoDataset</code> keeps the cached images as uint8 and normalises each image in <code>__getitem__</code>, which saves memory (2.7 GB instead of 10.8 GB as float32). Augmentation runs on the uint8 tensor before normalisation. Only the training loader shuffles, with a generator seeded by the run seed; all loaders use zero worker processes, so the order and the random augmentation are reproducible for a given seed and device.</p>
+<h3>Model definitions</h3>
+<p>Let B be the batch size. All models output eight raw logits; softmax is applied only to read probabilities, never before the cross-entropy loss.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Models, their roles and parameter counts (counted from the instantiated PyTorch modules).</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Role</strong></th>
+<th scope="col"><strong>Inductive bias / expected strength and limit</strong></th>
+<th scope="col"><strong>Params</strong></th>
+<th scope="col"><strong>Trainable</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>Simple baseline</td><td>Local filters and pooling, trained from scratch / cheap, but must learn every feature from 14k images</td><td>61,384</td><td>61,384</td></tr>
+<tr><th scope="row">ResNet-18 frozen</th><td>Pretrained, linear probe</td><td>Fixed ImageNet features, new head / very cheap to train, features not adapted to leaf lesions</td><td>11,180,616</td><td>4,104</td></tr>
+<tr><th scope="row">ResNet-18 full</th><td>Pretrained, fine-tuned</td><td>ImageNet features adapted end to end / strong, but can overfit quickly</td><td>11,180,616</td><td>11,180,616</td></tr>
+<tr><th scope="row">EfficientNet-B0</th><td>Backbone B (follow-up)</td><td>Depthwise convolutions, squeeze-and-excitation / fewer parameters</td><td>4,017,796</td><td>4,017,796</td></tr>
+<tr><th scope="row">ConvNeXt-Tiny</th><td>Backbone C (follow-up)</td><td>Modernised ConvNet: 7×7 depthwise kernels, LayerNorm / strongest, but 2.5 times the parameters</td><td>27,826,280</td><td>27,826,280</td></tr>
+</tbody></table></div>
+<h4>CNN: a small baseline trained from scratch</h4>
+<p>Four blocks of 3×3 convolution, batch normalisation [8], ReLU and 2×2 max pooling reduce the image to a 64×7×7 feature map. Global average pooling, dropout 0.3 and a linear layer give the logits. The first convolution uses stride 2 because a full-resolution convolution at 224×224 is slow on the CPU.</p>
+<pre><code>class CNN(nn.Module):
+    # small baseline trained from scratch
+    def __init__(self):
+        super().__init__()
+        def block(inputs, outputs, stride=1):
+            return [nn.Conv2d(inputs, outputs, 3,
+                              stride=stride, padding=1),
+                    nn.BatchNorm2d(outputs), nn.ReLU(),
+                    nn.MaxPool2d(2)]
+        self.layers = nn.Sequential(
+            *block(3, 16, stride=2), *block(16, 32),
+            *block(32, 64), *block(64, 64),
+            nn.AdaptiveAvgPool2d(1), nn.Flatten(),
+            nn.Dropout(0.3), nn.Linear(64, 8))
+
+    def forward(self, images):
+        return self.layers(images)</code></pre>
+<p></p>
+<pre><code>input             [B, 3, 224, 224]
+│ conv s2 3-&gt;16  [B, 16, 112, 112]
+│ maxpool        [B, 16, 56, 56]
+│ conv 16-&gt;32    [B, 32, 56, 56]
+│ maxpool        [B, 32, 28, 28]
+│ conv 32-&gt;64    [B, 64, 28, 28]
+│ maxpool        [B, 64, 14, 14]
+│ conv 64-&gt;64    [B, 64, 14, 14]
+│ maxpool        [B, 64, 7, 7]
+│ avgpool+flat   [B, 64]
+│ dropout 0.3    [B, 64]
+│ linear 64-&gt;8   [B, 8]
+▼
+output            [B, 8]
+
+parameters: conv 60,512
+  + batch norm 352 + linear 520
+  = 61,384</code></pre>
+<h4>ResNet-18: frozen backbone and full fine-tuning</h4>
+<p>ResNet-18 [4] stacks residual blocks y = F(x) + x in four stages. We load the torchvision ImageNet-1K weights [5] and replace the 1000-class layer by a new 512→8 layer. <strong>Frozen:</strong> only the new layer is trained (4,104 parameters) and every backbone module stays in evaluation mode, so batch-normalisation statistics are not updated either. <strong>Full fine-tuning:</strong> all 11.2M parameters are trained, at a ten times lower learning rate so the pretrained features change slowly.</p>
+<pre><code>class ResNet18(nn.Module):
+    def __init__(self, freeze_backbone):
+        super().__init__()
+        self.net = resnet18(
+            weights=ResNet18_Weights.IMAGENET1K_V1)
+        self.net.fc = nn.Linear(self.net.fc.in_features, 8)
+        self.freeze_backbone = freeze_backbone
+        if freeze_backbone:
+            for name, p in self.net.named_parameters():
+                p.requires_grad = name.startswith(&quot;fc.&quot;)
+
+    def train(self, mode=True):
+        super().train(mode)
+        if self.freeze_backbone:
+            # frozen layers keep their BatchNorm statistics
+            for name, module in self.net.named_children():
+                if name != &quot;fc&quot;:
+                    module.eval()
+        return self</code></pre>
+<p></p>
+<pre><code>input             [B, 3, 224, 224]
+│ conv1 7x7 s2   [B, 64, 112, 112]
+│ maxpool s2     [B, 64, 56, 56]
+│ layer1         [B, 64, 56, 56]
+│ layer2         [B, 128, 28, 28]
+│ layer3         [B, 256, 14, 14]
+│ layer4         [B, 512, 7, 7]
+│ avgpool+flat   [B, 512]
+│ fc 512-&gt;8      [B, 8]
+▼
+output            [B, 8]
+
+head: 512 x 8 + 8 = 4,104
+backbone: 11,176,512
+total: 11,180,616</code></pre>
+<h4>Follow-up backbones: EfficientNet-B0 and ConvNeXt-Tiny</h4>
+<p>For the backbone experiment (Experiment 5) two more ImageNet-pretrained families from torchvision are fine-tuned with exactly the ResNet-18 recipe. Each wrapper replaces only the last linear layer (file <code>models/backbones.py</code>).</p>
+<ul><li><strong>EfficientNet-B0</strong> [6]: inverted residual blocks with depthwise convolutions and squeeze-and-excitation, scaled by a compound rule. Features [B,1280,7,7]→ average pool → dropout 0.2 → linear 1280→8 (10,248 parameters). Total 4.0M parameters.</li><li><strong>ConvNeXt-Tiny</strong> [7]: a ResNet redesigned with Transformer-era choices (4×4 patchify stem, 7×7 depthwise convolutions, LayerNorm, GELU, inverted bottlenecks). Features [B,768,7,7]→ average pool → LayerNorm → linear 768→8 (6,152 parameters). Total 27.8M parameters.</li></ul>
+<h3>Fine-tuning procedure and training settings</h3>
+<p>All settings come from one committed file, <code>configs/a2.yaml</code>, and were fixed before the runs. No hyperparameter search was run on validation or test data; the only change from the M2 draft is the CNN budget (12 to 25 epochs), because the M2 CNN selected its last epoch.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Training and selection settings.</caption>
+<thead><tr>
+<th scope="col"><strong>Setting</strong></th>
+<th scope="col"><strong>Value</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Fine-tuning protocol</th><td>Replace the ImageNet head by a randomly initialised →8 linear layer; frozen: train the head only (lr 10<sup>-3</sup>, 6 epochs); full: train all layers from the pretrained weights (lr 10<sup>-4</sup>, 4 epochs). No layer-wise learning rates, no warm-up</td></tr>
+<tr><th scope="row">Optimizer</th><td>Adam [9] (β=(0.9, 0.999)), no weight decay, no learning-rate scheduler</td></tr>
+<tr><th scope="row">Epoch budget</th><td>CNN 25; ResNet-18 frozen 6; full fine-tuning 4 (8 in Experiment 4). Every epoch runs; no early stopping</td></tr>
+<tr><th scope="row">Batch size</th><td>64 for training and evaluation</td></tr>
+<tr><th scope="row">Gradient clipping</th><td>Total norm 5.0; a non-finite loss or gradient stops the run</td></tr>
+<tr><th scope="row">Regularisation</th><td>Flip augmentation (strong augmentation in the ablation); dropout 0.3 in the CNN; the torchvision defaults of the follow-up backbones (EfficientNet-B0: dropout 0.2 and stochastic depth 0.2; ConvNeXt-T: stochastic depth 0.1)</td></tr>
+<tr><th scope="row">Checkpoint rule</th><td>Highest validation macro-F1; the earliest epoch wins an exact tie. Reported metrics use these weights</td></tr>
+<tr><th scope="row">Seeds</th><td>42, 43, 44, 45, 46 per configuration. A seed sets Python, NumPy and PyTorch (CPU and CUDA) and the shuffle generator. The split never changes</td></tr>
+<tr><th scope="row">Hardware</th><td>Main study: one CPU, 14 PyTorch threads, float32. Follow-up study: one NVIDIA A40 (48 GB) per run, float32, cuDNN deterministic mode, no mixed precision</td></tr>
+</tbody></table></div>
+<p>The learning rate and epoch budget differ between the frozen and the full ResNet-18 because the two start from different situations: a new head alone needs a larger step, while full fine-tuning at 10<sup>-3</sup> risks destroying the pretrained features. This makes the main comparison a comparison of two <em>recipes</em>; Experiment 3 removes this confound.</p>
+<h3>Loss, metrics and timing</h3>
+<p>For logits z and target y the loss is ℓ(z,y) = -z<sub>y</sub> + logΣ<sub>k=1</sub><sup>8</sup>exp(z<sub>k</sub>), averaged over the batch; epoch loss weights batches by image count.</p>
+<ul><li><strong>Accuracy</strong> and <strong>macro-F1</strong> (primary metric, the unweighted mean of the eight per-class F1 = 2TP/(2TP+FP+FN); undefined scores count as 0). Macro-F1 keeps the small classes visible despite the 9.7 to 1 imbalance.</li><li><strong>Subset metrics</strong>: accuracy on the 82 web-style and 1,714 256×256 test images, and macro-F1 on the 1,708-image clean test subset.</li><li><strong>Training time</strong>: all epochs including validation, history writes and best-weight copies; excludes data download and caching.</li><li><strong>Inference time</strong>: median of two complete passes over the test set after one warm-up pass, divided by the number of images. It includes batch loading, normalisation, the forward pass and argmax (with a CUDA synchronisation on the GPU), so it measures batched throughput, not the latency of a single request.</li><li><strong>Aggregation</strong>: mean ± sample standard deviation (SD) over the five seeds.</li></ul>
+<h3>Experiment design</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Design of the five experiments. E1 and E2 were planned in M2; E3–E5 and the hardware check are follow-up experiments whose rules were fixed before their runs started. Results of different devices are never compared directly, except in the hardware check.</caption>
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>E1: main comparison (CPU)</strong></th>
+<th scope="col"><strong>E2: augmentation ablation (CPU)</strong></th>
+<th scope="col"><strong>E3: frozen vs full at a matched schedule (GPU)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Hypothesis</th><td>Full fine-tuning of ImageNet ResNet-18 beats the CNN trained from scratch; the frozen backbone is weaker than full fine-tuning</td><td>Strong augmentation improves accuracy on web-style test images</td><td>The frozen model is weaker because its features are not adapted, not because of its different learning rate and budget</td></tr>
+<tr><th scope="row">Changed factor</th><td>Model and training recipe</td><td>Augmentation: flip vs strong</td><td>Trainable layers: head only vs all</td></tr>
+<tr><th scope="row">Fixed factors</th><td>Split, preprocessing, flip augmentation, batch size, optimizer, clipping, checkpoint rule, seeds, hardware</td><td>Everything in ResNet18FineTune (model, weights, lr 10<sup>-4</sup>, 4 epochs, seeds)</td><td>Learning rate and epochs inside each pair: (10<sup>-3</sup>, 6) and (10<sup>-4</sup>, 4); everything else</td></tr>
+<tr><th scope="row">Metrics</th><td>Test macro-F1; accuracy, per-class F1, cost</td><td>Web-style accuracy (main), test macro-F1 (check)</td><td>Test macro-F1; web-style accuracy</td></tr>
+<tr><th scope="row">Decision rule</th><td>A gap is supported if the difference of means is larger than the larger seed SD of the two models</td><td>Supported if the mean paired web-style gain exceeds the baseline seed SD <em>and</em> macro-F1 drops by at most 0.5 points (set before training)</td><td>Supported if full beats frozen by more than the larger seed SD at <em>both</em> schedules</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>E4: augmentation, 8 epochs (GPU)</strong></th>
+<th scope="col"><strong>E5: backbone A vs B (GPU)</strong></th>
+<th scope="col"><strong>Hardware check (GPU)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Hypothesis</th><td>E2 failed because 4 epochs are too short for the harder augmented task; with 8 epochs strong augmentation helps web-style images</td><td>A stronger modern backbone (ConvNeXt-T) improves macro-F1 and web-style accuracy; EfficientNet-B0 matches ResNet-18 with fewer parameters</td><td>GPU copies of the CPU recipes reproduce the CPU results</td></tr>
+<tr><th scope="row">Changed factor</th><td>Augmentation: flip vs strong</td><td>Backbone: ResNet-18, EfficientNet-B0, ConvNeXt-T</td><td>Device: CPU vs GPU</td></tr>
+<tr><th scope="row">Fixed factors</th><td>ResNet-18 full, lr 10<sup>-4</sup>, 8 epochs, seeds</td><td>Full fine-tuning, lr 10<sup>-4</sup>, 4 epochs, flip, Adam, batch 64, seeds</td><td>Every setting of CNN, ResNet18Frozen and ResNet18FineTune</td></tr>
+<tr><th scope="row">Metrics</th><td>Web-style accuracy; test macro-F1</td><td>Test macro-F1, web-style accuracy, parameters, time</td><td>Test macro-F1</td></tr>
+<tr><th scope="row">Decision rule</th><td>Same rule as E2</td><td>Same rule as E1 (larger seed SD)</td><td>Difference of means within the larger seed SD</td></tr>
+</tbody></table></div>
+<h3>Training and validation loop</h3>
+<p>The same function trains (with an optimizer) and validates (without). The excerpt below from <code>train.py</code> shows the update path; <code>fit()</code> calls it once per epoch, keeps a copy of the weights with the best validation macro-F1, and writes <code>history.csv</code>, <code>best.pt</code>, <code>checkpoint_info.json</code> and a learning-curve figure.</p>
+<pre><code>def run_epoch(model, loader, optimizer=None, log_every=0, max_steps=0, device=DEVICE):
+    training = optimizer is not None
+    model.train(training)
+    with torch.set_grad_enabled(training):
+        for step, (images, targets) in enumerate(loader, 1):
+            images, targets = images.to(device), targets.to(device)
+            if training:
+                optimizer.zero_grad(set_to_none=True)
+            logits = model(images)
+            loss = nn.functional.cross_entropy(logits, targets)
+            if not torch.isfinite(loss):
+                raise FloatingPointError(&quot;non-finite loss&quot;)
+            if training:
+                loss.backward()
+                nn.utils.clip_grad_norm_(model.parameters(), CLIP_NORM, error_if_nonfinite=True)
+                optimizer.step()
+            ...  # accumulate loss, labels and predictions</code></pre>
+<p>The training metrics in <code>history.csv</code> are measured during the epoch, with augmentation and dropout active. After training, <code>fit()</code> reloads the selected weights and measures the training set again without augmentation; these fixed-weight numbers are the ones in the result tables.</p>
+<h3>Reproduction and recorded environment</h3>
+<p></p>
+<pre><code>pip install -r requirements.txt                    # Python 3.12
+cd Assignment2
+python download.py                                 # 17,996 files, revision c029791
+python data_loader.py                              # builds data/tomato/images_224.npz once
+python train.py CNN ResNet18Frozen ResNet18FineTune ResNet18FineTuneStrongAug   # E1, E2 (CPU)
+python train.py G_CNN G_ResNet18Frozen G_ResNet18FineTune G_ResNet18FrozenLR1e-4 \
+    G_ResNet18FineTuneLR1e-3 G_ResNet18FineTune8ep G_ResNet18FineTune8epStrongAug \
+    G_EfficientNetB0FineTune G_ConvNeXtTinyFineTune                           # E3-E5 (GPU)
+python evaluate.py                                 # metrics.json + predictions per run
+jupyter nbconvert --execute --inplace 02_results.ipynb 03_analysis.ipynb</code></pre>
+<p>Every run folder <code>outputs/&lt;run&gt;_seed&lt;seed&gt;_&lt;time&gt;/</code> holds <code>best.pt</code>, <code>checkpoint_info.json</code> (configuration, commit, environment), <code>history.csv</code>, <code>metrics.json</code> and the validation and test predictions. The 20 CPU runs were trained from commit <code>6869700</code> (tag <code>a2-final-runs</code>); their console output is committed in <code>Assignment2/logs/</code>. The 45 GPU runs were trained from commit <code>ba6072f</code> plus the follow-up changes described in Section  (the checkpoints therefore record <code>source_uncommitted = true</code>); these changes are committed together with this report.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Recorded environments.</caption>
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>Main study (E1, E2)</strong></th>
+<th scope="col"><strong>Follow-up study (hardware check, E3–E5)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Hardware</th><td>One CPU, 14 PyTorch threads</td><td>One NVIDIA A40 (48 GB) per run, one run per card; host CPU AMD EPYC 7543, 14 threads</td></tr>
+<tr><th scope="row">Source</th><td>Commit <code>6869700</code>, tag <code>a2-final-runs</code></td><td>Commit <code>ba6072f</code> + follow-up changes</td></tr>
+<tr><th scope="row">Software</th><td>Python, PyTorch and library versions recorded in each <code>checkpoint_info.json</code></td><td>Python 3.12.16, PyTorch 2.14.0 (CUDA 13.0), torchvision 0.29.2, NumPy 2.5.3, scikit-learn 1.9.1, pandas 3.0.5</td></tr>
+<tr><th scope="row">Precision</th><td>float32</td><td>float32, cuDNN deterministic mode, no mixed precision</td></tr>
+<tr><th scope="row">Checkpoints</th><td><code>best.pt</code> per run (link on the assignment page)</td><td><code>best.pt</code> per run: 45 MB for ResNet-18, 111 MB for ConvNeXt-T</td></tr>
+</tbody></table></div>
+</section>
+<section id="s3">
+<h2>Implementation results</h2>
+<p>Sources: <code>Assignment2/02_results.ipynb</code> (E1, E2: 20 CPU runs) and <code>Assignment2/03_analysis.ipynb</code> (hardware check and E3–E5: 45 GPU runs). Every value is mean ± SD over seeds 42–46 unless stated otherwise.</p>
+<h3>Saved runs and traceability</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>The 20 runs of the main study (CPU, 14 threads, commit <code>6869700</code>).</caption>
+<thead><tr>
+<th scope="col"><strong>Run</strong></th>
+<th scope="col"><strong>Seeds</strong></th>
+<th scope="col"><strong>Epochs</strong></th>
+<th scope="col"><strong>lr</strong></th>
+<th scope="col"><strong>Aug.</strong></th>
+<th scope="col"><strong>Selected epoch per seed (42–46)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>5</td><td>25</td><td>10<sup>-3</sup></td><td>flip</td><td>24, 21, 22, 20, 22</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>5</td><td>6</td><td>10<sup>-3</sup></td><td>flip</td><td>4, 6, 6, 5, 5</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>5</td><td>4</td><td>10<sup>-4</sup></td><td>flip</td><td>4, 4, 3, 3, 4</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>5</td><td>4</td><td>10<sup>-4</sup></td><td>strong</td><td>3, 4, 4, 3, 2</td></tr>
+</tbody></table></div>
+<p>All four models have results for the same five seeds, all from commit <code>6869700</code> on the same CPU, so differences between models do not come from code, hardware or seeds. Two runs (the two fine-tuned models with seed 46) are flagged as uncommitted because an untracked draft notebook was in the folder; <code>git diff</code> against the commit is empty for the training code and config, so both runs are kept.</p>
+<h3>Training behaviour</h3>
+<figure>
+<img alt="Loss and macro-F1 per epoch. Solid: validation; dashed: training (measured during the epoch, with augmentation and dropout). One colour per seed." src="assets/assignment2_M3/learning_curves.png"/>
+<figcaption>Loss and macro-F1 per epoch. Solid: validation; dashed: training (measured during the epoch, with augmentation and dropout). One colour per seed.</figcaption></figure>
+<ul><li><strong>CNN:</strong> selects epochs 20–24, so the 25-epoch budget is enough (the M2 run with 12 epochs selected its last epoch). Validation macro-F1 levels off around 0.92–0.93 after epoch 15.</li><li><strong>Frozen ResNet-18:</strong> smooth, almost identical curves across seeds. Two seeds select the last epoch, but epochs 4–6 differ by less than one point: the linear head is close to converged, and the limit is the fixed features.</li><li><strong>Full fine-tuning:</strong> selects epoch 3 or 4. Training loss keeps falling while validation loss stops improving after epoch 2–3 and rises at epoch 4 for seed 44, so overfitting starts inside the four-epoch budget.</li><li><strong>Strong augmentation:</strong> validation loss is noisier and training loss stays higher; with the same four epochs, the harder task may be less converged (tested in E4).</li></ul>
+<p>Training curves sit below validation curves for the CNN and the frozen model because they are measured with augmentation and dropout. With the selected weights and no augmentation (Table ) the CNN and the frozen model score about the same on training and test, so they <em>underfit</em>; full fine-tuning has the largest train–test gap (98.5 vs 95.9 macro-F1), a sign of mild <em>overfitting</em>.</p>
+<p><strong>Implementation issues and fixes.</strong> (1) In M2 the computer paused during one fine-tuning run, which made its stored training time unusable. In M3 the seed SD of the total training time is at most 0.8 minutes for every configuration (Table ), so no M3 run shows such a pause. (2) The CNN budget was too short in M2 (selected epoch 12 of 12) and was raised to 25. (3) Hyperparameters were hard-coded in <code>train.py</code> in M2; they moved to <code>configs/a2.yaml</code>, which each checkpoint records, and a <code>–smoke</code> mode writes test runs to a separate folder that evaluation never reads. (4) Some source file names contain “?”, which Windows cannot store; <code>download.py</code> replaces it. (5) For the GPU runs, timing needed a <code>torch.cuda.synchronize()</code> before the clock stops, because GPU kernels run asynchronously.</p>
+<h3>Quantitative results</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>E1: validation, test and training results (mean ± SD over five seeds).tab:splits</caption>
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>Validation</strong></th>
+<th scope="col"><strong>Test</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row"><strong>Model</strong></th><td><strong>Loss</strong></td><td><strong>Accuracy</strong></td><td><strong>Macro-F1</strong></td><td><strong>Loss</strong></td><td><strong>Accuracy</strong></td><td><strong>Macro-F1</strong></td></tr>
+<tr><th scope="row">CNN</th><td>0.170 ± 0.011</td><td>0.953 ± 0.002</td><td>0.934 ± 0.004</td><td>0.176 ± 0.011</td><td>0.947 ± 0.007</td><td>0.927 ± 0.008</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>0.291 ± 0.011</td><td>0.913 ± 0.003</td><td>0.878 ± 0.006</td><td>0.303 ± 0.015</td><td>0.911 ± 0.006</td><td>0.875 ± 0.007</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td><strong>0.088</strong> ± 0.005</td><td><strong>0.974</strong> ± 0.001</td><td><strong>0.962</strong> ± 0.002</td><td><strong>0.089</strong> ± 0.004</td><td><strong>0.971</strong> ± 0.002</td><td><strong>0.959</strong> ± 0.002</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>0.111 ± 0.011</td><td>0.966 ± 0.005</td><td>0.953 ± 0.007</td><td>0.110 ± 0.004</td><td>0.963 ± 0.003</td><td>0.946 ± 0.005</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"></th>
+<th scope="col"><strong>Training set, selected weights, no augmentation</strong></th>
+<th scope="col"></th>
+</tr></thead><tbody>
+<tr><th scope="row"><strong>Model</strong></th><td><strong>Loss</strong></td><td><strong>Accuracy</strong></td><td><strong>Macro-F1</strong></td><td>Train - test macro-F1</td></tr>
+<tr><th scope="row">CNN</th><td>0.217 ± 0.013</td><td>0.931 ± 0.004</td><td>0.909 ± 0.004</td><td>-1.9</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>0.307 ± 0.018</td><td>0.905 ± 0.004</td><td>0.871 ± 0.006</td><td>-0.3</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>0.036 ± 0.007</td><td>0.989 ± 0.003</td><td>0.985 ± 0.004</td><td>2.6</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>0.075 ± 0.017</td><td>0.975 ± 0.006</td><td>0.967 ± 0.008</td><td>2.0</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<caption>Test macro-F1 per seed.</caption>
+<thead><tr>
+<th scope="col"><strong>Test macro-F1</strong></th>
+<th scope="col"><strong>42</strong></th>
+<th scope="col"><strong>43</strong></th>
+<th scope="col"><strong>44</strong></th>
+<th scope="col"><strong>45</strong></th>
+<th scope="col"><strong>46</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>0.9330</td><td>0.9195</td><td>0.9320</td><td>0.9175</td><td>0.9343</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>0.8648</td><td>0.8831</td><td>0.8790</td><td>0.8692</td><td>0.8763</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>0.9597</td><td>0.9595</td><td>0.9619</td><td>0.9568</td><td>0.9577</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>0.9444</td><td>0.9403</td><td>0.9532</td><td>0.9465</td><td>0.9471</td></tr>
+</tbody></table></div>
+<p><strong>E1 decision.</strong> The ranking on test macro-F1 is ResNet18FineTune (0.959 ± 0.002), ResNet18FineTuneStrongAug (0.946 ± 0.005), CNN (0.927 ± 0.008), ResNet18Frozen (0.875 ± 0.007). The order is identical in all five seeds and every gap between neighbours is more than twice the larger seed SD, so the E1 hypothesis is supported in its first part: full fine-tuning beats the CNN trained from scratch by 3.2 macro-F1 points. Its second part also holds, the frozen backbone is far below full fine-tuning (8.5 points), and it is even 5.3 points below the 61K-parameter CNN. Because the frozen and the full model use different learning rates and budgets, E3 checks whether this gap is caused by freezing itself.</p>
+<h3>Per-class F1</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Test F1 per class.</caption>
+<thead><tr>
+<th scope="col"><strong>Class</strong></th>
+<th scope="col"><strong>CNN</strong></th>
+<th scope="col"><strong>R18 frozen</strong></th>
+<th scope="col"><strong>R18 fine-tune</strong></th>
+<th scope="col"><strong>R18 strong aug.</strong></th>
+<th scope="col"><strong>Test images</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Bacterial spot</th><td>0.955 ± 0.008</td><td>0.901 ± 0.006</td><td><strong>0.964</strong> ± 0.007</td><td>0.957 ± 0.012</td><td>241</td></tr>
+<tr><th scope="row">Early blight</th><td>0.835 ± 0.014</td><td>0.739 ± 0.020</td><td><strong>0.943</strong> ± 0.012</td><td>0.908 ± 0.021</td><td>117</td></tr>
+<tr><th scope="row">Late blight</th><td>0.901 ± 0.017</td><td>0.869 ± 0.012</td><td><strong>0.962</strong> ± 0.010</td><td>0.951 ± 0.012</td><td>209</td></tr>
+<tr><th scope="row">Leaf mold</th><td>0.897 ± 0.020</td><td>0.832 ± 0.011</td><td><strong>0.937</strong> ± 0.013</td><td>0.923 ± 0.018</td><td>125</td></tr>
+<tr><th scope="row">Septoria leaf spot</th><td>0.936 ± 0.012</td><td>0.880 ± 0.009</td><td><strong>0.960</strong> ± 0.009</td><td>0.951 ± 0.015</td><td>223</td></tr>
+<tr><th scope="row">Tomato yellow leaf curl virus</th><td>0.986 ± 0.006</td><td>0.978 ± 0.004</td><td><strong>0.993</strong> ± 0.002</td><td><strong>0.993</strong> ± 0.001</td><td>625</td></tr>
+<tr><th scope="row">Tomato mosaic virus</th><td><strong>0.932</strong> ± 0.008</td><td>0.825 ± 0.016</td><td>0.931 ± 0.012</td><td>0.918 ± 0.023</td><td>59</td></tr>
+<tr><th scope="row">Healthy</th><td>0.975 ± 0.010</td><td>0.971 ± 0.009</td><td><strong>0.982</strong> ± 0.004</td><td>0.969 ± 0.008</td><td>197</td></tr>
+</tbody></table></div>
+<p>Early blight is the hardest class for the CNN (0.835) and the frozen model (0.739); fine-tuning raises it to 0.943, the largest per-class gain. Tomato mosaic virus does not improve with fine-tuning (CNN 0.932, fine-tune 0.931); it has only 59 test images, so its scores are the least precise. Strong augmentation is below plain fine-tuning in 7 of 8 classes and equal on Tomato yellow leaf curl virus.</p>
+<h3>Confusion matrices</h3>
+<figure>
+<img alt="Test confusion matrices, counts summed over the five seeds and normalised per true class (page turned for readability)." src="assets/assignment2_M3/confusion.png"/>
+<figcaption>Test confusion matrices, counts summed over the five seeds and normalised per true class (page turned for readability).</figcaption></figure>
+<p>For the CNN and the frozen model the largest errors are between leaf-spot and blight diseases: Early blight and Leaf mold predicted as Late blight (8% each for the CNN, 6–7% for the frozen model) and Early blight predicted as Septoria leaf spot (4–6%). Fine-tuning removes most of these; Early blight predicted as Late blight drops to about 1%. One confusion stays in every model: Tomato mosaic virus predicted as Tomato yellow leaf curl virus (CNN 3%, frozen 10%, fine-tune 6%, strong augmentation 4%), which after fine-tuning comes almost only from web-style photos (Section ).</p>
+<h3>Leakage check: published vs clean test</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Test scores with and without the 88 near-duplicates of training images.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Macro-F1, all 1,796</strong></th>
+<th scope="col"><strong>Macro-F1, clean 1,708</strong></th>
+<th scope="col"><strong>Acc., 88 near-dup.</strong></th>
+<th scope="col"><strong>Acc., clean 1,708</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>0.927 ± 0.008</td><td>0.927 ± 0.008</td><td>0.973 ± 0.006</td><td>0.946 ± 0.007</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>0.875 ± 0.007</td><td>0.875 ± 0.007</td><td>0.955 ± 0.014</td><td>0.909 ± 0.006</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>0.959 ± 0.002</td><td>0.960 ± 0.002</td><td>0.975 ± 0.005</td><td>0.971 ± 0.002</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>0.946 ± 0.005</td><td>0.947 ± 0.005</td><td>0.980 ± 0.005</td><td>0.962 ± 0.004</td></tr>
+</tbody></table></div>
+<p>Removing the near-duplicates changes test macro-F1 by at most 0.11 points (fine-tune: +0.11 ± 0.04), well within the seed SD, and the ranking does not change. Keeping the published split therefore does not affect any conclusion. Near-duplicates are easier for every model, as expected when a copy was seen in training; the frozen model gains most (+4.5 points), plain fine-tuning only +0.4. With 88 images one image is 1.1 points.</p>
+<h3>E2: augmentation ablation (CPU)</h3>
+<p>The two runs with the same seed differ only in augmentation, so they are compared in pairs.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>E2: ResNet18FineTune with flip vs strong augmentation (4 epochs). Web-style images lost per seed: 4, 7, 4, 1, 7.</caption>
+<thead><tr>
+<th scope="col"><strong>Metric</strong></th>
+<th scope="col"><strong>Flip (baseline)</strong></th>
+<th scope="col"><strong>Strong</strong></th>
+<th scope="col"><strong>Paired change</strong></th>
+<th scope="col"><strong>Seeds improved</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Test macro-F1</th><td>0.959 ± 0.002</td><td>0.946 ± 0.005</td><td>-1.28 ± 0.43 pt</td><td>0/5</td></tr>
+<tr><th scope="row">Accuracy, 82 web-style images</th><td>0.488 ± 0.029</td><td>0.432 ± 0.014</td><td>-5.6 ± 3.1 pt</td><td>0/5</td></tr>
+<tr><th scope="row">Accuracy, 1,714 images of 256 x 256</th><td>0.994 ± 0.002</td><td>0.988 ± 0.003</td><td>-0.62 ± 0.12 pt</td><td>0/5</td></tr>
+</tbody></table></div>
+<p><strong>E2 decision: not supported.</strong> The rule needed a web-style gain larger than the baseline SD (2.9 points) and a macro-F1 drop of at most 0.5 points; both conditions fail. Strong augmentation lowered all three metrics in all five seeds. The size of the web-style drop is imprecise (1 to 7 of 82 images), and the result holds only for a four-epoch budget and generic crops and colour changes; E4 repeats it with eight epochs.</p>
+<h3>Follow-up experiments on the GPU</h3>
+<p>Source: <code>Assignment2/03_analysis.ipynb</code>. 9 configurations × 5 seeds, one NVIDIA A40 per run. All rules were fixed before these runs (Section 2.6).</p>
+<h4>Hardware check</h4>
+<div class="table-scroll"><table class="numeric">
+<caption>The same recipes on the CPU (main study, from <code>logs/eval_log.txt</code>) and on the GPU.</caption>
+<thead><tr>
+<th scope="col"><strong>Recipe</strong></th>
+<th scope="col"><strong>CPU test macro-F1</strong></th>
+<th scope="col"><strong>GPU test macro-F1</strong></th>
+<th scope="col">GPU - CPU</th>
+<th scope="col"><strong>Larger SD</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>0.9273 ± 0.0081</td><td>0.9292 ± 0.0084</td><td>+0.0019</td><td>0.0084</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>0.8745 ± 0.0074</td><td>0.8746 ± 0.0072</td><td>+0.0002</td><td>0.0074</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>0.9591 ± 0.0020</td><td>0.9583 ± 0.0023</td><td>-0.0008</td><td>0.0023</td></tr>
+</tbody></table></div>
+<p>All three differences are smaller than the larger seed SD, so the GPU copies reproduce the CPU results. They also serve as the controls of E3 and E5. The same 82 web-style, 88 near-duplicate and 1,708 clean test images were found in our new download of the data.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>All 45 GPU runs (mean ± SD over five seeds). Clean-subset macro-F1 is within 0.15 points of test macro-F1 for every run.tab:gpu</caption>
+<thead><tr>
+<th scope="col"><strong>Run (GPU)</strong></th>
+<th scope="col"><strong>Epochs</strong></th>
+<th scope="col"><strong>lr</strong></th>
+<th scope="col"><strong>Test acc.</strong></th>
+<th scope="col"><strong>Test macro-F1</strong></th>
+<th scope="col"><strong>Web-style acc.</strong></th>
+<th scope="col"><strong>256 x 256 acc.</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">G_CNN</th><td>25</td><td>10<sup>-3</sup></td><td>0.948 ± 0.006</td><td>0.929 ± 0.008</td><td>0.256 ± 0.036</td><td>0.981 ± 0.006</td></tr>
+<tr><th scope="row">G_ResNet18Frozen</th><td>6</td><td>10<sup>-3</sup></td><td>0.911 ± 0.005</td><td>0.875 ± 0.007</td><td>0.307 ± 0.032</td><td>0.940 ± 0.005</td></tr>
+<tr><th scope="row">G_ResNet18FineTune</th><td>4</td><td>10<sup>-4</sup></td><td>0.971 ± 0.002</td><td>0.958 ± 0.002</td><td>0.485 ± 0.023</td><td>0.994 ± 0.002</td></tr>
+<tr><th scope="row">G_ResNet18FrozenLR1e-4</th><td>4</td><td>10<sup>-4</sup></td><td>0.814 ± 0.008</td><td>0.702 ± 0.023</td><td>0.222 ± 0.023</td><td>0.842 ± 0.008</td></tr>
+<tr><th scope="row">G_ResNet18FineTuneLR1e-3</th><td>6</td><td>10<sup>-3</sup></td><td>0.959 ± 0.003</td><td>0.942 ± 0.003</td><td>0.412 ± 0.032</td><td>0.985 ± 0.002</td></tr>
+<tr><th scope="row">G_ResNet18FineTune8ep</th><td>8</td><td>10<sup>-4</sup></td><td>0.975 ± 0.002</td><td>0.963 ± 0.003</td><td>0.510 ± 0.026</td><td>0.997 ± 0.001</td></tr>
+<tr><th scope="row">G_ResNet18FineTune8epStrongAug</th><td>8</td><td>10<sup>-4</sup></td><td>0.966 ± 0.005</td><td>0.953 ± 0.008</td><td>0.466 ± 0.064</td><td>0.990 ± 0.003</td></tr>
+<tr><th scope="row">G_EfficientNetB0FineTune</th><td>4</td><td>10<sup>-4</sup></td><td>0.977 ± 0.002</td><td>0.967 ± 0.003</td><td>0.549 ± 0.021</td><td>0.997 ± 0.001</td></tr>
+<tr><th scope="row">G_ConvNeXtTinyFineTune</th><td>4</td><td>10<sup>-4</sup></td><td><strong>0.979</strong> ± 0.002</td><td><strong>0.970</strong> ± 0.002</td><td><strong>0.615</strong> ± 0.037</td><td>0.996 ± 0.002</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Validation (solid) and training (dashed) macro-F1 of the GPU runs, one colour per seed." src="assets/assignment2_M3/learning_curves_gpu.png"/>
+<figcaption>Validation (solid) and training (dashed) macro-F1 of the GPU runs, one colour per seed.</figcaption></figure>
+<p>The curves explain several results below. The frozen model at 10<sup>-4</sup> is still climbing at epoch 4 (it selects its last epoch in every seed). Full fine-tuning at 10<sup>-3</sup> jumps around: seed 46 falls to 0.80 at epoch 2, so the large step disturbs the pretrained features. EfficientNet-B0 and ConvNeXt-T are above 0.93 validation macro-F1 after one epoch.</p>
+<h4>E3: frozen vs full fine-tuning at the same schedule</h4>
+<div class="table-scroll"><table class="numeric">
+<caption>E3. Full minus frozen: +6.8 ± 0.9 points at (10<sup>-3</sup>, 6) and +25.7 ± 2.2 points at (10<sup>-4</sup>, 4), paired over seeds; full wins in 5 of 5 seeds at both schedules.</caption>
+<thead><tr>
+<th scope="col"><strong>Schedule</strong></th>
+<th scope="col"><strong>Trained</strong></th>
+<th scope="col"><strong>Trainable</strong></th>
+<th scope="col"><strong>Test macro-F1</strong></th>
+<th scope="col"><strong>Web-style acc.</strong></th>
+<th scope="col"><strong>Training min</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">lr 10<sup>-3</sup>, 6 epochs</th><td>head only</td><td>4,104</td><td>0.875 ± 0.007</td><td>0.307 ± 0.032</td><td>1.5</td></tr>
+<tr><th scope="row"></th><td>all layers</td><td>11.18M</td><td>0.942 ± 0.003</td><td>0.412 ± 0.032</td><td>2.2</td></tr>
+<tr><th scope="row">lr 10<sup>-4</sup>, 4 epochs</th><td>head only</td><td>4,104</td><td>0.702 ± 0.023</td><td>0.222 ± 0.023</td><td>1.0</td></tr>
+<tr><th scope="row"></th><td>all layers</td><td>11.18M</td><td>0.958 ± 0.002</td><td>0.485 ± 0.023</td><td>1.5</td></tr>
+</tbody></table></div>
+<p><strong>E3 decision: supported.</strong> At the frozen model's own schedule, full fine-tuning is still 6.8 points better, far more than the larger seed SD (0.7). So the 8.5-point gap of the main study is caused by freezing, not by the different learning rate. The learning rate interacts with freezing: the head alone needs the larger step (0.875 at 10<sup>-3</sup> against 0.702 at 10<sup>-4</sup>), while full fine-tuning prefers the smaller one (0.958 against 0.942). Each recipe of the main study was therefore the better choice for its model, and the main comparison was fair to both.</p>
+<h4>E4: augmentation ablation with 8 epochs</h4>
+<div class="table-scroll"><table class="numeric">
+<caption>E4. Web-style images gained per seed (42–46): -8, 0, -9, -6, +5.</caption>
+<thead><tr>
+<th scope="col"><strong>Metric</strong></th>
+<th scope="col"><strong>Flip, 8 ep.</strong></th>
+<th scope="col"><strong>Strong, 8 ep.</strong></th>
+<th scope="col"><strong>Paired change</strong></th>
+<th scope="col"><strong>Seeds improved</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Test macro-F1</th><td>0.963 ± 0.003</td><td>0.953 ± 0.008</td><td>-1.08 ± 0.75 pt</td><td>1/5</td></tr>
+<tr><th scope="row">Accuracy, 82 web-style images</th><td>0.510 ± 0.026</td><td>0.466 ± 0.064</td><td>-4.4 ± 7.3 pt</td><td>1/5</td></tr>
+<tr><th scope="row">Accuracy, 1,714 images of 256 x 256</th><td>0.997 ± 0.001</td><td>0.990 ± 0.003</td><td>-0.70 ± 0.32 pt</td><td>0/5</td></tr>
+</tbody></table></div>
+<p><strong>E4 decision: not supported.</strong> With twice the budget, strong augmentation still lowers web-style accuracy and macro-F1, and it wins in only one seed. The strong runs now select epochs 6–7 in four seeds, so they had time to converge; the short budget was not why E2 failed. The extra epochs help plain flip instead (macro-F1 0.958 to 0.963, web-style 0.485 to 0.510). The large SD with strong augmentation (6.4 points on web-style images) also makes it less stable.</p>
+<h4>E5: backbone A vs B</h4>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>E5: three backbones with the same recipe (full fine-tuning, lr 10<sup>-4</sup>, 4 epochs, flip).</caption>
+<thead><tr>
+<th scope="col"><strong>Backbone</strong></th>
+<th scope="col"><strong>Params</strong></th>
+<th scope="col"><strong>Test acc.</strong></th>
+<th scope="col"><strong>Test macro-F1</strong></th>
+<th scope="col"><strong>Web-style acc.</strong></th>
+<th scope="col"><strong>Errors / seed</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">ResNet-18</th><td>11.18M</td><td>0.971 ± 0.002</td><td>0.958 ± 0.002</td><td>0.485 ± 0.023</td><td>52.0 ± 2.8</td></tr>
+<tr><th scope="row">EfficientNet-B0</th><td>4.02M</td><td>0.977 ± 0.002</td><td>0.967 ± 0.003</td><td>0.549 ± 0.021</td><td>41.4 ± 3.5</td></tr>
+<tr><th scope="row">ConvNeXt-T</th><td>27.83M</td><td><strong>0.979</strong> ± 0.002</td><td><strong>0.970</strong> ± 0.002</td><td><strong>0.615</strong> ± 0.037</td><td>37.8 ± 3.7</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>Test F1 per class</strong></th>
+<th scope="col"><strong>ResNet-18</strong></th>
+<th scope="col"><strong>EfficientNet-B0</strong></th>
+<th scope="col"><strong>ConvNeXt-T</strong></th>
+<th scope="col"><strong>Images</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Bacterial spot</th><td>0.966 ± 0.008</td><td>0.970 ± 0.004</td><td>0.969 ± 0.007</td><td>241</td></tr>
+<tr><th scope="row">Early blight</th><td>0.922 ± 0.016</td><td>0.957 ± 0.010</td><td>0.954 ± 0.009</td><td>117</td></tr>
+<tr><th scope="row">Late blight</th><td>0.964 ± 0.008</td><td>0.973 ± 0.005</td><td>0.976 ± 0.004</td><td>209</td></tr>
+<tr><th scope="row">Leaf mold</th><td>0.935 ± 0.009</td><td>0.941 ± 0.009</td><td>0.956 ± 0.007</td><td>125</td></tr>
+<tr><th scope="row">Septoria leaf spot</th><td>0.963 ± 0.008</td><td>0.976 ± 0.009</td><td>0.967 ± 0.009</td><td>223</td></tr>
+<tr><th scope="row">Tomato yellow leaf curl virus</th><td>0.994 ± 0.002</td><td>0.994 ± 0.001</td><td>0.997 ± 0.002</td><td>625</td></tr>
+<tr><th scope="row">Tomato mosaic virus</th><td>0.940 ± 0.007</td><td>0.941 ± 0.011</td><td>0.947 ± 0.009</td><td>59</td></tr>
+<tr><th scope="row">Healthy</th><td>0.982 ± 0.006</td><td>0.981 ± 0.004</td><td>0.991 ± 0.002</td><td>197</td></tr>
+</tbody></table></div>
+<p><strong>E5 decision: supported for both.</strong> ConvNeXt-T is 1.1 points above ResNet-18 (larger SD 0.2) and EfficientNet-B0 0.8 points (larger SD 0.3), in 5 of 5 seeds. The gain is far larger on web-style photos: +12.9 points for ConvNeXt-T and +6.3 for EfficientNet-B0, also in every seed. ConvNeXt-T cuts web-style errors from 42.2 to 31.6 per seed, which is most of its gain. EfficientNet-B0 has the fewest spot / blight errors (2.2 per seed) and lifts Early blight from 0.922 to 0.957 with 2.8 times fewer parameters than ResNet-18.</p>
+<figure>
+<img alt="Seed 42. Top: web-style images that ConvNeXt-T gets right and ResNet-18 gets wrong. Bottom: web-style images wrong for all three backbones in all five seeds." src="assets/assignment2_M3/web_examples.png"/>
+<figcaption>Seed 42. Top: web-style images that ConvNeXt-T gets right and ResNet-18 gets wrong. Bottom: web-style images wrong for all three backbones in all five seeds.</figcaption></figure>
+<p>In seed 42 ConvNeXt-T fixes 9 web-style images of ResNet-18 but also breaks 7, so the per-seed change is noisy; over five seeds the net gain is 10.6 images. The fixed images usually show one leaf or one lesion large in the frame. 8 of the 82 web-style images are wrong for every backbone and seed: many overlapping leaves, fruit in view, or a cut plant on a white background, often predicted with high confidence (Leaf mold as Late blight at 1.00). Some of these may be hard for a person without the source label.</p>
+<h3>Error analysis</h3>
+<p></p>
+<p>Each test error is put in the first group that matches, so the groups do not overlap: (1) <em>web-style photo</em>: original size not 256×256; (2) <em>conflicting near-duplicate</em>: a near-duplicate of a training image with a different label; (3) <em>virus confusion</em>: true and predicted classes are the two virus classes; (4) <em>spot / blight confusion</em>: both classes are among Bacterial spot, Early blight, Late blight and Septoria leaf spot; (5) <em>other</em>.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Error taxonomy of the main study (mean ± SD over five seeds).tab:taxonomy</caption>
+<thead><tr>
+<th scope="col"><strong>Errors per seed (of 1,796)</strong></th>
+<th scope="col"><strong>CNN</strong></th>
+<th scope="col"><strong>R18 frozen</strong></th>
+<th scope="col"><strong>R18 fine-tune</strong></th>
+<th scope="col"><strong>R18 strong aug.</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Web-style photo (82 images)</th><td>58.8 ± 3.6</td><td>56.8 ± 2.6</td><td>42.0 ± 2.3</td><td>46.6 ± 1.1</td></tr>
+<tr><th scope="row">Conflicting near-duplicate (25 images)</th><td>0.0 ± 0.0</td><td>1.0 ± 0.0</td><td>0.0 ± 0.0</td><td>0.0 ± 0.0</td></tr>
+<tr><th scope="row">Virus confusion</th><td>0.0 ± 0.0</td><td>2.8 ± 1.3</td><td>0.2 ± 0.4</td><td>0.2 ± 0.4</td></tr>
+<tr><th scope="row">Spot / blight confusion</th><td>22.8 ± 4.1</td><td>54.0 ± 4.3</td><td>6.2 ± 1.9</td><td>11.4 ± 4.1</td></tr>
+<tr><th scope="row">Other</th><td>13.8 ± 6.1</td><td>44.8 ± 6.5</td><td>3.2 ± 1.8</td><td>8.6 ± 4.7</td></tr>
+<tr><th scope="row">All errors</th><td>95.4 ± 12.6</td><td>159.4 ± 10.0</td><td>51.6 ± 3.6</td><td>66.8 ± 6.0</td></tr>
+<tr><th scope="row">Web-style share of errors</th><td>61.6%</td><td>35.6%</td><td>81.4%</td><td>69.8%</td></tr>
+<tr><th scope="row">Error rate on web-style images</th><td>71.7%</td><td>69.3%</td><td>51.2%</td><td>56.8%</td></tr>
+<tr><th scope="row">Error rate on 256×256 images</th><td>2.1%</td><td>6.0%</td><td>0.6%</td><td>1.2%</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets)." src="assets/assignment2_M3/error_groups.png"/>
+<figcaption>ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets).</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Error groups, causes and ideas. Only the web-style cause is tested by an experiment (E2, E4, E5).</caption>
+<thead><tr>
+<th scope="col"><strong>Group</strong></th>
+<th scope="col"><strong>What the errors look like</strong></th>
+<th scope="col"><strong>Hypothesised cause</strong></th>
+<th scope="col"><strong>Improvement idea</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Web-style photo</th><td>Field or web photos with several leaves, busy background, other lighting; often wrong with confidence above 0.9</td><td>Domain shift: only 6.6% of training images are web-style</td><td>More field images; crop or segment the leaf first; report the subset separately</td></tr>
+<tr><th scope="row">Conflicting near-duplicate</th><td>At most 1 error per seed</td><td>Most hash matches with another label are not true copies, or they are web-style and counted there</td><td>Check the 25 pairs by eye; group-aware re-split</td></tr>
+<tr><th scope="row">Virus confusion</th><td>Mosaic predicted as yellow leaf curl or the reverse; rare outside web photos</td><td>Similar yellowing; mosaic is the smallest class (509 training images)</td><td>Class-weighted loss or oversampling</td></tr>
+<tr><th scope="row">Spot / blight confusion</th><td>Small lesions confused among four leaf-spot diseases</td><td>Fine lesion detail is partly lost at 224×224; frozen ImageNet features do not separate them</td><td>Full fine-tuning (done); higher resolution</td></tr>
+<tr><th scope="row">Other</th><td>Lab photos; for the best model mainly Tomato mosaic virus predicted as Septoria leaf spot</td><td>Mild mottling without clear lesions; small class</td><td>More mosaic images; class-weighted loss</td></tr>
+</tbody></table></div>
+<p>Web-style photos are the dominant error source. For the fine-tuned model they cause 42.0 of 51.6 errors per seed (81%): about half of the 82 web-style images are wrong in every seed, against 0.6% of the lab images. From the CNN to fine-tuning, errors on lab images fall from 36.6 to 9.6 per seed (-74%), but web-style errors fall only from 58.8 to 42.0 (-29%). Fine-tuning fixes most lab errors, not the domain gap. The frozen model has by far the most spot / blight errors (54.0 per seed), matching its weak Early blight score. Conflicting near-duplicates cause almost no errors, so label noise from duplicate photos is not a measurable error source.</p>
+<h3>Qualitative results</h3>
+<figure>
+<img alt="ResNet18FineTune, seed 42. Top: confident correct predictions. Middle: correct predictions with the lowest confidence. Bottom: the most confident errors." src="assets/assignment2_M3/examples.png"/>
+<figcaption>ResNet18FineTune, seed 42. Top: confident correct predictions. Middle: correct predictions with the lowest confidence. Bottom: the most confident errors.</figcaption></figure>
+<p>Confident correct predictions are lab photos: one leaf on a plain background with clear symptoms. The difficult but correct predictions have low confidence (0.25 to 0.45), and four of the six are web-style photos with several leaves, fruit or soil in view. All six confident errors are web-style photos, wrong with confidence 0.94 to 1.00: the model is overconfident on field photos, so its confidence cannot be used to flag them. One error may be a label problem: an image labelled Leaf mold (predicted Healthy, 0.94) shows no clear symptom on the visible side of the leaf; this cannot be confirmed from the photo alone. Section  adds web-style examples that a stronger backbone fixes and examples that no model gets right.</p>
+<h3>Compute cost</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Compute cost of the main study. Inference includes batch loading (median of two passes after one warm-up).tab:cost</caption>
+<thead><tr>
+<th scope="col"><strong>Model (CPU, 14 threads)</strong></th>
+<th scope="col"><strong>Params</strong></th>
+<th scope="col"><strong>Trainable</strong></th>
+<th scope="col"><strong>Epochs</strong></th>
+<th scope="col"><strong>s / epoch</strong></th>
+<th scope="col"><strong>Training min</strong></th>
+<th scope="col"><strong>Inference ms / image</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">CNN</th><td>61,384</td><td>61,384</td><td>25</td><td>70 ± 1</td><td>29.3 ± 0.6</td><td>2.95 ± 0.04</td></tr>
+<tr><th scope="row">ResNet18Frozen</th><td>11.18M</td><td>4,104</td><td>6</td><td>366 ± 1</td><td>36.6 ± 0.1</td><td>23.04 ± 0.44</td></tr>
+<tr><th scope="row">ResNet18FineTune</th><td>11.18M</td><td>11.18M</td><td>4</td><td>581 ± 3</td><td>38.7 ± 0.2</td><td>23.41 ± 0.24</td></tr>
+<tr><th scope="row">ResNet18FineTuneStrongAug</th><td>11.18M</td><td>11.18M</td><td>4</td><td>673 ± 14</td><td>44.8 ± 0.8</td><td>23.70 ± 0.08</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Test macro-F1 against inference time and training time (CPU)." src="assets/assignment2_M3/cost.png"/>
+<figcaption>Test macro-F1 against inference time and training time (CPU).</figcaption></figure>
+<p>On the CPU the CNN is the cheapest model: 29 minutes of training and 3.0 ms per image. ResNet-18 needs 23–24 ms per image, eight times slower, for every variant because they share one architecture. Full fine-tuning costs 9 more minutes of training (+32%) than the CNN and eight times its inference time for 3.2 more macro-F1 points. The frozen model trains only 4,104 parameters, yet each epoch still passes every image through the whole backbone, so an epoch takes 366 s, five times the CNN; with the lowest score, it is the worst trade-off here. Strong augmentation adds 16% time per epoch because its transforms run on the CPU. Training minutes compare full recipes, since the epoch budgets differ.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Compute cost of the main GPU runs (means over five seeds; SDs in <code>03_analysis.ipynb</code>). CPU ms / image: seed-42 checkpoint, 512 test images, 14 threads on the follow-up machine (AMD EPYC 7543), one measurement.</caption>
+<thead><tr>
+<th scope="col"><strong>Run (one A40)</strong></th>
+<th scope="col"><strong>Params</strong></th>
+<th scope="col"><strong>s / epoch</strong></th>
+<th scope="col"><strong>Training min</strong></th>
+<th scope="col"><strong>GPU ms / img</strong></th>
+<th scope="col"><strong>CPU ms / img</strong></th>
+<th scope="col"><strong>Test macro-F1</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">G_CNN</th><td>0.06M</td><td>12.3</td><td>5.24</td><td>0.49</td><td>1.8</td><td>0.929</td></tr>
+<tr><th scope="row">G_ResNet18Frozen</th><td>11.18M</td><td>15.1</td><td>1.53</td><td>0.52</td><td></td><td>0.875</td></tr>
+<tr><th scope="row">G_ResNet18FineTune</th><td>11.18M</td><td>21.8</td><td>1.49</td><td>0.52</td><td>10.2</td><td>0.958</td></tr>
+<tr><th scope="row">G_ResNet18FineTune8ep</th><td>11.18M</td><td>22.7</td><td>3.05</td><td>0.56</td><td></td><td>0.963</td></tr>
+<tr><th scope="row">G_ResNet18FineTune8epStrongAug</th><td>11.18M</td><td>70.1</td><td>9.56</td><td>0.52</td><td></td><td>0.953</td></tr>
+<tr><th scope="row">G_EfficientNetB0FineTune</th><td>4.02M</td><td>34.4</td><td>2.32</td><td>0.60</td><td>18.1</td><td>0.967</td></tr>
+<tr><th scope="row">G_ConvNeXtTinyFineTune</th><td>27.83M</td><td>79.9</td><td>5.33</td><td>1.12</td><td>35.2</td><td>0.970</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Test macro-F1 against parameters and GPU training time." src="assets/assignment2_M3/cost_gpu.png"/>
+<figcaption>Test macro-F1 against parameters and GPU training time.</figcaption></figure>
+<p>On one A40, ResNet-18 fine-tuning takes 1.5 minutes instead of 39 on the CPU. GPU inference is about 0.5 ms per image for the CNN and every ResNet-18 run, because with zero DataLoader workers the time is mostly spent loading and normalising batches on the CPU, not in the network; only ConvNeXt-T is clearly slower (1.1 ms). Strong augmentation triples the epoch time (70 s against 23 s) for the same reason. On the CPU the picture is different: EfficientNet-B0 has 2.8 times fewer parameters than ResNet-18 but is slower (18.1 against 10.2 ms), since depthwise convolutions do little work per memory access, and ConvNeXt-T is 3 to 3.5 times slower than ResNet-18. The follow-up CPU is faster than the one of the main study (ResNet-18 10.2 against 23.4 ms), and it is shared with other users, so its times moved by up to 30% over three measurements, although the order never changed; only the ratios should be read.</p>
+<h3>Comparison and discussion</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Summary of the experiments.</caption>
+<thead><tr>
+<th scope="col"><strong>Experiment</strong></th>
+<th scope="col"><strong>Decision</strong></th>
+<th scope="col"><strong>Evidence</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">E1: pretrained vs baseline</th><td>Supported</td><td>Full fine-tuning 0.959 vs CNN 0.927 vs frozen 0.875 macro-F1; same order in all 5 seeds</td></tr>
+<tr><th scope="row">E2: strong aug., 4 epochs</th><td>Not supported</td><td>Web-style -5.6 pt, macro-F1 -1.3 pt, 0/5 seeds better</td></tr>
+<tr><th scope="row">E3: frozen vs full, same schedule</th><td>Supported</td><td>Full +6.8 pt at (10<sup>-3</sup>, 6) and +25.7 pt at (10<sup>-4</sup>, 4), 5/5 seeds each</td></tr>
+<tr><th scope="row">E4: strong aug., 8 epochs</th><td>Not supported</td><td>Web-style -4.4 pt, macro-F1 -1.1 pt, 1/5 seeds better</td></tr>
+<tr><th scope="row">E5: backbone</th><td>Supported</td><td>ConvNeXt-T +1.1 pt, EfficientNet-B0 +0.8 pt macro-F1; web-style +12.9 and +6.3 pt; 5/5 seeds</td></tr>
+<tr><th scope="row">Hardware check</th><td>Reproduced</td><td>GPU vs CPU within one seed SD for all three recipes</td></tr>
+</tbody></table></div>
+<p><strong>Which method is better, and by how much.</strong> Among the planned models, full fine-tuning of ImageNet ResNet-18 is the best: 0.959 macro-F1, 3.2 points above the CNN trained from scratch and 8.5 above the frozen backbone. In the follow-up study a newer backbone adds another 0.8 to 1.1 points (EfficientNet-B0 0.967, ConvNeXt-T 0.970). On the lab images these differences are small, since every fine-tuned model is above 99.4% accuracy. They are large on web-style photos, where accuracy goes from 26% (CNN) and 31% (frozen) to 49% (ResNet-18), 55% (EfficientNet-B0) and 62% (ConvNeXt-T).</p>
+<p><strong>Where the differences come from.</strong> (1) <em>Data</em>: 94% of the images are uniform lab crops, so even a 61K-parameter CNN reaches 98% on them; almost all remaining errors are on the 6% of web-style photos, which are under-represented in training. (2) <em>Pretraining and adaptation</em>: ImageNet features help only when they are adapted. Frozen, they cannot separate the small lesions of the four spot / blight diseases (54 such errors per seed) and lose even to the small CNN; E3 shows this is due to freezing and not to the recipe. (3) <em>Backbone</em>: the ranking on web-style photos follows the ImageNet top-1 accuracy of the torchvision weights (ResNet-18 69.8%, EfficientNet-B0 77.7%, ConvNeXt-T 82.5%), so better general features seem to carry over to cluttered field photos. This is the only change in the project that clearly reduces the domain gap. (4) <em>Training</em>: generic augmentation did not imitate field conditions and made the task harder for the model (E2, E4), while a longer budget for plain fine-tuning helped a little.</p>
+<p><strong>Accuracy, speed and size.</strong> On the CPU the CNN is 8 times faster than ResNet-18 at inference for 3.2 fewer macro-F1 points; if only lab images matter, it is a reasonable choice. For field use the web-style results matter more: EfficientNet-B0 gives 0.967 macro-F1 and 55% on web-style photos with 4.0M parameters, and ConvNeXt-T gives the best results (0.970, 62%) at about 3 to 3.5 times the CPU latency of ResNet-18. On a GPU all models classify an image in about 1 ms or less, and the bottleneck is data loading.</p>
+<p><strong>What cannot be concluded yet.</strong> The web-style subset has only 82 test images and is defined by image size, so its accuracies have SDs of 2 to 6 points and the subset is only a proxy for field photos. We did not test whether ConvNeXt-T helps because of its architecture or because of its pretraining recipe; both changed together. Per-class differences on Tomato mosaic virus (59 test images) are within noise.</p>
+<h3>Limitations and conclusion</h3>
+<p><strong>Data.</strong> The split keeps 88 near-duplicate test images, some with a different label; the clean-subset check shows they change scores by at most 0.15 points. Labels were not checked by an expert. Web-style images are identified by a size rule, not by their true source.</p>
+<p><strong>Method.</strong> Each model uses one fixed recipe without a hyperparameter search; E3 shows that the learning rate matters a lot for the frozen model, so a search could move individual numbers. Only generic augmentations were tried. The images are squeezed to 224×224, which may lose lesion detail and distort non-square field photos.</p>
+<p><strong>Experiments.</strong> Five seeds per configuration; the main study and the follow-up study ran on different hardware, so their times are compared only through ratios, while their scores agree within one SD (hardware check). The test set was used once per run, but 45 follow-up runs were designed after seeing the main results, so the follow-up decisions are confirmatory only for their own pre-set rules.</p>
+<p><strong>Generalisation and future work.</strong> The models are near perfect on lab photos and still miss 38% (ConvNeXt-T) to 51% (ResNet-18) of the web-style photos, so they should not be trusted on field images yet. Next steps: add field images to training (for example the full PlantDoc training set), crop or segment the leaf before classification, use field-like augmentation (background replacement, blur, lighting), and report a source-separated test set.</p>
+<p><strong>Answer to the research question.</strong> ImageNet pretraining helps on this task only with full fine-tuning: it adds 3.2 macro-F1 points over a small CNN, while a frozen backbone is 5.3 points worse than the CNN, and this gap is caused by freezing, not by the training recipe. Strong generic augmentation does not help, even with twice the epochs. The backbone matters most for the hardest images: ConvNeXt-T reaches 0.970 macro-F1 and raises accuracy on web-style photos from 49% to 62%, at about 3 to 3.5 times the CPU cost of ResNet-18. The main remaining problem is the domain gap between lab and field photos, not the choice among fine-tuned models.</p>
+</section>
+<section id="s4">
+<h2>AI Usage Disclosure</h2>
+<p></p>
+<p>The group used generative AI tools as disclosed below and in <code>AI_USAGE.md</code> of the repository. All numbers in this report are computed by the committed notebooks from saved run outputs; no number, figure or citation was written by an AI tool without being produced or checked by code or by the cited source.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>AI usage for Assignment 2.</caption>
+<thead><tr>
+<th scope="col"><strong>Field</strong></th>
+<th scope="col"><strong>Entry 1: M1 to M3 (whole assignment)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Tools</th><td>Claude (Anthropic) and ChatGPT (OpenAI), chat interfaces</td></tr>
+<tr><th scope="row">Used by</th><td>All members</td></tr>
+<tr><th scope="row">Purpose</th><td>Ideation, concept explanation, generic code examples, grammar and wording of notebook text (Sections 1–4 of <code>AI_USAGE.md</code>)</td></tr>
+<tr><th scope="row">Verification</th><td>Every suggestion was checked against PyTorch / torchvision / scikit-learn documentation, the cited papers, and the actual run outputs</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>Field</strong></th>
+<th scope="col"><strong>Entry 2: M3 follow-up experiments and report drafting</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Tool</th><td>Claude Code (Anthropic), model Claude Opus 5.5, running in the group's VS Code workspace</td></tr>
+<tr><th scope="row">Used by</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Time / stage</th><td>8–9 November 2026, after the 20 CPU runs and the results notebook were complete</td></tr>
+<tr><th scope="row">Purpose</th><td>(1) Coding assistance: per-run device option in <code>train.py</code> / <code>evaluate.py</code> (with a CUDA synchronisation for GPU timing), the EfficientNet-B0 and ConvNeXt-T wrappers in <code>models/backbones.py</code>, the nine <code>G_</code> configurations in <code>configs/a2.yaml</code>. (2) Experiment execution: the agent ran the group's training and evaluation scripts for the 45 GPU runs and built <code>03_analysis.ipynb</code>. (3) Report writing: first draft of this LaTeX report from the notebooks and the M2 report. (4) Removal of the duplicate notebook <code>02_results_final.ipynb</code></td></tr>
+<tr><th scope="row">Affected sections</th><td>Report Sections 1–3 (text), 2.3.3, 2.6, 3.8, 3.11; <code>Assignment2/train.py</code>, <code>evaluate.py</code>, <code>models/backbones.py</code>, <code>configs/a2.yaml</code>, <code>03_analysis.ipynb</code>, <code>README.md</code></td></tr>
+<tr><th scope="row">Representative prompt</th><td>“Read the handbook requirements for Assignment 2 and complete the M3 final: run more experiments if needed, follow the style of Assignment 1, and write the M3 report from the LaTeX template.”</td></tr>
+<tr><th scope="row">How output was edited and verified</th><td>The CPU results (E1, E2) were produced by the group before this stage and were not rerun or changed. Every GPU number comes from <code>metrics.json</code> and prediction files written by the scripts and is recomputed in <code>03_analysis.ipynb</code>. The code changes keep the CPU path unchanged (default device and all CPU configurations untouched); they are reviewed with <code>git diff</code> before commit. Parameter counts were checked against the instantiated models</td></tr>
+<tr><th scope="row">Responsible member</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Verification sources</th><td>PyTorch and torchvision documentation (model definitions, <code>torch.cuda.synchronize</code>); the cited papers; the saved run outputs and logs</td></tr>
+</tbody></table></div>
+<p>All members are able to explain every part of the submission and take responsibility for the submitted code, numbers, figures and text.</p>
+</section>
+<section id="references">
+<h2>References</h2>
+<ol><li>L. Perinello and S. Giro, “Tomato Leaves Dataset,” Hugging Face dataset repository, 2024. A merge of PlantVillage and PlantDoc, tomato-leaf classes only. <a href="https://huggingface.co/datasets/lorenzoxi/vcs-tomatoes-dataset">https://huggingface.co/datasets/lorenzoxi/vcs-tomatoes-dataset</a>. Copy used in this work: <a href="https://huggingface.co/datasets/shreemunale/tomato-leaves-dataset">https://huggingface.co/datasets/shreemunale/tomato-leaves-dataset</a>, revision <code>c029791</code>, CC BY 4.0.</li><li>D. P. Hughes and M. Salathé, “An open access repository of images on plant health to enable the development of mobile disease diagnostics,” <em>arXiv preprint arXiv:1511.08060</em>, 2015. <a href="https://arxiv.org/abs/1511.08060">https://arxiv.org/abs/1511.08060</a></li><li>D. Singh, N. Jain, P. Jain, P. Kayal, S. Kumawat, and N. Batra, “PlantDoc: A dataset for visual plant disease detection,” in <em>Proceedings of the 7th ACM IKDD CoDS and 25th COMAD</em>, pp. 249–253, 2020. <a href="https://arxiv.org/abs/1911.10317">https://arxiv.org/abs/1911.10317</a></li><li>K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</em>, pp. 770–778, 2016. <a href="https://doi.org/10.1109/CVPR.2016.90">https://doi.org/10.1109/CVPR.2016.90</a></li><li>O. Russakovsky et al., “ImageNet large scale visual recognition challenge,” <em>International Journal of Computer Vision</em>, vol. 115, no. 3, pp. 211–252, 2015. <a href="https://doi.org/10.1007/s11263-015-0816-y">https://doi.org/10.1007/s11263-015-0816-y</a></li><li>M. Tan and Q. V. Le, “EfficientNet: Rethinking model scaling for convolutional neural networks,” in <em>Proceedings of the 36th International Conference on Machine Learning (ICML)</em>, PMLR 97, pp. 6105–6114, 2019. <a href="https://arxiv.org/abs/1905.11946">https://arxiv.org/abs/1905.11946</a></li><li>Z. Liu, H. Mao, C.-Y. Wu, C. Feichtenhofer, T. Darrell, and S. Xie, “A ConvNet for the 2020s,” in <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>, pp. 11976–11986, 2022. <a href="https://arxiv.org/abs/2201.03545">https://arxiv.org/abs/2201.03545</a></li><li>S. Ioffe and C. Szegedy, “Batch normalization: Accelerating deep network training by reducing internal covariate shift,” in <em>Proceedings of the 32nd International Conference on Machine Learning (ICML)</em>, PMLR 37, pp. 448–456, 2015. <a href="https://arxiv.org/abs/1502.03167">https://arxiv.org/abs/1502.03167</a></li><li>D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in <em>International Conference on Learning Representations (ICLR)</em>, 2015. <a href="https://arxiv.org/abs/1412.6980">https://arxiv.org/abs/1412.6980</a></li><li>A. Paszke et al., “PyTorch: An imperative style, high-performance deep learning library,” in <em>Advances in Neural Information Processing Systems 32 (NeurIPS)</em>, pp. 8024–8035, 2019. <a href="https://arxiv.org/abs/1912.01703">https://arxiv.org/abs/1912.01703</a></li></ol>
+</section>
+
 </main>
 </div>
 </body>
