@@ -136,18 +136,22 @@ editing**, not as substitutes for the group's own work. In particular:
 - **Verification sources:** PyTorch and torchvision documentation; the cited papers
   (ResNet, EfficientNet, ConvNeXt); saved run outputs and logs.
 
-## 7. Assignment 3 M1: data code, EDA and proposal draft
+## 7. Assignment 3 (M1, M2, M3): data code, experiments, reports and slides
 
 - **Tool:** Claude Code (Anthropic), model Claude Opus 5.5 (the main session plus one helper
   agent running Claude Sonnet), in the group's VS Code workspace.
 - **Used by:** Võ Thị Như Quỳnh.
-- **Stage:** 9 November 2026, dataset proposal (A3-M1).
+- **Stage:** 9 November 2026, dataset proposal (A3-M1), draft (M2) and final (M3).
 - **Purpose and AI contribution:** wrote `Assignment3/download.py`, `data_loader.py` and
   `01_eda.ipynb` and ran them; measured CLIP encoder speed for the compute estimate; drafted
   the M1 proposal in LaTeX and the `assignment3_M1.html` page (converted from the LaTeX with
   `latex/tex2html.py`); searched Hugging Face for datasets that meet the handbook size rules
   and compared them. A first draft used STVQA-7K, which is below the 10,000-pair VQA threshold;
   after this comparison the group chose A-OKVQA, and the proposal was rewritten for it.
+  For M2 and M3 it wrote `features.py`, `models.py`, `train.py`, `configs/a3.yaml` and
+  `02_results.ipynb`, ran the 35 training runs (7 configurations x seeds 42-46) on one GPU per
+  process, and drafted the M2 and M3 reports, the A3 slides and the assignment pages. The group
+  decided to start M2 and M3 before a formal approval of the proposal; the reports state this.
 - **Representative prompt:** "Set up Assignment 3 M1, read the handbook carefully and satisfy
   all requirements; keep the code simple, like students learning the course", then "search
   Hugging Face for a dataset that fits" and "switch Assignment 3 to

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assignment 3 · M2 Draft · G-02 · CO3133</title>
-<meta name="description" content="Assignment 3 · M2 Draft">
+<meta name="description" content="Assignment 3 Milestone 2 draft: text-only, image-only and late-fusion models on A-OKVQA with frozen CLIP features. Class CC01, group G-02, CO3133.">
 <link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
@@ -14,25 +14,116 @@
 <nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html" aria-current="location">Assignment 3</a></nav>
 </div></div>
 <div class="milestone-bar">
-<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" href="assignment3_M1.html">M1 Proposal</a><a class="report-button" href="assignment3_M2.html" aria-current="page">M2 Draft</a><a class="report-button" href="assignment3_M3.html">M3 Final</a></nav>
+<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" href="assignment3_M1.html">M1 Proposal</a><a class="report-button" aria-current="page" href="assignment3_M2.html">M2 Draft</a><a class="report-button" href="assignment3_M3.html">M3 Final</a></nav>
 </div>
 <div class="wrap">
 <header>
 <p class="kicker">Assignment 3 · Milestone 2</p>
-<h1>Multimodal learning</h1>
-
-
+<h1>Knowledge-based visual question answering</h1>
+<dl class="facts">
+<div><dt>Group</dt><dd>G-02</dd></div>
+<div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br>Mai Trung Kiên (2352641)<br>Hứa Tuệ Minh (2450018)</dd></div>
+<div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div>
+</dl>
 </header>
 <main id="main">
-<section class="report-preview" aria-labelledby="pdf-report">
+<section class="report-preview" aria-labelledby="detailed-report">
 <div class="report-card-row">
-<div class="report-cover report-cover-pending" aria-hidden="true">PDF</div>
+<div class="report-cover" aria-hidden="true"><object class="report-cover-pdf" data="reports/A3_M2.pdf#page=1&amp;view=Fit&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0" type="application/pdf" tabindex="-1">PDF</object></div>
 <div class="report-preview-copy">
-<h2 class="report-preview-title" id="pdf-report">M2 Draft PDF report</h2>
-<p>Pending</p>
+<h2 class="report-preview-title" id="detailed-report">M2 Draft PDF report</h2>
+<p>Professional report - 6 pages</p>
+</div>
+<div class="report-card-actions">
+<a class="report-button report-open" href="reports/A3_M2.pdf" target="_blank" rel="noopener" aria-label="Open PDF in a new tab">Open PDF</a>
 </div>
 </div>
+<details class="report-pdf-preview">
+<summary>Preview PDF</summary>
+<object class="pdf-reader" data="reports/A3_M2.pdf#view=Fit&amp;navpanes=0" type="application/pdf" aria-label="Assignment 3 M2 Draft PDF report">
+<p><a href="reports/A3_M2.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+</object>
+</details>
 </section>
+<p>Source: <a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (features.py, models.py, train.py, 02_results.ipynb).</p>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#s1">Task and data (summary of M1)</a><a href="#s2">Methods of the draft</a><a href="#s3">Preliminary results</a><a href="#s4">Status and next steps</a><a href="#s5">AI Usage Disclosure</a><a href="#references">References</a></nav>
+
+<section id="s1">
+<h2>Task and data (summary of M1)</h2>
+<p>Task: multiple-choice visual question answering on A-OKVQA [1]. One sample is a COCO image [2], a question that needs commonsense or world knowledge, and 4 choices; the model picks one choice. Details of the data and the EDA are in the M1 proposal and <code>Assignment3/01_eda.ipynb</code>.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Data and split used in M2.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Value</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Dataset</th><td><code>HuggingFaceM4/A-OKVQA</code>, revision <code>d1b0efa</code>; annotations Apache 2.0, COCO images</td></tr>
+<tr><th scope="row">Labelled pairs</th><td>18,201 questions on 17,661 images (official test split has no labels)</td></tr>
+<tr><th scope="row">Split (by image)</th><td>train 15,346 / validation 1,710 / test 1,145 (= official validation); seed 42</td></tr>
+<tr><th scope="row">Modalities</th><td>image (modality B) and question + choices (modality A)</td></tr>
+<tr><th scope="row">Missing modality</th><td>none (0 missing images or questions)</td></tr>
+<tr><th scope="row">Proposal status</th><td>submitted; no formal decision returned yet, the group continued after checking the handbook rules</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Random training pairs; * marks the correct choice." src="assets/assignment3_M2/samples.png"/>
+<figcaption>Random training pairs; * marks the correct choice.</figcaption></figure>
+</section>
+<section id="s2">
+<h2>Methods of the draft</h2>
+<p>All models share one frozen encoder, CLIP ViT-B/32 [3]. Its outputs are computed once (<code>Assignment3/features.py</code>, 99 s for all images and 72 s for all texts on one A40) and cached: an image vector v, a question vector q and a vector c<sub>j</sub> for each choice, all 512-d and scaled to length 1. A small MLP (Linear → ReLU → Dropout 0.1 → Linear to 1 score) scores each choice; a softmax over the 4 scores and cross-entropy give the loss.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>The three M2 models. References without training: chance, the answer-text prior of the EDA, and zero-shot CLIP (cos(v, “question answer: choice”)).</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col">Input of the MLP for choice j</th>
+<th scope="col"><strong>Trainable</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">TextOnly (modality A)</th><td>[q; c<sub>j</sub>; q⊙ c<sub>j</sub>]</td><td>787,457</td></tr>
+<tr><th scope="row">ImageOnly (modality B)</th><td>[v; c<sub>j</sub>; v⊙ c<sub>j</sub>] (choices name the answers; no question)</td><td>787,457</td></tr>
+<tr><th scope="row">LateFusion (simple fusion)</th><td>[v; q; c<sub>j</sub>; v⊙ c<sub>j</sub>; q⊙ c<sub>j</sub>]</td><td>1,311,745</td></tr>
+</tbody></table></div>
+<p>Training: Adam, learning rate 10<sup>-3</sup>, batch 64, 20 epochs, checkpoint with the best validation accuracy, seeds 42–46, settings in <code>configs/a3.yaml</code>. The test split is used once per run. Metrics: multiple-choice accuracy (main) and the A-OKVQA direct-answer (DA) score of the chosen text, min(n/3, 1) with n the number of workers who gave it.</p>
+</section>
+<section id="s3">
+<h2>Preliminary results</h2>
+<div class="table-scroll"><table class="numeric">
+<caption>Results of the M2 models, mean ± SD over 5 seeds. “Shuffled images”: every test image replaced by the image of another test question.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Val. accuracy</strong></th>
+<th scope="col"><strong>Test accuracy</strong></th>
+<th scope="col"><strong>Test DA score</strong></th>
+<th scope="col"><strong>Test, shuffled images</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Chance</th><td></td><td>0.250</td><td></td><td></td></tr>
+<tr><th scope="row">Answer-text prior</th><td></td><td>0.312</td><td>0.281</td><td></td></tr>
+<tr><th scope="row">Zero-shot CLIP</th><td></td><td>0.536</td><td>0.438</td><td></td></tr>
+<tr><th scope="row">TextOnly</th><td>0.475 ± 0.003</td><td>0.433 ± 0.010</td><td>0.362 ± 0.008</td><td>0.433</td></tr>
+<tr><th scope="row">ImageOnly</th><td>0.579 ± 0.005</td><td>0.572 ± 0.010</td><td>0.463 ± 0.009</td><td>0.322</td></tr>
+<tr><th scope="row">LateFusion</th><td><strong>0.587</strong> ± 0.008</td><td><strong>0.577</strong> ± 0.009</td><td><strong>0.470</strong> ± 0.008</td><td>0.343</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Test accuracy of the references and the M2 models (error bars: seed SD)." src="assets/assignment3_M2/m2_accuracy.png"/>
+<figcaption>Test accuracy of the references and the M2 models (error bars: seed SD).</figcaption></figure>
+<ul><li><strong>The image is the strong modality.</strong> ImageOnly (57.2%) is far above TextOnly (43.3%); LateFusion is 14.4 points above TextOnly in all 5 seeds.</li><li><strong>The question adds little on top of the image.</strong> LateFusion is only 0.5 points above ImageOnly, less than the seed SD. With CLIP features, matching the image with the 4 choices already answers most questions.</li><li><strong>The models use the image.</strong> With shuffled images, accuracy falls by 23–25 points, below the text-only model.</li><li><strong>Training helps a little over zero-shot.</strong> Zero-shot CLIP already gets 53.6%; the trained late fusion adds about 4 points.</li></ul>
+<figure>
+<img alt="Seed 42. Top: the image helps (LateFusion right, TextOnly wrong; 263 questions). Bottom: the image misleads (TextOnly right, LateFusion wrong; 101 questions)." src="assets/assignment3_M2/support_conflict.png"/>
+<figcaption>Seed 42. Top: the image helps (LateFusion right, TextOnly wrong; 263 questions). Bottom: the image misleads (TextOnly right, LateFusion wrong; 101 questions).</figcaption></figure>
+<p>Support cases ask about something clearly visible; conflict cases contain a plausible wrong answer in the image (left vs right, two foods on one plate).</p>
+</section>
+<section id="s4">
+<h2>Status and next steps</h2>
+<ul><li>Done: data pipeline and split, feature cache, unimodal A, unimodal B and simple fusion with 5 seeds, shuffle test, support / conflict examples.</li><li>For M3: the improved fusion (cross-attention from the choice tokens to the 50 image tokens), ablations (fusion level, product terms, fine-tuning the last CLIP block), error analysis by question type, compute cost, final report, slides and video.</li></ul>
+</section>
+<section id="s5">
+<h2>AI Usage Disclosure</h2>
+<p>Claude Code (Claude Opus 5.5), used by Võ Thị Như Quỳnh on 9 November 2026, wrote the feature cache, the models and the training script, ran the experiments and drafted this report. Every number comes from saved run outputs read by <code>Assignment3/02_results.ipynb</code>; details are in <code>AI_USAGE.md</code>.</p>
+</section>
+<section id="references">
+<h2>References</h2>
+<ol><li>D. Schwenk, A. Khandelwal, C. Clark, K. Marino and R. Mottaghi, “A-OKVQA: A benchmark for visual question answering using world knowledge,” in <em>Proc. ECCV</em>, pp. 146–162, 2022. Dataset: <a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA</a>, revision <code>d1b0efa</code>.</li><li>T.-Y. Lin et al., “Microsoft COCO: Common objects in context,” in <em>Proc. ECCV</em>, pp. 740–755, 2014.</li><li>A. Radford et al., “Learning transferable visual models from natural language supervision,” in <em>Proc. ICML</em>, PMLR 139, pp. 8748–8763, 2021.</li><li>A. Vaswani et al., “Attention is all you need,” in <em>Advances in Neural Information Processing Systems 30</em>, pp. 5998–6008, 2017.</li><li>D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in <em>Proc. ICLR</em>, 2015.</li></ol>
+</section>
+
 </main>
 </div>
 </body>

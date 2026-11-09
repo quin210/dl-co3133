@@ -85,17 +85,20 @@ Checkpoint selection: highest validation macro-F1, earliest epoch on a tie. The 
 
 The `outputs/` folders are not tracked by git (about 45 MB per ResNet-18 run, 111 MB per ConvNeXt-T run). The checkpoints are rebuilt exactly from the configuration and seed with the commands above; every run folder then holds its `best.pt`.
 
-## Assignment 3 (knowledge-based visual question answering), M1 proposal stage
+## Assignment 3: knowledge-based visual question answering
 
-Report: `docs/reports/A3_M1.pdf` · Page: https://quin210.github.io/dl-co3133/assignment3_M1.html
+Reports: `docs/reports/A3_M1.pdf` (proposal), `A3_M2.pdf` (draft), `A3_M3.pdf` (final) · Slides: `docs/reports/A3_M3_slides.pdf` · Page: https://quin210.github.io/dl-co3133/assignment3.html
 
-Dataset: A-OKVQA (`HuggingFaceM4/A-OKVQA`, revision `d1b0efa`): COCO images with multiple-choice questions that need commonsense or world knowledge. The official test split has no labels, so only the official train and validation splits are used.
+Dataset: A-OKVQA (`HuggingFaceM4/A-OKVQA`, revision `d1b0efa`): COCO images with multiple-choice questions that need commonsense or world knowledge. The official test split has no labels, so the official validation split is our test set and the official train split is divided into train and validation by image (seed 42).
 
 ```bash
 cd Assignment3
 python download.py      # parquet files -> data/aokvqa/
-python data_loader.py   # builds splits.csv (grouped by image, seed 42) and prints one batch
-jupyter nbconvert --to notebook --execute --inplace 01_eda.ipynb
+python data_loader.py   
+python features.py      
+python train.py         
+python train.py LateFusion --seeds 42   # one run
+jupyter nbconvert --to notebook --execute --inplace 01_eda.ipynb 02_results.ipynb
 ```
 
-The official validation split is our test set; the official train split is divided into train and validation by image, so all questions about one image stay in one split. Model training starts after the proposal is approved (handbook Section 7.1).
+Each run folder holds `best.pt` (selected head weights), `metrics.json` (settings, commit, environment, validation and test results), `history.csv` and the test scores. Console logs are in `Assignment3/logs/`. Checkpoints are rebuilt exactly with the commands above. Hardware for the reported runs: one NVIDIA A40 per process.

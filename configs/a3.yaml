@@ -1,0 +1,24 @@
+shared:
+  encoder: openai/clip-vit-base-patch32   # frozen; features cached once by Assignment3/features.py
+  batch_size: 64
+  epochs: 20
+  optimizer: Adam
+  lr: 1.0e-3                # fusion heads
+  lr_clip_block: 1.0e-5     # only for the fine-tune ablation
+  dropout: 0.1
+  hidden: 512
+  seeds: [42, 43, 44, 45, 46]
+  checkpoint_rule: highest validation accuracy; earliest tie
+  loss: cross-entropy over the 4 choices
+
+runs:
+  # M2: unimodal baselines and simple fusion
+  TextOnly: {model: TextOnly}
+  ImageOnly: {model: ImageOnly}
+  LateFusion: {model: LateFusion}
+  # M3: improved fusion
+  CrossAttention: {model: CrossAttention}
+  # M3 ablations
+  LateFusionNoProduct: {model: LateFusionNoProduct}
+  LateFusionFineTune: {model: LateFusionFineTune}
+  CrossAttentionFineTune: {model: CrossAttentionFineTune}

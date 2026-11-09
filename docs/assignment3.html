@@ -45,27 +45,41 @@
 </section>
 <section id="setup">
 <h2 id="section-2">Experimental setup</h2>
-<p class="placeholder">Pending</p>
+<ul>
+<li>Frozen CLIP ViT-B/32 features cached once; fusion heads trained with Adam (lr 1e-3, batch 64, 20 epochs), checkpoint by validation accuracy, seeds 42-46.</li>
+<li>Split by image: 15,346 / 1,710 / 1,145 questions (test = official validation split).</li>
+</ul>
 </section>
 <section id="results">
 <h2 id="section-3">Results</h2>
-<p class="placeholder">Pending</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Test accuracy, mean ± SD over seeds 42-46</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Test accuracy</th><th scope="col">DA score</th><th scope="col">With shuffled images</th></tr></thead>
+<tbody>
+<tr><th scope="row">Zero-shot CLIP (no training)</th><td>0.536</td><td>0.438</td><td></td></tr>
+<tr><th scope="row">Text only</th><td>0.433 ± 0.010</td><td>0.362</td><td>0.433</td></tr>
+<tr><th scope="row">Image only</th><td>0.572 ± 0.010</td><td>0.463</td><td>0.322</td></tr>
+<tr><th scope="row">Late fusion</th><td>0.577 ± 0.009</td><td>0.470</td><td>0.343</td></tr>
+<tr><th scope="row">Cross-attention fusion</th><td>0.576 ± 0.007</td><td>0.470</td><td>0.345</td></tr>
+<tr><th scope="row">Cross-attention + fine-tuned last CLIP block</th><td>0.582 ± 0.009</td><td>0.472</td><td>0.323</td></tr>
+</tbody></table></div>
+<p class="meta">The image adds 14.4 points over text only; the question adds 0.5 points over image only. Full analysis on the <a href="assignment3_M3.html">M3 Final</a> page.</p>
 </section>
 <section id="milestones">
 <h2 id="section-4">Milestones</h2>
 <div class="table-scroll"><table>
 <thead><tr><th scope="col">Milestone</th><th scope="col">Due</th><th scope="col">Weight within A3</th><th scope="col">Status</th></tr></thead>
 <tbody>
-<tr><th scope="row"><a href="assignment3_M1.html">M1 Proposal</a></th><td>18 Nov 2026</td><td>15%</td><td>Dataset proposal available; waiting for approval.</td></tr>
-<tr><th scope="row"><a href="assignment3_M2.html">M2 Draft</a></th><td>25 Nov 2026</td><td>25%</td><td>Pending</td></tr>
-<tr><th scope="row"><a href="assignment3_M3.html">M3 Final</a></th><td>2 Dec 2026</td><td>60%</td><td>Pending</td></tr>
+<tr><th scope="row"><a href="assignment3_M1.html">M1 Proposal</a></th><td>18 Nov 2026</td><td>15%</td><td>Dataset proposal available; no formal decision yet.</td></tr>
+<tr><th scope="row"><a href="assignment3_M2.html">M2 Draft</a></th><td>25 Nov 2026</td><td>25%</td><td>Draft report available.</td></tr>
+<tr><th scope="row"><a href="assignment3_M3.html">M3 Final</a></th><td>2 Dec 2026</td><td>60%</td><td>Final report and slides available; video pending.</td></tr>
 </tbody>
 </table></div>
 <p class="meta">All deadlines: 23:59 Vietnam time.</p>
 <ul>
-<li><strong>Reports:</strong> <a href="reports/A3_M1.pdf">M1 Proposal</a></li>
-<li><strong>Code and checkpoints:</strong> <a href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (data loader and EDA; models after approval)</li>
-<li><strong>Slides and video:</strong> Pending</li>
+<li><strong>Reports:</strong> <a href="reports/A3_M1.pdf">M1 Proposal</a>, <a href="reports/A3_M2.pdf">M2 Draft</a>, <a href="reports/A3_M3.pdf">M3 Final</a></li>
+<li><strong>Code and checkpoints:</strong> <a href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (data, features, models, training, results notebook); checkpoints are rebuilt with the README commands</li>
+<li><strong>Slides and video:</strong> <a href="reports/A3_M3_slides.pdf">Slides (PDF)</a>; YouTube video: pending</li>
 </ul>
 </section>
 <section id="references">

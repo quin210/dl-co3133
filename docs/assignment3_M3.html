@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Assignment 3 · M3 Final · G-02 · CO3133</title>
-<meta name="description" content="Assignment 3 · M3 Final">
+<meta name="description" content="Assignment 3 final report: unimodal baselines, late fusion and cross-attention fusion on A-OKVQA with CLIP ViT-B/32, ablations and error analysis. Class CC01, group G-02, CO3133.">
 <link rel="stylesheet" href="assets/assignment.css?v=3">
 </head>
 <body id="top">
@@ -14,25 +14,524 @@
 <nav class="course-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html" aria-current="location">Assignment 3</a></nav>
 </div></div>
 <div class="milestone-bar">
-<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" href="assignment3_M1.html">M1 Proposal</a><a class="report-button" href="assignment3_M2.html">M2 Draft</a><a class="report-button" href="assignment3_M3.html" aria-current="page">M3 Final</a></nav>
+<nav class="milestone-nav" aria-label="Assignment 3 milestones"><a class="report-button" href="assignment3.html">Main</a><a class="report-button" href="assignment3_M1.html">M1 Proposal</a><a class="report-button" href="assignment3_M2.html">M2 Draft</a><a class="report-button" aria-current="page" href="assignment3_M3.html">M3 Final</a></nav>
 </div>
 <div class="wrap">
 <header>
 <p class="kicker">Assignment 3 · Milestone 3</p>
-<h1>Multimodal learning</h1>
-
-
+<h1>Knowledge-based visual question answering</h1>
+<dl class="facts">
+<div><dt>Group</dt><dd>G-02</dd></div>
+<div><dt>Members</dt><dd>Võ Thị Như Quỳnh (2353041)<br>Mai Trung Kiên (2352641)<br>Hứa Tuệ Minh (2450018)</dd></div>
+<div><dt>Instructor</dt><dd>Lê Thành Sách</dd></div>
+</dl>
 </header>
 <main id="main">
-<section class="report-preview" aria-labelledby="pdf-report">
+<section class="report-preview" aria-labelledby="detailed-report">
 <div class="report-card-row">
-<div class="report-cover report-cover-pending" aria-hidden="true">PDF</div>
+<div class="report-cover" aria-hidden="true"><object class="report-cover-pdf" data="reports/A3_M3.pdf#page=1&amp;view=Fit&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0" type="application/pdf" tabindex="-1">PDF</object></div>
 <div class="report-preview-copy">
-<h2 class="report-preview-title" id="pdf-report">M3 Final PDF report</h2>
-<p>Pending</p>
+<h2 class="report-preview-title" id="detailed-report">M3 Final PDF report</h2>
+<p>Professional report - 21 pages</p>
+</div>
+<div class="report-card-actions">
+<a class="report-button report-open" href="reports/A3_M3.pdf" target="_blank" rel="noopener" aria-label="Open PDF in a new tab">Open PDF</a>
 </div>
 </div>
+<details class="report-pdf-preview">
+<summary>Preview PDF</summary>
+<object class="pdf-reader" data="reports/A3_M3.pdf#view=Fit&amp;navpanes=0" type="application/pdf" aria-label="Assignment 3 M3 Final PDF report">
+<p><a href="reports/A3_M3.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+</object>
+</details>
 </section>
+<p>Source: <a class="source-link" href="https://github.com/quin210/dl-co3133/tree/main/Assignment3">Assignment3/</a> (features.py, models.py, train.py, 02_results.ipynb, configs/a3.yaml). Slides: <a class="source-link" href="reports/A3_M3_slides.pdf">A3_M3_slides.pdf</a>. Checkpoints: rebuilt with the commands in the README (one <code>best.pt</code> per run). YouTube video: pending.</p>
+<nav class="page-contents" aria-label="On this page"><span>On this page</span><a href="#detailed-report">Detailed Report</a><a href="#s1">Problem and data description</a><a href="#s2">Methodology</a><a href="#s3">Implementation results</a><a href="#s4">AI Usage Disclosure</a><a href="#references">References</a></nav>
+
+<section id="s1">
+<h2>Problem and data description</h2>
+<h3>Problem statement</h3>
+<p>Visual question answering (VQA) asks a model to answer a question about an image. In A-OKVQA the questions also need commonsense or world knowledge: “what does this company specialise in”, “which gang wears these colours”. Each question comes with 4 choices, so the task is multiple-choice classification over the choices. The prediction unit is one (image, question) pair.</p>
+<p><strong>Main difficulties.</strong> (1) Two modalities must be combined: the image shows what is there, the question and the choices say what to do with it. (2) Many answers need knowledge that is not visible. (3) The training set is small for a multimodal model (15,346 questions), so we use frozen pretrained encoders. (4) Workers often disagree on the free-form answer (32.4% of questions have low agreement).</p>
+<p><strong>Research question.</strong> How much does each modality contribute, and does a token-level fusion of image and text help over a simple late fusion of global vectors?</p>
+<h3>Source, version and licence</h3>
+<p>Dataset: A-OKVQA [1], a visual question answering benchmark whose questions need commonsense or world knowledge in addition to what is visible in the image.</p>
+<p><a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA</a></p>
+<p>Version: Hugging Face revision <code>d1b0efa</code> (<code>d1b0efa3a436e9101dfbde3752db7607da696c35</code>), downloaded on 9 November 2026 with <code>Assignment3/download.py</code>. Parquet files with the JPEG bytes inside, about 1.2 GB in total.</p>
+<p>Licence: the A-OKVQA annotations are released by AllenAI under Apache 2.0. The images are COCO 2017 photos [2], which keep their Flickr licences; we use them only for course work.</p>
+<p>How the data was made: crowd workers looked at a COCO image and wrote a question that cannot be answered from the image alone or from knowledge alone. Each question has 4 answer choices, 10 free-form answers from 10 different workers, and 3 short rationales that explain the answer.</p>
+<h3>Task, modalities, input and output</h3>
+<p>Task: multiple-choice VQA. One sample is one image with one question and exactly 4 choices.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Task definition.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Definition</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Modality A</th><td>Text: the question (mean 8.8 words) and the 4 choice texts (mean 1.3 words)</td></tr>
+<tr><th scope="row">Modality B</th><td>Image: one RGB COCO photo (median 640×480), resized to 224×224</td></tr>
+<tr><th scope="row">Extra annotation</th><td>10 direct answers and 3 rationales per question. Used for evaluation and analysis only, never as model input</td></tr>
+<tr><th scope="row">Output</th><td>Index of the correct choice, ŷ∈{0,1,2,3}</td></tr>
+<tr><th scope="row">Prediction unit</th><td>One (image, question) pair</td></tr>
+</tbody></table></div>
+<p>Formulation. For choice j the model gives a score s<sub>j</sub> = f<sub>θ</sub>(image, question, choice<sub>j</sub>), p<sub>j</sub> = softmax<sub>j</sub>(s<sub>j</sub>) and ŷ = argmax<sub>j</sub> p<sub>j</sub>. Training minimises the cross-entropy -log p<sub>y</sub>.</p>
+<p>Why this task is multimodal. A worker wrote each question while looking at that image, so the pair is linked by the same scene. The answer needs both: the image says <em>what</em> is there (a red shirt, a clock at seven), and the question with the choices says what to do with it (which gang wears red, what hour it is). Section  shows that text alone gets only a few points above chance.</p>
+<h3>Size</h3>
+<p>The handbook asks for about 10,000 question–image pairs for VQA. The official test split (6,702 questions) has no public labels, so we count only labelled pairs: 17,056 (train) + 1,145 (validation) = <strong>18,201 labelled pairs on 17,661 images</strong>, which meets the threshold.</p>
+<h3>Proposal and approval status</h3>
+<p>The dataset proposal (A3-M1) was submitted with this protocol. At the time of writing no formal decision had been returned by the instructor. The group checked the proposal against the handbook rules (Section 28: genuine pairs, about 10,000 pairs for VQA, split by entity) and continued with the plan; any later condition from the instructor will be added to the assignment page.</p>
+<h3>Exploratory data analysis</h3>
+<p>Source: <code>Assignment3/01_eda.ipynb</code>.</p>
+<h3>Pair counts and missing modalities</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Official splits. Images are identified by the MD5 hash of their bytes, because the files have no image id.</caption>
+<thead><tr>
+<th scope="col"><strong>Official split</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>Labelled</strong></th>
+<th scope="col"><strong>Distinct images</strong></th>
+<th scope="col"><strong>Images with 2 questions</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">train</th><td>17,056</td><td>17,056</td><td>16,539</td><td>517</td></tr>
+<tr><th scope="row">validation</th><td>1,145</td><td>1,145</td><td>1,122</td><td>23</td></tr>
+<tr><th scope="row">test</th><td>6,702</td><td>0</td><td>6,030</td><td></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<caption>Missing-modality and validity checks.</caption>
+<thead><tr>
+<th scope="col"><strong>Check on the 18,201 labelled questions</strong></th>
+<th scope="col"><strong>Result</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Missing or undecodable image, empty question</th><td>0</td></tr>
+<tr><th scope="row">Not exactly 4 choices, label outside 0–3</th><td>0</td></tr>
+<tr><th scope="row">Not 10 direct answers or not 3 rationales</th><td>0</td></tr>
+<tr><th scope="row">Questions with an empty choice</th><td>7 (0.04%)</td></tr>
+<tr><th scope="row">Questions with two identical choices</th><td>37 (0.20%)</td></tr>
+<tr><th scope="row">Images shared by the official train and validation splits</th><td>0</td></tr>
+<tr><th scope="row">Grayscale images (converted to RGB)</th><td>20 of 17,661</td></tr>
+</tbody></table></div>
+<p>No image or question is missing, so no missing-modality strategy is needed for training. The 44 questions with an empty or repeated choice are kept; they are counted in the error analysis. Section  tests what happens when the image is replaced.</p>
+<h3>Images</h3>
+<figure>
+<img alt="Original image width, height and file size." src="assets/assignment3_M3/image_sizes.png"/>
+<figcaption>Original image width, height and file size.</figcaption></figure>
+<p>The photos are COCO images, mostly 640×480 (4,005) or 640×427 (2,295); the median aspect ratio is 1.33 and the extremes are 0.33 and 4.81. Resizing to 224×224 squeezes a 4:3 photo horizontally by 25%. CLIP's own preprocessing resizes the short side and takes a centre crop instead; we kept the plain resize for all models and list the crop as future work.</p>
+<h3>Text</h3>
+<figure>
+<img alt="Question length in words." src="assets/assignment3_M3/question_length.png"/>
+<figcaption>Question length in words.</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Text lengths (left) and the most common two-word question openings (right).</caption>
+<thead><tr>
+<th scope="col"><strong>Words</strong></th>
+<th scope="col"><strong>mean</strong></th>
+<th scope="col"><strong>median</strong></th>
+<th scope="col"><strong>max</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">question</th><td>8.8</td><td>8</td><td>44</td></tr>
+<tr><th scope="row">choice</th><td>1.3</td><td>1</td><td>4</td></tr>
+<tr><th scope="row">direct answer</th><td>1.2</td><td>1</td><td>4</td></tr>
+<tr><th scope="row">rationale</th><td>11.1</td><td>9</td><td>65</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>Opening</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>Share</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">what is</th><td>4,109</td><td>22.6%</td></tr>
+<tr><th scope="row">what type</th><td>1,102</td><td>6.1%</td></tr>
+<tr><th scope="row">what are</th><td>850</td><td>4.7%</td></tr>
+<tr><th scope="row">why is</th><td>730</td><td>4.0%</td></tr>
+<tr><th scope="row">how many</th><td>595</td><td>3.3%</td></tr>
+<tr><th scope="row">what color</th><td>542</td><td>3.0%</td></tr>
+<tr><th scope="row">what kind</th><td>526</td><td>2.9%</td></tr>
+</tbody></table></div>
+<p>Questions are short (median 8 words) and every text fits the 77-token limit of the CLIP text encoder. The vocabulary is large (6,508 words in questions, 13,456 in choices) because the topics are open: animals, sports, food, history, brands. 64.5% of the questions start with “what” and 7.7% with “why”. A-OKVQA has no question-type field, so we use the opening words as a rough type in the error analysis.</p>
+<h3>Labels and answer agreement</h3>
+<figure>
+<img alt="Share of each correct letter." src="assets/assignment3_M3/answer_letters.png"/>
+<figcaption>Share of each correct letter.</figcaption></figure>
+<p>The correct letter is spread evenly: A 24.2%, B 24.8%, C 25.4%, D 25.7% over all labelled questions, so a letter bias cannot help. The correct choice appears among the 10 direct answers for every question, given on average by 3.7 of the 10 workers. Agreement between workers is moderate: the most common direct answer is given by 5.0 workers on average, and by 3 or fewer for 32.4% of the questions. The dataset flags 8.9% of the questions as difficult for direct answering.</p>
+<h3>Pair quality</h3>
+<figure>
+<img alt="Eight random training pairs (seed 42); * marks the correct choice and “Why” is the first rationale." src="assets/assignment3_M3/samples.png"/>
+<figcaption>Eight random training pairs (seed 42); * marks the correct choice and “Why” is the first rationale.</figcaption></figure>
+<p>The examples show the mix the dataset was built for: counting (how many people on the scooter), reading the scene (the hour on the clock), and outside knowledge (which gang wears red, which civilisation made a vase). In 76.8% of the questions at least one rationale repeats a word of the correct choice, so the rationales usually talk about the answer, which makes them useful to explain errors later.</p>
+<figure>
+<img alt="Four training questions with low agreement among the 10 direct answers (possible noise)." src="assets/assignment3_M3/noisy.png"/>
+<figcaption>Four training questions with low agreement among the 10 direct answers (possible noise).</figcaption></figure>
+<p>Two kinds of low agreement show up. Some questions are vague (who uses this bathtub: adults or children?), so several answers are reasonable. Others need rare knowledge (which player won a 1992 playoff game by sliding home), which many workers did not know. In both cases the multiple-choice label is still one of the direct answers. We keep these questions; Section  compares accuracy on the high- and low-agreement subsets.</p>
+<h3>How much can text alone answer?</h3>
+<p></p>
+<p>Simple rules that never look at the image, built on our train split and scored on our validation split (1,710 questions):</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Text-only rules.tab:prior</caption>
+<thead><tr>
+<th scope="col"><strong>Rule</strong></th>
+<th scope="col"><strong>Validation accuracy</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Chance</th><td>25.0%</td></tr>
+<tr><th scope="row">Always the most frequent letter (D)</th><td>26.0%</td></tr>
+<tr><th scope="row">Choice whose text was most often correct in training</th><td>31.1%</td></tr>
+<tr><th scope="row">Choice sharing most words with the question</th><td>24.1%</td></tr>
+<tr><th scope="row">Longest choice</th><td>28.5%</td></tr>
+</tbody></table></div>
+<p>The best rule reaches 31.1%, only 6 points above chance, although 89.6% of the validation questions offer at least one choice that was correct somewhere in training. The dataset was built so that the wrong choices are plausible answers, so answer frequency and word overlap help little. This is the opposite of datasets where the text alone gives most answers, and it means the image should matter. A trained text-only model learns more than these rules (43.3%, Section ), but stays far below the models that see the image.</p>
+<h3>Splits and leakage prevention</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Split plan.</caption>
+<thead><tr>
+<th scope="col"><strong>Item</strong></th>
+<th scope="col"><strong>Plan</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Test</th><td>The official validation split: 1,145 questions on 1,122 images, used once at the end</td></tr>
+<tr><th scope="row">Train / validation</th><td>The official train split divided about 90/10 by image: 15,346 / 1,710 questions on 14,885 / 1,654 images</td></tr>
+<tr><th scope="row">Seed</th><td><code>GroupShuffleSplit</code>, seed 42, groups = image hash; saved in <code>Assignment3/splits.csv</code></td></tr>
+<tr><th scope="row">Split unit</th><td>The image. 540 images have two questions, and both always stay in the same split; the code asserts that no image is in two splits (0 overlaps found)</td></tr>
+<tr><th scope="row">Unused</th><td>The official test split (6,702 questions, no labels)</td></tr>
+<tr><th scope="row">Leakage notes</th><td>CLIP was pretrained on web images, and some COCO photos may be among them; this cannot be checked and affects all models equally</td></tr>
+<tr><th scope="row">Subset rules</th><td>None. All 18,201 labelled questions are used</td></tr>
+</tbody></table></div>
+<p>The letter shares and the share of difficult questions are close in the three splits (difficult: 9.1%, 8.6% and 6.1%). With 1,145 test questions one standard error of accuracy is about 1.4 points, so small differences are judged with the five-seed comparison.</p>
+<h3>Preprocessing</h3>
+<ul><li>Image: decode JPEG, convert to RGB, resize to 224×224 (bicubic), scale to [0,1], normalise with the CLIP mean and standard deviation. No augmentation in the first runs.</li><li>Text: the question and each choice go through the CLIP tokenizer (lower case, byte-pair encoding, at most 77 tokens). For the fusion models the text of choice j is “question + answer: choice<sub>j</sub>”.</li><li>Batch: images [B,3,224,224] float32, labels [B] int64, plus B questions and B lists of 4 choices. One batch of 32 has channel means (-0.06, -0.09, -0.02) and standard deviations close to 1 after normalisation.</li></ul>
+<figure>
+<img alt="One training image before and after resizing and CLIP normalisation." src="assets/assignment3_M3/preprocessing.png"/>
+<figcaption>One training image before and after resizing and CLIP normalisation.</figcaption></figure>
+</section>
+<section id="s2">
+<h2>Methodology</h2>
+<h3>Pipeline</h3>
+<figure><p class="pipeline">Raw pairs: image, question, 4 choices → Resize 224×224, CLIP norm., tokenize → Frozen CLIP encoders (run once, cached) → Fusion head one score per choice → Softmax over 4, cross-entropy → Adam, 20 epochs, best val. accuracy → Test, once: argmax over choices → MC accuracy, DA score, types, shuffle test, cost</p><figcaption>Pipeline: raw paired data, preprocessing, encoders, fusion, loss, optimisation, prediction and evaluation. Only the shaded fusion head changes between models.</figcaption></figure>
+<p><strong>Self-implemented vs library code.</strong> We wrote the data loader and split, the feature cache (<code>features.py</code>), all fusion heads (<code>models.py</code>), the training and evaluation loop with the shuffle test and the DA score (<code>train.py</code>), and the notebooks. Libraries: PyTorch (layers, <code>nn.MultiheadAttention</code>, Adam), Hugging Face <code>transformers</code> (CLIP model and tokenizer, pretrained weights), scikit-learn (<code>GroupShuffleSplit</code>), pandas, NumPy, Pillow and Matplotlib.</p>
+<h3>Encoders, representations and alignment</h3>
+<p>Both modalities use CLIP ViT-B/32 [3] (<code>openai/clip-vit-base-patch32</code>, the checkpoint of the course slides). CLIP was pretrained with a contrastive loss on 400M web image–text pairs, so its image and text vectors live in one 512-d space.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Encoders and representations. 51 is the longest tokenized “question answer: choice” text.</caption>
+<thead><tr>
+<th scope="col"><strong>Modality</strong></th>
+<th scope="col"><strong>Encoder</strong></th>
+<th scope="col"><strong>Representation (cached, float16)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Image</th><td>ViT-B/32, 87.5M params, frozen</td><td>global vector v∈ℝ<sup>512</sup>; 50 tokens V∈ℝ<sup>50×768</sup> (class token + 7×7 patches); the input of the last block, for the fine-tune ablation</td></tr>
+<tr><th scope="row">Question</th><td>text Transformer, 63.2M params, frozen</td><td>global vector q∈ℝ<sup>512</sup></td></tr>
+<tr><th scope="row">Choice j</th><td>same text encoder</td><td>global vector c<sub>j</sub>∈ℝ<sup>512</sup></td></tr>
+<tr><th scope="row">“question answer: choice<sub>j</sub>”</th><td>same text encoder</td><td>global vector g<sub>j</sub>∈ℝ<sup>512</sup>; tokens T<sub>j</sub>∈ℝ<sup>51×512</sup> with a padding mask</td></tr>
+</tbody></table></div>
+<p><strong>Alignment.</strong> Every question belongs to exactly one image, so pairs are aligned by the dataset itself; <code>features.py</code> stores one row per distinct image (17,661) and each question points to its image index. Global vectors are scaled to length 1 before fusion, because CLIP compares vectors by direction. Since the encoders are frozen, their outputs are computed once and reused by every model and seed.</p>
+<p><strong>Missing-modality handling.</strong> No image or question is missing (Section 1), so no special handling is needed during training. Robustness to a wrong image is tested instead (Section ).</p>
+<h3>Models and fusion</h3>
+<p>Each model gives one score s<sub>j</sub> per choice; p = softmax(s<sub>1</sub>,…,s<sub>4</sub>). Every head is a small MLP: Linear → ReLU → Dropout(0.1) → Linear(512 → 1).</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Models. ⊙ is the element-wise product, [·;·] concatenation.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Fusion stage</strong></th>
+<th scope="col">Input of the MLP for choice j</th>
+<th scope="col"><strong>Trainable</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Zero-shot CLIP</th><td>none</td><td>no MLP: s<sub>j</sub>=cos(v, g<sub>j</sub>)</td><td>0</td></tr>
+<tr><th scope="row">TextOnly (A)</th><td>none</td><td>[q; c<sub>j</sub>; q⊙ c<sub>j</sub>]</td><td>787,457</td></tr>
+<tr><th scope="row">ImageOnly (B)</th><td>none</td><td>[v; c<sub>j</sub>; v⊙ c<sub>j</sub>]</td><td>787,457</td></tr>
+<tr><th scope="row">LateFusion</th><td>late (global vectors)</td><td>[v; q; c<sub>j</sub>; v⊙ c<sub>j</sub>; q⊙ c<sub>j</sub>]</td><td>1,311,745</td></tr>
+<tr><th scope="row">CrossAttention</th><td>intermediate (tokens)</td><td>LateFusion input + [r<sub>j</sub>; r<sub>j</sub>⊙ g<sub>j</sub>], with r<sub>j</sub> from cross-attention</td><td>3,283,969</td></tr>
+</tbody></table></div>
+<p><strong>Fusion operation.</strong> Late fusion concatenates the global vectors and adds two element-wise products. The products let the MLP compare the image (or the question) with each choice dimension by dimension; Section  shows they matter most.</p>
+<p><strong>Improved fusion: cross-attention.</strong> The text tokens of “question answer: choice<sub>j</sub>” are the queries, and the 50 image tokens are the keys and values, so each word can look at the image regions it needs. The attended tokens are mean-pooled into one region vector r<sub>j</sub> per choice.</p>
+<pre><code>image = self.image_proj(self.image_norm(v_tokens))
+image = image.repeat_interleave(4, 0)
+queries = self.text_norm(qc_tokens.reshape(b * 4, L, 512))
+attended, _ = self.attention(queries, image, image)
+attended = self.norm(queries + attended)
+region = masked_mean(attended, mask).view(b, 4, 512)
+parts = [v, q, c, v * c, q * c,
+         unit(region), unit(region) * qc]
+scores = self.head(torch.cat(parts, -1)).squeeze(-1)</code></pre>
+<p></p>
+<pre><code>v_tokens            [B, 50, 768]
+│ LayerNorm, Linear [B, 50, 512]
+│ repeat per choice [B*4, 50, 512]
+qc_tokens           [B, 4, 51, 512]
+│ LayerNorm         [B*4, 51, 512]
+│ attention, 8 heads[B*4, 51, 512]
+│ residual + norm   [B*4, 51, 512]
+│ masked mean       [B, 4, 512]
+│ concat 7 parts    [B, 4, 3584]
+│ MLP 3584-&gt;512-&gt;1  [B, 4]
+▼
+scores              [B, 4]</code></pre>
+<p>4pt CrossAttention keeps all late-fusion inputs and only adds the region branch, so a comparison with LateFusion isolates the effect of token-level fusion. This design was chosen on the validation split with seed 42: a first version that used only the region vector, without the late-fusion inputs and without LayerNorm on the tokens, reached 51.2% validation accuracy, against 58.9% for the final version (saved seed-42 run).</p>
+<h3>Loss, training and fine-tuning strategy</h3>
+<p><strong>Loss.</strong> One loss for every model: cross-entropy over the 4 choices, ℓ = -log p<sub>y</sub>. The unimodal baselines are trained on their own with the same loss; there is no extra per-modality loss in the fusion models.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Training settings (<code>configs/a3.yaml</code>).</caption>
+<thead><tr>
+<th scope="col"><strong>Setting</strong></th>
+<th scope="col"><strong>Value</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Optimizer</th><td>Adam, learning rate 10<sup>-3</sup> for the heads, 10<sup>-5</sup> for the CLIP block in the fine-tune ablation; no weight decay, no scheduler</td></tr>
+<tr><th scope="row">Batch size, epochs</th><td>64, 20 epochs; every epoch runs (no early stopping)</td></tr>
+<tr><th scope="row">Regularisation</th><td>Dropout 0.1 in every head and in the attention</td></tr>
+<tr><th scope="row">Checkpoint rule</th><td>Highest validation accuracy; earliest epoch on a tie. Test used once, after the choice</td></tr>
+<tr><th scope="row">Seeds</th><td>42–46 (PyTorch, NumPy, Python); the split is fixed (seed 42)</td></tr>
+<tr><th scope="row">Pretraining / fine-tuning</th><td>CLIP pretrained and frozen; only the heads are trained. Ablation: the last CLIP vision block (7.1M parameters) is also trained, recomputed from the cached input of that block</td></tr>
+<tr><th scope="row">Hardware</th><td>One NVIDIA A40 per process, float32 heads (features stored in float16)</td></tr>
+<tr><th scope="row">Hyperparameter selection</th><td>Fixed in the proposal; only the cross-attention design was chosen on validation (seed 42)</td></tr>
+</tbody></table></div>
+<p>Because the last CLIP block is recomputed from its cached input, the fine-tune ablation gives exactly the same image features as CLIP at initialisation (checked: maximum difference 0).</p>
+<h3>Metrics</h3>
+<ul><li><strong>MC accuracy</strong> (primary): the chosen option equals the correct option.</li><li><strong>DA score</strong>: min(n/3, 1), where n is the number of the 10 workers whose free-form answer equals the chosen text; partial credit for acceptable answers.</li><li><strong>Shuffled-image accuracy</strong>: test accuracy when every test image is replaced by the image of another test question (fixed permutation per seed).</li><li>Breakdowns by question type (first words), difficult flag and worker agreement.</li><li>Cost: parameters, training time, head time per question, feature caching time.</li><li>Aggregation: mean ± sample SD over five seeds.</li></ul>
+<h3>Experiment design</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Experiments. Metric: test MC accuracy (DA score as a check). Decision rule for every comparison, fixed in the proposal: a difference is supported if the gap between the two means is larger than the larger of the two seed SDs.</caption>
+<thead><tr>
+<th scope="col"><strong>Experiment</strong></th>
+<th scope="col"><strong>Hypothesis</strong></th>
+<th scope="col"><strong>Changed factor</strong></th>
+<th scope="col"><strong>Fixed factors</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">E1 unimodal vs multimodal (M2)</th><td>Each modality alone is worse than both together</td><td>Modalities given to the head (text, image, both)</td><td>Features, head size, optimizer, epochs, seeds, split</td></tr>
+<tr><th scope="row">E2 fusion level (M3)</th><td>Token-level cross-attention beats late fusion of global vectors</td><td>LateFusion vs CrossAttention</td><td>Same as E1</td></tr>
+<tr><th scope="row">E3 fusion operation</th><td>The product terms are needed</td><td>LateFusion with and without ⊙</td><td>Same as E1</td></tr>
+<tr><th scope="row">E4 freeze vs fine-tune</th><td>Training the last CLIP block helps</td><td>Last vision block frozen or trained</td><td>Same as E1</td></tr>
+<tr><th scope="row">E5 shuffled images</th><td>The fusion models use the image</td><td>Test images replaced by other images</td><td>Trained checkpoints</td></tr>
+</tbody></table></div>
+<h3>Reproduction and recorded environment</h3>
+<pre><code>cd Assignment3
+python download.py         # A-OKVQA parquet files, revision d1b0efa
+python data_loader.py      # splits.csv (grouped by image, seed 42)
+python features.py         # CLIP features of 17,661 images and 163,809 texts (one GPU, ~3 min)
+python train.py            # 7 configurations x seeds 42-46 -&gt; outputs/&lt;run&gt;_seed&lt;s&gt;_&lt;time&gt;/
+jupyter nbconvert --to notebook --execute --inplace 02_results.ipynb</code></pre>
+<p>Each run folder keeps <code>best.pt</code>, <code>metrics.json</code> (settings, commit, environment), <code>history.csv</code> and the test scores. Environment: Python 3.12.16, PyTorch 2.14.0 (CUDA 13.0), <code>transformers</code> 5.22.2, NVIDIA A40.</p>
+</section>
+<section id="s3">
+<h2>Implementation results</h2>
+<p>Source: <code>Assignment3/02_results.ipynb</code>. 7 configurations × seeds 42–46 = 35 runs, each on one NVIDIA A40. Values are mean ± SD over the five seeds unless stated otherwise.</p>
+<h3>Training behaviour</h3>
+<figure>
+<img alt="Validation (solid) and training (dashed) accuracy per epoch, one colour per seed." src="assets/assignment3_M3/learning_curves.png"/>
+<figcaption>Validation (solid) and training (dashed) accuracy per epoch, one colour per seed.</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Checkpoint selected by validation accuracy.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Selected epoch (seeds 42–46)</strong></th>
+<th scope="col"><strong>Comment</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">TextOnly</th><td>20, 15, 13, 20, 17</td><td>slow, still rising for two seeds</td></tr>
+<tr><th scope="row">ImageOnly</th><td>14, 11, 9, 11, 10</td><td></td></tr>
+<tr><th scope="row">LateFusion</th><td>19, 14, 18, 12, 15</td><td></td></tr>
+<tr><th scope="row">CrossAttention</th><td>17, 14, 19, 14, 12</td><td></td></tr>
+<tr><th scope="row">LateFusionNoProduct</th><td>18, 16, 18, 17, 19</td><td></td></tr>
+<tr><th scope="row">LateFusionFineTune</th><td>4, 5, 3, 4, 4</td><td>overfits early</td></tr>
+<tr><th scope="row">CrossAttentionFineTune</th><td>5, 4, 5, 4, 5</td><td>overfits early</td></tr>
+</tbody></table></div>
+<p>All heads overfit: training accuracy of the fusion models passes 0.9, while validation accuracy stays near 0.58. With frozen features the best epoch is 9 to 20, so 20 epochs is enough budget. When the last CLIP block is also trained (7.1M more parameters) the best epoch is 3 to 5 and validation accuracy then falls, so the extra capacity is used to memorise the 15,346 training questions rather than to generalise. <strong>Implementation issues.</strong> (1) The first cross-attention design learned slowly (51.2% validation); normalising the tokens and keeping the late-fusion inputs fixed it (Section 2.3). (2) The CLIP encoder layer in <code>transformers</code> 5.22 takes two positional arguments; we checked the recomputed last block against the full model (difference 0). (3) The parquet files store <code>direct_answers</code> as a string, parsed back with <code>ast.literal_eval</code>.</p>
+<h3>Main comparison: unimodal vs multimodal</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Main models (top: mean ± SD over 5 seeds; bottom: per seed). The references need no training.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Val. accuracy</strong></th>
+<th scope="col"><strong>Test accuracy</strong></th>
+<th scope="col"><strong>Test DA score</strong></th>
+<th scope="col"><strong>Trainable</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Chance</th><td></td><td>0.250</td><td></td><td>0</td></tr>
+<tr><th scope="row">Answer-text prior</th><td></td><td>0.312</td><td>0.281</td><td>0</td></tr>
+<tr><th scope="row">Zero-shot CLIP</th><td></td><td>0.536</td><td>0.438</td><td>0</td></tr>
+<tr><th scope="row">TextOnly (A)</th><td>0.475 ± 0.003</td><td>0.433 ± 0.010</td><td>0.362 ± 0.008</td><td>0.79M</td></tr>
+<tr><th scope="row">ImageOnly (B)</th><td>0.579 ± 0.005</td><td>0.572 ± 0.010</td><td>0.463 ± 0.009</td><td>0.79M</td></tr>
+<tr><th scope="row">LateFusion</th><td><strong>0.587</strong> ± 0.008</td><td><strong>0.577</strong> ± 0.009</td><td><strong>0.470</strong> ± 0.008</td><td>1.31M</td></tr>
+<tr><th scope="row">CrossAttention</th><td>0.584 ± 0.005</td><td>0.576 ± 0.007</td><td>0.470 ± 0.005</td><td>3.28M</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table class="numeric">
+<thead><tr>
+<th scope="col"><strong>Test accuracy</strong></th>
+<th scope="col"><strong>42</strong></th>
+<th scope="col"><strong>43</strong></th>
+<th scope="col"><strong>44</strong></th>
+<th scope="col"><strong>45</strong></th>
+<th scope="col"><strong>46</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">TextOnly</th><td>0.4201</td><td>0.4419</td><td>0.4271</td><td>0.4332</td><td>0.4445</td></tr>
+<tr><th scope="row">ImageOnly</th><td>0.5546</td><td>0.5764</td><td>0.5773</td><td>0.5738</td><td>0.5790</td></tr>
+<tr><th scope="row">LateFusion</th><td>0.5616</td><td>0.5843</td><td>0.5799</td><td>0.5825</td><td>0.5764</td></tr>
+<tr><th scope="row">CrossAttention</th><td>0.5712</td><td>0.5677</td><td>0.5834</td><td>0.5817</td><td>0.5755</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="Test accuracy of the references and of the four main models (error bars: seed SD)." src="assets/assignment3_M3/main_accuracy.png"/>
+<figcaption>Test accuracy of the references and of the four main models (error bars: seed SD).</figcaption></figure>
+<p><strong>E1 decision.</strong> Adding the image to the text is a large and clear gain: LateFusion is 14.4 ± 0.8 points above TextOnly, in 5 of 5 seeds (supported). Adding the question to the image is not: LateFusion is only 0.5 ± 0.5 points above ImageOnly, below the seed SD, and ImageOnly wins in one seed (not supported). So the multimodal model beats modality A by far, but is only level with modality B. For CLIP features, the 4 choices plus the image carry most of the information. Our hypothesis is that the wrong choices are often things that are not in the picture, so matching each choice with the image already finds the answer; we did not check this by hand. The question then adds little, except for the types in Section . Zero-shot CLIP, which only matches the image with “question answer: choice” and is never trained, already reaches 53.6%; the trained heads add about 4 points.</p>
+<h3>Does the model use the image? Shuffled images</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>E5: every test image replaced by the image of another test question.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Test accuracy</strong></th>
+<th scope="col"><strong>With shuffled images</strong></th>
+<th scope="col"><strong>Drop (points)</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">TextOnly</th><td>0.433 ± 0.010</td><td>0.433 ± 0.010</td><td>0.0</td></tr>
+<tr><th scope="row">ImageOnly</th><td>0.572 ± 0.010</td><td>0.322 ± 0.005</td><td>25.0</td></tr>
+<tr><th scope="row">LateFusion</th><td>0.577 ± 0.009</td><td>0.343 ± 0.003</td><td>23.4</td></tr>
+<tr><th scope="row">CrossAttention</th><td>0.576 ± 0.007</td><td>0.345 ± 0.011</td><td>23.1</td></tr>
+<tr><th scope="row">LateFusionNoProduct</th><td>0.506 ± 0.005</td><td>0.354 ± 0.002</td><td>15.1</td></tr>
+<tr><th scope="row">LateFusionFineTune</th><td>0.575 ± 0.010</td><td>0.314 ± 0.011</td><td>26.1</td></tr>
+<tr><th scope="row">CrossAttentionFineTune</th><td>0.582 ± 0.009</td><td>0.323 ± 0.013</td><td>26.0</td></tr>
+</tbody></table></div>
+<p>With a wrong image every image-based model falls to 31–35%, a drop of 23 to 26 points (15 for the model without products). TextOnly does not change. The fusion models therefore depend on the image, and a wrong image pulls them <em>below</em> the text-only model (43.3%): the image is not an optional hint but the main evidence.</p>
+<h3>Results by question type</h3>
+<p></p>
+<figure>
+<img alt="Test accuracy by question opening (mean over seeds); n is the number of test questions." src="assets/assignment3_M3/by_type.png"/>
+<figcaption>Test accuracy by question opening (mean over seeds); n is the number of test questions.</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Test accuracy by question type, averaged over seeds.</caption>
+<thead><tr>
+<th scope="col"><strong>Type</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>TextOnly</strong></th>
+<th scope="col"><strong>ImageOnly</strong></th>
+<th scope="col"><strong>LateFusion</strong></th>
+<th scope="col"><strong>CrossAttn.</strong></th>
+<th scope="col"><strong>Zero-shot</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">what / which (other)</th><td>667</td><td>0.448</td><td>0.563</td><td>0.574</td><td>0.572</td><td>0.547</td></tr>
+<tr><th scope="row">what type / kind</th><td>163</td><td>0.434</td><td>0.617</td><td>0.622</td><td>0.606</td><td>0.564</td></tr>
+<tr><th scope="row">other</th><td>148</td><td>0.351</td><td>0.473</td><td>0.488</td><td>0.492</td><td>0.473</td></tr>
+<tr><th scope="row">where / who / when</th><td>62</td><td>0.371</td><td>0.710</td><td>0.635</td><td>0.655</td><td>0.613</td></tr>
+<tr><th scope="row">why</th><td>61</td><td>0.603</td><td>0.764</td><td>0.787</td><td>0.780</td><td>0.590</td></tr>
+<tr><th scope="row">how many</th><td>32</td><td>0.312</td><td>0.444</td><td>0.412</td><td>0.438</td><td>0.188</td></tr>
+<tr><th scope="row">what color</th><td>12</td><td>0.383</td><td>0.350</td><td>0.300</td><td>0.350</td><td>0.583</td></tr>
+<tr><th scope="row">difficult (flag)</th><td>70</td><td>0.349</td><td>0.566</td><td>0.537</td><td>0.583</td><td></td></tr>
+</tbody></table></div>
+<p>The image helps most on where / who / when (+26.5 points over TextOnly), what type / kind (+18.8) and why (+18.4). Why questions are the easiest (79%): the choices are explanations, the text alone already gets 60%, and fusion is 2.3 points above image only, one of the few types where the question adds something. Counting stays weak (41–44%) because one global vector does not count objects, and zero-shot CLIP is even worse (19%). What color has only 12 questions; the trained heads (30–35%) fall below zero-shot CLIP (58%), which hints that the heads lose some colour information, but 12 questions are too few to conclude. On the 70 difficult questions CrossAttention is 4.6 points above LateFusion, the only place where token-level fusion looks better; with 70 questions this is a hint, not a result.</p>
+<h3>Support and conflict between modalities</h3>
+<figure>
+<img alt="Seed 42. Top: the image helps (LateFusion right, TextOnly wrong). Bottom: the image misleads (TextOnly right, LateFusion wrong)." src="assets/assignment3_M3/support_conflict.png"/>
+<figcaption>Seed 42. Top: the image helps (LateFusion right, TextOnly wrong). Bottom: the image misleads (TextOnly right, LateFusion wrong).</figcaption></figure>
+<p>For seed 42 the image helps on 263 test questions and misleads on 101 (Table: 380 questions both right, 401 both wrong). Over the five seeds support is 254–282 and conflict 86–111, about 2.6 support cases for each conflict case. Support cases ask about something clearly visible (a baseball bat, powdered sugar, wild animals). Conflict cases share a pattern: the image contains a plausible but wrong answer. The model picks “left” for a couch on the right (a global vector has no position), “chicken” instead of “carrot” for the food that grows in the ground (both are on the plate), and “judge” for a tennis player near the net.</p>
+<h3>Ablation study</h3>
+<p></p>
+<div class="table-scroll"><table class="numeric">
+<caption>Ablations, each against its base model (CrossAttentionFineTune against CrossAttention). Paired change in points, mean ± SD over seeds.</caption>
+<thead><tr>
+<th scope="col"><strong>Ablation</strong></th>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Test accuracy</strong></th>
+<th scope="col"><strong>Paired change</strong></th>
+<th scope="col"><strong>Seeds better</strong></th>
+<th scope="col"><strong>Decision</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Reference</th><td>LateFusion</td><td>0.577 ± 0.009</td><td></td><td></td><td></td></tr>
+<tr><th scope="row">E2 fusion level</th><td>CrossAttention</td><td>0.576 ± 0.007</td><td>-0.1 ± 1.0</td><td>2/5</td><td>not supported</td></tr>
+<tr><th scope="row">E3 fusion operation</th><td>LateFusionNoProduct</td><td>0.506 ± 0.005</td><td>-7.1 ± 0.7</td><td>0/5</td><td>products needed</td></tr>
+<tr><th scope="row">E4 fine-tune (late)</th><td>LateFusionFineTune</td><td>0.575 ± 0.010</td><td>-0.2 ± 1.7</td><td>2/5</td><td>not supported</td></tr>
+<tr><th scope="row">E4 fine-tune (cross)</th><td>CrossAttentionFineTune</td><td>0.582 ± 0.009</td><td>+0.6 ± 1.3</td><td>3/5</td><td>not supported</td></tr>
+<tr><th scope="row">E1 remove image</th><td>TextOnly</td><td>0.433 ± 0.010</td><td>-14.4 ± 0.8</td><td>0/5</td><td>image needed</td></tr>
+<tr><th scope="row">E1 remove question</th><td>ImageOnly</td><td>0.572 ± 0.010</td><td>-0.5 ± 0.5</td><td>1/5</td><td>not supported</td></tr>
+</tbody></table></div>
+<ul><li><strong>Fusion operation (E3)</strong>: removing the element-wise products costs 7.1 points in every seed, the largest effect of any design choice. Concatenation alone makes the MLP learn the comparison between image and choice itself, which it does poorly with 15k examples.</li><li><strong>Fusion level (E2)</strong>: token-level cross-attention gives the same accuracy as late fusion, at 2.5 times the parameters and 9 times the training time per epoch.</li><li><strong>Freeze vs fine-tune (E4)</strong>: training the last CLIP block changes accuracy by less than one seed SD and makes the models overfit after 3–5 epochs.</li></ul>
+<h3>Error analysis</h3>
+<p></p>
+<p>The best fusion model by validation accuracy is CrossAttentionFineTune (0.587 validation, 0.582 test). Its errors, averaged over seeds:</p>
+<div class="table-scroll"><table class="numeric">
+<caption>Errors of CrossAttentionFineTune by question type. Accuracy is 54.1% on the 313 low-agreement questions and 59.8% on the 832 high-agreement ones.</caption>
+<thead><tr>
+<th scope="col"><strong>Question type</strong></th>
+<th scope="col"><strong>Errors per seed</strong></th>
+<th scope="col"><strong>Questions</strong></th>
+<th scope="col"><strong>Error rate</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">what / which (other)</th><td>286.6</td><td>667</td><td>0.430</td></tr>
+<tr><th scope="row">other</th><td>72.2</td><td>148</td><td>0.488</td></tr>
+<tr><th scope="row">what type / kind</th><td>60.2</td><td>163</td><td>0.369</td></tr>
+<tr><th scope="row">where / who / when</th><td>20.4</td><td>62</td><td>0.329</td></tr>
+<tr><th scope="row">how many</th><td>16.6</td><td>32</td><td>0.519</td></tr>
+<tr><th scope="row">why</th><td>13.2</td><td>61</td><td>0.216</td></tr>
+<tr><th scope="row">what color</th><td>9.0</td><td>12</td><td>0.750</td></tr>
+</tbody></table></div>
+<figure>
+<img alt="The four most confident errors of CrossAttentionFineTune, seed 42 (probability of the wrong choice in brackets)." src="assets/assignment3_M3/confident_errors.png"/>
+<figcaption>The four most confident errors of CrossAttentionFineTune, seed 42 (probability of the wrong choice in brackets).</figcaption></figure>
+<div class="table-scroll"><table class="numeric">
+<caption>Error groups. Frequencies are from the tables above; causes are hypotheses, not tested here.</caption>
+<thead><tr>
+<th scope="col"><strong>Error group</strong></th>
+<th scope="col"><strong>Description and frequency</strong></th>
+<th scope="col"><strong>Hypothesised cause</strong></th>
+<th scope="col"><strong>Improvement idea</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Visible distractor</th><td>The most visible object is chosen instead of the asked one (suitcase → “travel” for Fidelity; chicken vs carrot)</td><td>One global image vector; choices are matched to the whole image</td><td>Region features or the cross-attention branch with more data; use the rationale as extra supervision</td></tr>
+<tr><th scope="row">Text in the image</th><td>Answers written on signs (“watch out for children” on a truck)</td><td>CLIP features do not read text reliably</td><td>Add an OCR model as a third input</td></tr>
+<tr><th scope="row">Counting</th><td>how many: error rate 52%</td><td>Global features do not count</td><td>Object detector counts as input</td></tr>
+<tr><th scope="row">Position</th><td>left / right questions</td><td>No position in global vectors; images are squeezed</td><td>Patch tokens with position; keep aspect ratio</td></tr>
+<tr><th scope="row">Colour</th><td>what color: 75% errors (12 questions)</td><td>Head loses colour detail that zero-shot CLIP keeps</td><td>Mix zero-shot CLIP scores into the head</td></tr>
+<tr><th scope="row">Ambiguous label</th><td>313 low-agreement questions: 54.1% vs 59.8%</td><td>Workers disagree; several answers acceptable</td><td>Report the DA score next to MC accuracy</td></tr>
+</tbody></table></div>
+<h3>Compute cost</h3>
+<div class="table-scroll"><table class="numeric">
+<caption>Cost on one NVIDIA A40 with cached features. One-time feature caching: 99 s for 17,661 images (5.6 ms per image) and 72 s for 163,809 texts. The frozen CLIP encoders have 151M parameters in total.</caption>
+<thead><tr>
+<th scope="col"><strong>Model</strong></th>
+<th scope="col"><strong>Trainable</strong></th>
+<th scope="col"><strong>s / epoch</strong></th>
+<th scope="col"><strong>Train min</strong></th>
+<th scope="col"><strong>Head ms / question</strong></th>
+<th scope="col"><strong>Test acc.</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">TextOnly</th><td>0.79M</td><td>0.29</td><td>0.10</td><td>0.002</td><td>0.433</td></tr>
+<tr><th scope="row">ImageOnly</th><td>0.79M</td><td>0.29</td><td>0.10</td><td>0.002</td><td>0.572</td></tr>
+<tr><th scope="row">LateFusion</th><td>1.31M</td><td>0.32</td><td>0.11</td><td>0.003</td><td>0.577</td></tr>
+<tr><th scope="row">LateFusionNoProduct</th><td>0.79M</td><td>0.31</td><td>0.11</td><td>0.002</td><td>0.506</td></tr>
+<tr><th scope="row">CrossAttention</th><td>3.28M</td><td>2.74</td><td>0.92</td><td>0.056</td><td>0.576</td></tr>
+<tr><th scope="row">LateFusionFineTune</th><td>8.79M</td><td>2.85</td><td>0.95</td><td>0.053</td><td>0.575</td></tr>
+<tr><th scope="row">CrossAttentionFineTune</th><td>10.77M</td><td>5.52</td><td>1.84</td><td>0.107</td><td>0.582</td></tr>
+</tbody></table></div>
+<p>The cost is dominated by the frozen CLIP encoders, which every model shares; once the features are cached, a head trains in 6 seconds (LateFusion) to 2 minutes and answers a question in well under 0.1 ms. LateFusion gives the best accuracy per unit of cost; CrossAttention costs 9 times more per epoch for the same accuracy.</p>
+<h3>Comparison and discussion</h3>
+<p><strong>Which model is better, and by how much.</strong> All fusion models land at 57.5–58.2% test accuracy, within one seed SD of each other. They are 14 points above text only, 4 points above zero-shot CLIP and 33 points above chance, but only about 0.5 points above the image-only model. The planned improvement (token-level cross-attention) did not beat simple late fusion, and fine-tuning the last CLIP block did not either. The handbook allows this when it is explained; the evidence points to three causes. (1) <em>Data</em>: image–choice matching already solves most questions (ImageOnly 57.2%, zero-shot CLIP 53.6%), so there is little left for the question or for region-level fusion to add. (2) <em>Size</em>: 15k training questions are few for learning attention over image regions; the fine-tuned models overfit within 5 epochs. (3) <em>Features</em>: CLIP was trained to match the pooled class token with text, not the 50 patch tokens, so these tokens may not be well suited to region-level matching.</p>
+<p><strong>Modality interaction.</strong> The image is the main evidence: removing it costs 14.4 points, and a wrong image costs 23–26 points, pulling the model below text-only accuracy. Support cases outnumber conflict cases 2.6 to 1. Conflicts happen when the image contains a plausible wrong answer, which a model that matches choices with the whole image cannot reject.</p>
+<p><strong>What cannot be concluded.</strong> Per-type differences for small groups (12 colour, 32 counting, 70 difficult questions) are within noise. We did not test other encoders, so we cannot say whether a stronger encoder or region features would let token-level fusion help.</p>
+<h3>Limitations and conclusion</h3>
+<p><strong>Limitations.</strong> One frozen encoder (CLIP ViT-B/32) and short training; no search beyond the fixed proposal settings, except the cross-attention design chosen on validation. Images are squeezed to 224×224. The test split is the official validation split (1,145 questions), because the official test labels are not public. Question types come from the first words, not from an official label. The proposal had no formal approval decision when the experiments ran (Section 1).</p>
+<p><strong>Future work.</strong> Region features or an object detector for counting and position, OCR for text in images, the rationales as extra training signal, and a stronger encoder (for example a larger CLIP or a VLM) with the same protocol.</p>
+<p><strong>Answer to the research question.</strong> The image is the modality that matters: it adds 14.4 points over text alone, and replacing it with a wrong image costs 23–26 points. The question adds only 0.5 points once the image and the choices are known. The way the vectors are combined matters more than where: element-wise products add 7.1 points, while token-level cross-attention and fine-tuning the last CLIP block do not improve on late fusion (about 58% test accuracy for all).</p>
+</section>
+<section id="s4">
+<h2>AI Usage Disclosure</h2>
+<p></p>
+<p>The group used generative AI tools as disclosed below and in <code>AI_USAGE.md</code>. All numbers in this report are computed by the committed notebooks from saved run outputs.</p>
+<div class="table-scroll"><table class="numeric">
+<caption>AI usage for Assignment 3.</caption>
+<thead><tr>
+<th scope="col"><strong>Field</strong></th>
+<th scope="col"><strong>Entry</strong></th>
+</tr></thead><tbody>
+<tr><th scope="row">Tool</th><td>Claude Code (Anthropic), model Claude Opus 5.5, with helper agents on Claude Sonnet, in the group's VS Code workspace</td></tr>
+<tr><th scope="row">Used by</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Time / stage</th><td>9 November 2026: dataset search, proposal, M2 and M3</td></tr>
+<tr><th scope="row">Purpose</th><td>Coding assistance (<code>download.py</code>, <code>data_loader.py</code>, <code>features.py</code>, <code>models.py</code>, <code>train.py</code>, notebooks); running the 35 training runs; first drafts of the M2 and M3 reports, the slides and the assignment pages. The dataset and the decision to continue before a formal approval were made by the group</td></tr>
+<tr><th scope="row">Affected sections</th><td>All sections of this report; <code>Assignment3/</code>; <code>configs/a3.yaml</code></td></tr>
+<tr><th scope="row">Representative prompt</th><td>“Continue with Assignment 3 M2 and M3 now; follow the handbook and the style of Assignment 1; keep the code simple.”</td></tr>
+<tr><th scope="row">How output was verified</th><td>Every number is read from <code>metrics.json</code> and prediction files by <code>02_results.ipynb</code>; the recomputed CLIP block was checked against the full model; the group reviews code and text before submission</td></tr>
+<tr><th scope="row">Responsible member</th><td>Võ Thị Như Quỳnh</td></tr>
+<tr><th scope="row">Verification sources</th><td>A-OKVQA and CLIP papers, course slides (multimodal learning: CLIP, cross-attention), PyTorch and <code>transformers</code> documentation</td></tr>
+</tbody></table></div>
+<p>All members are able to explain every part of the submission and take responsibility for the submitted code, numbers, figures and text.</p>
+</section>
+<section id="references">
+<h2>References</h2>
+<ol><li>D. Schwenk, A. Khandelwal, C. Clark, K. Marino and R. Mottaghi, “A-OKVQA: A benchmark for visual question answering using world knowledge,” in <em>Proc. ECCV</em>, pp. 146–162, 2022. Dataset: <a href="https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA">https://huggingface.co/datasets/HuggingFaceM4/A-OKVQA</a>, revision <code>d1b0efa</code>.</li><li>T.-Y. Lin et al., “Microsoft COCO: Common objects in context,” in <em>Proc. ECCV</em>, pp. 740–755, 2014.</li><li>A. Radford et al., “Learning transferable visual models from natural language supervision,” in <em>Proc. ICML</em>, PMLR 139, pp. 8748–8763, 2021.</li><li>A. Vaswani et al., “Attention is all you need,” in <em>Advances in Neural Information Processing Systems 30</em>, pp. 5998–6008, 2017.</li><li>D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in <em>Proc. ICLR</em>, 2015.</li></ol>
+</section>
+
 </main>
 </div>
 </body>
