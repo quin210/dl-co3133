@@ -552,8 +552,8 @@ jupyter nbconvert --execute --inplace 02_results.ipynb 03_analysis.ipynb</code><
 <p>Early blight is the hardest class for the CNN (0.835) and the frozen model (0.739); fine-tuning raises it to 0.943, the largest per-class gain. Tomato mosaic virus does not improve with fine-tuning (CNN 0.932, fine-tune 0.931); it has only 59 test images, so its scores are the least precise. Strong augmentation is below plain fine-tuning in 7 of 8 classes and equal on Tomato yellow leaf curl virus.</p>
 <h3>Confusion matrices</h3>
 <figure>
-<img alt="Test confusion matrices, counts summed over the five seeds and normalised per true class (page turned for readability)." src="assets/assignment2_M3/confusion.png"/>
-<figcaption>Test confusion matrices, counts summed over the five seeds and normalised per true class (page turned for readability).</figcaption></figure>
+<img alt="Test confusion matrices, counts summed over the five seeds and normalised per true class." src="assets/assignment2_M3/confusion_grid.png"/>
+<figcaption>Test confusion matrices, counts summed over the five seeds and normalised per true class.</figcaption></figure>
 <p>For the CNN and the frozen model the largest errors are between leaf-spot and blight diseases: Early blight and Leaf mold predicted as Late blight (8% each for the CNN, 6–7% for the frozen model) and Early blight predicted as Septoria leaf spot (4–6%). Fine-tuning removes most of these; Early blight predicted as Late blight drops to about 1%. One confusion stays in every model: Tomato mosaic virus predicted as Tomato yellow leaf curl virus (CNN 3%, frozen 10%, fine-tune 6%, strong augmentation 4%), which after fine-tuning comes almost only from web-style photos (Section ).</p>
 <h3>Leakage check: published vs clean test</h3>
 <p></p>
@@ -723,8 +723,8 @@ jupyter nbconvert --execute --inplace 02_results.ipynb 03_analysis.ipynb</code><
 <tr><th scope="row">Error rate on 256×256 images</th><td>2.1%</td><td>6.0%</td><td>0.6%</td><td>1.2%</td></tr>
 </tbody></table></div>
 <figure>
-<img alt="ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets)." src="assets/assignment2_M3/error_groups.png"/>
-<figcaption>ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets).</figcaption></figure>
+<img alt="ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets). The conflicting near-duplicate and virus confusion groups have no error in this seed, so they are not shown." src="assets/assignment2_M3/error_groups_trim.png"/>
+<figcaption>ResNet18FineTune, seed 42: the most confident errors of each group (group size in brackets). The conflicting near-duplicate and virus confusion groups have no error in this seed, so they are not shown.</figcaption></figure>
 <div class="table-scroll"><table class="numeric">
 <caption>Error groups, causes and ideas. Only the web-style cause is tested by an experiment (E2, E4, E5).</caption>
 <thead><tr>
@@ -818,34 +818,19 @@ jupyter nbconvert --execute --inplace 02_results.ipynb 03_analysis.ipynb</code><
 <section id="s4">
 <h2>AI Usage Disclosure</h2>
 <p></p>
-<p>The group used generative AI tools as disclosed below and in <code>AI_USAGE.md</code> of the repository. All numbers in this report are computed by the committed notebooks from saved run outputs; no number, figure or citation was written by an AI tool without being produced or checked by code or by the cited source.</p>
+<p>The group takes full responsibility for all submitted code, numbers, figures, claims and text. AI tools were used as assistants for ideation, coding, drafting and language editing. No number in this report was written by hand or invented: every number comes from saved run outputs (<code>Assignment2/outputs/</code>, <code>logs/</code>) read by <code>02_results.ipynb</code> and <code>03_analysis.ipynb</code>. Every member can explain any part of the submission. The dated usage log is in <code>AI_USAGE.md</code>.</p>
 <div class="table-scroll"><table class="numeric">
-<caption>AI usage for Assignment 2.</caption>
+<caption>AI tools used in Assignment 2.</caption>
 <thead><tr>
-<th scope="col"><strong>Field</strong></th>
-<th scope="col"><strong>Entry 1: M1 to M3 (whole assignment)</strong></th>
+<th scope="col"><strong>Tool (provider)</strong></th>
+<th scope="col"><strong>Version / access</strong></th>
+<th scope="col"><strong>Uses (below)</strong></th>
 </tr></thead><tbody>
-<tr><th scope="row">Tools</th><td>Claude (Anthropic) and ChatGPT (OpenAI), chat interfaces</td></tr>
-<tr><th scope="row">Used by</th><td>All members</td></tr>
-<tr><th scope="row">Purpose</th><td>Ideation, concept explanation, generic code examples, grammar and wording of notebook text (Sections 1–4 of <code>AI_USAGE.md</code>)</td></tr>
-<tr><th scope="row">Verification</th><td>Every suggestion was checked against PyTorch / torchvision / scikit-learn documentation, the cited papers, and the actual run outputs</td></tr>
+<tr><th scope="row">Claude (Anthropic)</th><td>Claude Opus 5.5, claude.ai</td><td>1, 2</td></tr>
+<tr><th scope="row">ChatGPT (OpenAI)</th><td>chatgpt.com</td><td>1, 2</td></tr>
+<tr><th scope="row">Claude Code (Anthropic)</th><td>Claude Opus 5.5, VS Code extension</td><td>3</td></tr>
 </tbody></table></div>
-<div class="table-scroll"><table class="numeric">
-<thead><tr>
-<th scope="col"><strong>Field</strong></th>
-<th scope="col"><strong>Entry 2: M3 follow-up experiments and report drafting</strong></th>
-</tr></thead><tbody>
-<tr><th scope="row">Tool</th><td>Claude Code (Anthropic), model Claude Opus 5.5, running in the group's VS Code workspace</td></tr>
-<tr><th scope="row">Used by</th><td>Võ Thị Như Quỳnh</td></tr>
-<tr><th scope="row">Time / stage</th><td>8–9 November 2026, after the 20 CPU runs and the results notebook were complete</td></tr>
-<tr><th scope="row">Purpose</th><td>(1) Coding assistance: per-run device option in <code>train.py</code> / <code>evaluate.py</code> (with a CUDA synchronisation for GPU timing), the EfficientNet-B0 and ConvNeXt-T wrappers in <code>models/backbones.py</code>, the nine <code>G_</code> configurations in <code>configs/a2.yaml</code>. (2) Experiment execution: the agent ran the group's training and evaluation scripts for the 45 GPU runs and built <code>03_analysis.ipynb</code>. (3) Report writing: first draft of this LaTeX report from the notebooks and the M2 report. (4) Removal of the duplicate notebook <code>02_results_final.ipynb</code></td></tr>
-<tr><th scope="row">Affected sections</th><td>Report Sections 1–3 (text), 2.3.3, 2.6, 3.8, 3.11; <code>Assignment2/train.py</code>, <code>evaluate.py</code>, <code>models/backbones.py</code>, <code>configs/a2.yaml</code>, <code>03_analysis.ipynb</code>, <code>README.md</code></td></tr>
-<tr><th scope="row">Representative prompt</th><td>“Read the handbook requirements for Assignment 2 and complete the M3 final: run more experiments if needed, follow the style of Assignment 1, and write the M3 report from the LaTeX template.”</td></tr>
-<tr><th scope="row">How output was edited and verified</th><td>The CPU results (E1, E2) were produced by the group before this stage and were not rerun or changed. Every GPU number comes from <code>metrics.json</code> and prediction files written by the scripts and is recomputed in <code>03_analysis.ipynb</code>. The code changes keep the CPU path unchanged (default device and all CPU configurations untouched); they are reviewed with <code>git diff</code> before commit. Parameter counts were checked against the instantiated models</td></tr>
-<tr><th scope="row">Responsible member</th><td>Võ Thị Như Quỳnh</td></tr>
-<tr><th scope="row">Verification sources</th><td>PyTorch and torchvision documentation (model definitions, <code>torch.cuda.synchronize</code>); the cited papers; the saved run outputs and logs</td></tr>
-</tbody></table></div>
-<p>All members are able to explain every part of the submission and take responsibility for the submitted code, numbers, figures and text.</p>
+<ol><li><strong>Ideation.</strong> Stage: planning of the M1 proposal and the M2 draft. Contribution: high-level suggestions on which comparisons and checks a fine-tuning study should include. Prompt: “What should a study comparing a small CNN with a pretrained ResNet-18 on a leaf-disease dataset check?” Verification: decisions were made by the group and checked against the course handbook.</li><li><strong>Language editing.</strong> Stage: writing the notebook observations and the reports. Contribution: grammar and clarity edits on text written by the group. Prompt: “Fix the grammar and improve the clarity of this paragraph without changing its meaning or any numbers.” Verification: each edit compared with the original; edits that changed meaning or numbers were rejected.</li><li><strong>Coding and drafting for M3.</strong> Stage: M3, 8–9 November 2026. Contribution: help with the code of the follow-up study (GPU option, two extra backbones, <code>03_analysis.ipynb</code>), executing its runs, and first drafts of this report and the slides. Verification: the GPU copies reproduce the CPU results within one seed SD (Section 3.8.1); every table was checked against the notebook outputs and the text was read and edited by the group.</li></ol>
 </section>
 <section id="references">
 <h2>References</h2>
